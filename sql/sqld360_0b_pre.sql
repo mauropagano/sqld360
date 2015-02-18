@@ -38,7 +38,8 @@ BEGIN
   -- if standalone execution then need to insert metadata   
   IF '&&from_edb360.' = '' THEN
     -- no need to clean, it's a GTT
-    INSERT INTO plan_table (statement_id, timestamp, operation) VALUES ('SQLD360_SQLID',sysdate,'&&sqld360_sqlid.');
+    -- column options set to 1 is safe here, if no diagnostics then ASH is not extracted at all anyway
+    INSERT INTO plan_table (statement_id, timestamp, operation, options) VALUES ('SQLD360_SQLID',sysdate,'&&sqld360_sqlid.','1');
     INSERT INTO plan_table (statement_id, timestamp, operation) VALUES ('SQLD360_ASH_LOAD',sysdate, NULL);
   END IF;
   
