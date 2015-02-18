@@ -54,8 +54,8 @@ SET TERM ON
 -- get current time
 SPO &&sqld360_log..txt APP;
 COL current_time NEW_V current_time FOR A15;
-SPO OFF;
 SELECT 'Completed: ' x, TO_CHAR(SYSDATE, 'HH24:MI:SS') current_time FROM DUAL;
+SPO OFF;
 SET TERM OFF
 
 HOS zip -q &&sqld360_main_filename._&&sqld360_file_time. &&sqld360_log..txt
