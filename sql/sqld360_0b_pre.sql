@@ -188,8 +188,8 @@ SELECT SUBSTR(sql_text,1,50) sqld360_sqltxt FROM v$sqltext_with_newlines WHERE s
 SELECT SUBSTR(sql_text,1,50) sqld360_sqltxt FROM dba_hist_sqltext WHERE sql_id = '&&sqld360_sqlid.' AND rownum = 1;
 
 -- setup
-DEF sqld360_vYYNN = 'v1501';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-01-01)';
+DEF sqld360_vYYNN = 'v1502';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-03-01)';
 DEF sqld360_prefix = 'sqld360';
 DEF sql_trace_level = '8';
 DEF main_table = '';

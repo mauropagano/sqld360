@@ -1,8 +1,3 @@
-DEF section_name = 'Expanded SQL';
---SPO &&sqld360_main_report..html APP;
---PRO <h2>&&section_name.</h2>
---SPO OFF
-
 DEF title = 'Expanded SQL';
 DEF main_table = 'DBMS_UTILITY';
 

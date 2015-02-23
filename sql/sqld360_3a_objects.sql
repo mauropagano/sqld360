@@ -32,6 +32,21 @@ END;
 @@sqld360_9a_pre_one.sql
 
 
+DEF title = 'Index Columns';
+DEF main_table = 'DBA_INDEXES';
+BEGIN
+  :sql_text := '
+SELECT /*+ &&top_level_hints. */
+       *
+  FROM dba_ind_columns
+ WHERE (table_owner, table_name) in &&tables_list.
+ ORDER BY table_owner, table_name, index_name, column_position
+';
+END;
+/
+@@sqld360_9a_pre_one.sql
+
+
 -- compute low and high values for each table column
 -- the delete is safe, one SQL at a time
 DELETE plan_table WHERE statement_id = 'SQLD360_LOW_HIGH'; 
@@ -161,6 +176,7 @@ END;
 /
 @@sqld360_9a_pre_one.sql
 
+
 -- find if there are partitioned tables involved
 COL cols_from_part_tables NEW_V cols_from_part_tables
 COL part_tables NEW_V part_tables 
@@ -183,17 +199,18 @@ PRO </li>
 SPO OFF;
 @@sqld360_3b_partitions_columns.sql
 
---DEF title = 'Subpartitions';
---DEF main_table = 'DBA_TAB_SUBPARTITIONS';
---BEGIN
---  :sql_text := '
---SELECT /*+ &&top_level_hints. */
---       *
---  FROM dba_tab_subpartitions
--- WHERE (table_owner, table_name) in &&tables_list.
--- ORDER BY table_owner, table_name
---';
---END;
---/
---@@sqld360_9a_pre_one.sql
+
+DEF title = 'Table Modifications';
+DEF main_table = 'DBA_TAB_MODIFICATIONS';
+BEGIN
+  :sql_text := '
+SELECT /*+ &&top_level_hints. */
+       *
+  FROM dba_tab_modifications
+ WHERE (table_owner, table_name) in &&tables_list.
+ ORDER BY table_owner, table_name, partition_name, subpartition_name
+';
+END;
+/
+@@sqld360_9a_pre_one.sql
 

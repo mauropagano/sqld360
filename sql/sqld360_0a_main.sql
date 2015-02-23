@@ -21,6 +21,7 @@ DEF column_number = '1';
 @@&&from_edb360.sqld360_1a_configuration.sql
 @@sqld360_1b_identification.sql
 @@&&skip_10g.&&skip_11r1.sqld360_1c_xpand.sql
+@@sqld360_1d_standalone.sql
 
 PRO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -35,6 +36,7 @@ SPO OFF;
 @@sqld360_2a_plans.sql
 @@sqld360_2b_performance.sql
 @@sqld360_2c_binds.sql
+@@sqld360_2d_cursor_sharing.sql
 
 PRO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -48,6 +50,8 @@ SPO OFF;
 
 @@sqld360_3a_objects.sql
 @@sqld360_3c_stats_history.sql
+@@sqld360_3d_metadata.sql
+
 
 PRO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -71,7 +75,6 @@ PRO </td><td>
 PRO
 SPO OFF;
 
-@@sqld360_5d_metadata.sql
 @@&&skip_10g.&&skip_11r1.sqld360_5f_10053.sql
 @@&&skip_tuning.&&skip_10g.sqld360_5b_sqlmon.sql
 @@&&skip_diagnostics.sqld360_5c_ash.sql
