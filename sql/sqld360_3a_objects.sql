@@ -109,8 +109,9 @@ END;
 -- find if there are histograms 
 COL num_histograms NEW_V num_histograms
 SELECT TRIM(TO_CHAR(COUNT(DISTINCT owner||'.'||table_name))) num_histograms 
-  FROM dba_tab_histograms
- WHERE (owner, table_name) in &&tables_list_s.;
+  FROM dba_tab_cols
+ WHERE (owner, table_name) in &&tables_list_s.
+   AND histogram <> 'NONE';
 DEF title= 'Histograms'
 DEF main_table = 'DBA_TAB_HISTOGRAMS'	
 
@@ -209,6 +210,29 @@ SELECT /*+ &&top_level_hints. */
   FROM dba_tab_modifications
  WHERE (table_owner, table_name) in &&tables_list.
  ORDER BY table_owner, table_name, partition_name, subpartition_name
+';
+END;
+/
+@@sqld360_9a_pre_one.sql
+
+
+DEF title = 'Segments';
+DEF main_table = 'DBA_TAB_MODIFICATIONS';
+BEGIN
+  :sql_text := '
+SELECT /*+ &&top_level_hints. */
+       *
+  FROM (SELECT *
+	      FROM dba_segments
+         WHERE (owner, segment_name) in &&tables_list.
+        UNION ALL
+		SELECT a.*
+		  FROM dba_segments a,
+		       dba_indexes b
+		 WHERE (b.table_owner, b.table_name) in &&tables_list.
+		   AND a.owner = b.owner
+           AND a.segment_name = b.index_name)
+ ORDER BY owner, segment_name, segment_type
 ';
 END;
 /

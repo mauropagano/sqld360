@@ -6,6 +6,15 @@ DEF main_table = 'V$SQL';
 SET SERVEROUT ON
 SET TERM OFF HEA OFF
 
+VAR binds_from_mem NUMBER
+BEGIN
+  SELECT COUNT(*) 
+    INTO :binds_from_mem 
+	FROM gv$sql_bind_capture 
+   WHERE sql_id = '&&sqld360_sqlid.';
+END;
+/
+
 -- thanks to Kerry's post http://kerryosborne.oracle-guy.com/2009/07/creating-test-scripts-with-bind-variables/
 
 SPO &&one_spool_filename..sql
@@ -24,6 +33,15 @@ SELECT 'VAR '||
                                       WHERE sql_id = '&&sqld360_sqlid.')
  ORDER BY position; 
 
+-- if there is no info available in memory then try AWR
+SELECT 'VAR '||
+       CASE WHEN REGEXP_INSTR(SUBSTR(name,1,2),'[[:digit:]]') > 0 THEN 'b'||SUBSTR(name,2) ELSE SUBSTR(name,2) END||' '||
+	   CASE WHEN datatype_string = 'DATE' OR datatype_string LIKE 'TIMESTAMP%' THEN 'VARCHAR2(50)' ELSE datatype_string END
+  FROM dba_hist_sql_bind_metadata
+ WHERE :binds_from_mem = 0
+   AND sql_id = '&&sqld360_sqlid.'
+   AND '&&diagnostics_pack.' = 'Y';
+   
 PRO
 -- values come from V$SQL_PLAN for the peeked binds
 SELECT  
@@ -55,9 +73,31 @@ SELECT
         )
  ORDER BY 1;
 
+-- if there is no plan in memory then extract info from AWR
+SELECT  
+   'EXEC '||
+   CASE WHEN REGEXP_INSTR(SUBSTR(b.name,1,2),'[[:digit:]]') > 0 THEN ':b'||SUBSTR(b.name,2) ELSE b.name END||
+   ' := ' ||
+   CASE WHEN b.datatype = 2 THEN NULL ELSE '''' END||
+   a.value_string||
+   CASE WHEN b.datatype = 2 THEN NULL ELSE '''' END||
+   ';' 
+  FROM TABLE(SELECT DBMS_SQLTUNE.EXTRACT_BINDS(bind_data) 
+               FROM dba_hist_sqlstat
+              WHERE sql_id = '&&sqld360_sqlid.'  
+                AND rownum < 2
+                AND bind_data IS NOT NULL) a,
+       dba_hist_sql_bind_metadata b
+ WHERE a.position = b.position
+   AND :binds_from_mem = 0
+   AND b.sql_id = '&&sqld360_sqlid.'
+   AND '&&diagnostics_pack.' = 'Y'
+ ORDER BY b.position;
+
+
 PRO
 
-PRINT :mysql
+PRINT :sqld360_fullsql
 PRO /
 SPO OFF;
 

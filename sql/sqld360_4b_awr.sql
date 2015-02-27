@@ -36,7 +36,7 @@ SELECT MIN(a.snap_id) snap_id,
 	   TO_CHAR(c.end_interval_time, ''YYYY-MM-DD HH24:MI'')  end_time,
 	   SUM(NVL(b.sql_val,0))/1000000 sql_elapsed,
        SUM(a.system_val)/1000000 system_elapsed, 
-       0 dummy_03,
+       TRUNC((SUM(NVL(b.sql_val,0))/SUM(a.system_val))*100,3) sql_impact_percentage,
        0 dummy_04,
        0 dummy_05,
        0 dummy_06,
@@ -56,7 +56,8 @@ SELECT MIN(a.snap_id) snap_id,
           FROM dba_hist_sqlstat
          WHERE sql_id = ''&&sqld360_sqlid.'') b,
        (SELECT snap_id, instance_number, begin_interval_time, end_interval_time
-          FROM dba_hist_snapshot) c
+          FROM dba_hist_snapshot
+	     WHERE snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.) c
  WHERE a.snap_id = b.snap_id(+)
    AND a.instance_number = b.instance_number(+)
    AND a.instance_number = @instance_number@
@@ -214,7 +215,8 @@ SELECT MIN(a.snap_id) snap_id,
           FROM dba_hist_sqlstat
          WHERE sql_id = ''&&sqld360_sqlid.'') b,
        (SELECT snap_id, instance_number, begin_interval_time, end_interval_time
-          FROM dba_hist_snapshot) a
+          FROM dba_hist_snapshot
+	     WHERE snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.) a
  WHERE a.snap_id = b.snap_id(+)
    AND a.instance_number = b.instance_number(+)
    AND ''&&diagnostics_pack.'' = ''Y''

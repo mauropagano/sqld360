@@ -28,9 +28,9 @@ END;
 COL from_edb360 NEW_V from_edb360;
 SELECT CASE WHEN count(*) > 0 THEN '--' END from_edb360
   FROM plan_table
-  WHERE statement_id = 'SQLD360_SQLID' -- SQL IDs list flag
-	AND operation = '&&sqld360_sqlid.'
-    AND rownum = 1;
+ WHERE statement_id = 'SQLD360_SQLID' -- SQL IDs list flag
+   AND operation = '&&sqld360_sqlid.'
+   AND rownum = 1;
 
 BEGIN  
   -- the check from_edb360 was here before
@@ -187,9 +187,45 @@ COL sqld360_sqltxt NEW_V sqld360_sqltxt
 SELECT SUBSTR(sql_text,1,50) sqld360_sqltxt FROM v$sqltext_with_newlines WHERE sql_id = '&&sqld360_sqlid.' AND piece = 0 AND rownum = 1;
 SELECT SUBSTR(sql_text,1,50) sqld360_sqltxt FROM dba_hist_sqltext WHERE sql_id = '&&sqld360_sqlid.' AND rownum = 1;
 
+-- get sql full text
+VAR sqld360_fullsql CLOB;
+EXEC :sqld360_fullsql := NULL;
+
+BEGIN
+ -- if available from AWR then grab it from there
+ BEGIN
+   SELECT sql_text
+     INTO :sqld360_fullsql
+     FROM dba_hist_sqltext
+    WHERE sql_id = '&&sqld360_sqlid.';
+ EXCEPTION WHEN NO_DATA_FOUND THEN NULL;
+ END;
+
+  IF :sqld360_fullsql IS NULL THEN
+   SELECT sql_fulltext
+     INTO :sqld360_fullsql
+     FROM gv$sql
+    WHERE sql_id = '&&sqld360_sqlid.'
+	  AND sql_fulltext IS NOT NULL
+	  AND ROWNUM = 1;
+  END IF;
+
+END;
+/
+
+-- get exact_matching_signature, force_matching_signature
+COL exact_matching_signature NEW_V exact_matching_signature FOR 999999999999999999
+COL force_matching_signature NEW_V force_matching_signature FOR 999999999999999999
+
+SELECT DBMS_SQLTUNE.SQLTEXT_TO_SIGNATURE(:sqld360_fullsql,0) exact_matching_signature,
+       DBMS_SQLTUNE.SQLTEXT_TO_SIGNATURE(:sqld360_fullsql,1) force_matching_signature
+  FROM dual
+/
+
+
 -- setup
-DEF sqld360_vYYNN = 'v1502';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-03-01)';
+DEF sqld360_vYYNN = 'v1503';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-02-27)';
 DEF sqld360_prefix = 'sqld360';
 DEF sql_trace_level = '8';
 DEF main_table = '';
@@ -221,12 +257,12 @@ DEF ash_html = 'Y';
 DEF ash_mem = 'Y';
 DEF ash_awr = 'Y';
 DEF ash_max_reports = '12';
-DEF exclusion_list = "(''ANONYMOUS'',''APEX_030200'',''APEX_040000'',''APEX_SSO'',''APPQOSSYS'',''CTXSYS'',''DBSNMP'',''DIP'',''EXFSYS'',''FLOWS_FILES'',''MDSYS'',''OLAPSYS'',''ORACLE_OCM'',''ORDDATA'',''ORDPLUGINS'',''ORDSYS'',''OUTLN'',''OWBSYS'')";
-DEF exclusion_list2 = "(''SI_INFORMTN_SCHEMA'',''SQLTXADMIN'',''SQLTXPLAIN'',''SYS'',''SYSMAN'',''SYSTEM'',''TRCANLZR'',''WMSYS'',''XDB'',''XS$NULL'')";
-COL exclusion_list_single_quote NEW_V exclusion_list_single_quote;
-COL exclusion_list2_single_quote NEW_V exclusion_list2_single_quote;
-SELECT REPLACE('&&exclusion_list.', '''''', '''') exclusion_list_single_quote FROM DUAL;
-SELECT REPLACE('&&exclusion_list2.', '''''', '''') exclusion_list2_single_quote FROM DUAL;
+--DEF exclusion_list = "(''ANONYMOUS'',''APEX_030200'',''APEX_040000'',''APEX_SSO'',''APPQOSSYS'',''CTXSYS'',''DBSNMP'',''DIP'',''EXFSYS'',''FLOWS_FILES'',''MDSYS'',''OLAPSYS'',''ORACLE_OCM'',''ORDDATA'',''ORDPLUGINS'',''ORDSYS'',''OUTLN'',''OWBSYS'')";
+--DEF exclusion_list2 = "(''SI_INFORMTN_SCHEMA'',''SQLTXADMIN'',''SQLTXPLAIN'',''SYS'',''SYSMAN'',''SYSTEM'',''TRCANLZR'',''WMSYS'',''XDB'',''XS$NULL'')";
+--COL exclusion_list_single_quote NEW_V exclusion_list_single_quote;
+--COL exclusion_list2_single_quote NEW_V exclusion_list2_single_quote;
+--SELECT REPLACE('&&exclusion_list.', '''''', '''') exclusion_list_single_quote FROM DUAL;
+--SELECT REPLACE('&&exclusion_list2.', '''''', '''') exclusion_list2_single_quote FROM DUAL;
 --DEF skip_tcb = '';
 DEF skip_html = '';
 DEF skip_text = '';
@@ -259,35 +295,35 @@ DEF tit_12 = '';
 DEF tit_13 = '';
 DEF tit_14 = '';
 DEF tit_15 = '';
-DEF wait_class_01 = '';
-DEF event_name_01 = '';
-DEF wait_class_02 = '';
-DEF event_name_02 = '';
-DEF wait_class_03 = '';
-DEF event_name_03 = '';
-DEF wait_class_04 = '';
-DEF event_name_04 = '';
-DEF wait_class_05 = '';
-DEF event_name_05 = '';
-DEF wait_class_06 = '';
-DEF event_name_06 = '';
-DEF wait_class_07 = '';
-DEF event_name_07 = '';
-DEF wait_class_08 = '';
-DEF event_name_08 = '';
-DEF wait_class_09 = '';
-DEF event_name_09 = '';
-DEF wait_class_10 = '';
-DEF event_name_10 = '';
-DEF wait_class_11 = '';
-DEF event_name_11 = '';
-DEF wait_class_12 = '';
-DEF event_name_12 = '';
+--DEF wait_class_01 = '';
+--DEF event_name_01 = '';
+--DEF wait_class_02 = '';
+--DEF event_name_02 = '';
+--DEF wait_class_03 = '';
+--DEF event_name_03 = '';
+--DEF wait_class_04 = '';
+--DEF event_name_04 = '';
+--DEF wait_class_05 = '';
+--DEF event_name_05 = '';
+--DEF wait_class_06 = '';
+--DEF event_name_06 = '';
+--DEF wait_class_07 = '';
+--DEF event_name_07 = '';
+--DEF wait_class_08 = '';
+--DEF event_name_08 = '';
+--DEF wait_class_09 = '';
+--DEF event_name_09 = '';
+--DEF wait_class_10 = '';
+--DEF event_name_10 = '';
+--DEF wait_class_11 = '';
+--DEF event_name_11 = '';
+--DEF wait_class_12 = '';
+--DEF event_name_12 = '';
 DEF exadata = '';
 DEF max_col_number = '1';
 DEF column_number = '1';
-COL recovery NEW_V recovery;
-SELECT CHR(38)||' recovery' recovery FROM DUAL;
+--COL recovery NEW_V recovery;
+--SELECT CHR(38)||' recovery' recovery FROM DUAL;
 -- this above is to handle event "RMAN backup & recovery I/O"
 COL skip_html NEW_V skip_html;
 COL skip_text NEW_V skip_text;
@@ -318,9 +354,10 @@ COL title_no_spaces NEW_V title_no_spaces;
 COL spool_filename NEW_V spool_filename;
 COL one_spool_filename NEW_V one_spool_filename;
 VAR row_count NUMBER;
+-- next two are using to hold the reports SQL
 VAR sql_text CLOB;
 VAR sql_text_backup CLOB;
-VAR sql_text_backup2 CLOB;
+--VAR sql_text_backup2 CLOB;
 VAR sql_text_display CLOB;
 VAR file_seq NUMBER;
 EXEC :file_seq := 5;
@@ -337,6 +374,9 @@ ALTER SESSION SET NLS_TIMESTAMP_TZ_FORMAT = 'YYYY-MM-DD/HH24:MI:SS.FF TZH:TZM';
 -- adding to prevent slow access to ASH with non default NLS settings
 ALTER SESSION SET NLS_SORT = 'BINARY';
 ALTER SESSION SET NLS_COMP = 'BINARY';
+-- to work around Siebel
+--ALTER SESSION SET optimizer_index_cost_adj = 100;
+--ALTER SESSION SET optimizer_dynamic_sampling = 2;
 -- tracing script in case it takes long to execute so we can diagnose it
 ALTER SESSION SET MAX_DUMP_FILE_SIZE = '1G';
 ALTER SESSION SET TRACEFILE_IDENTIFIER = "&&sqld360_tracefile_identifier.";

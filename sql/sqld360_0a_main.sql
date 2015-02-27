@@ -34,6 +34,7 @@ PRO
 SPO OFF;
 
 @@sqld360_2a_plans.sql
+@@sqld360_2e_plan_control.sql
 @@sqld360_2b_performance.sql
 @@sqld360_2c_binds.sql
 @@sqld360_2d_cursor_sharing.sql

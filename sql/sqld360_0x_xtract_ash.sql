@@ -39,6 +39,7 @@ BEGIN
                             other_tag,                                     -- wait_class
                             &&skip_10g.id,                                 -- sql_plan_line_id
                             &&skip_10g.partition_id,                       -- sql_exec_id
+							&&skip_10g.distribution,                       -- sql_exec_start
 							cpu_cost, io_cost,                             -- session_id, session_serial#
                             parent_id                                      -- sample_id
                            )
@@ -50,6 +51,7 @@ BEGIN
              wait_class,
              &&skip_10g.sql_plan_line_id, 
              &&skip_10g.sql_exec_id,
+			 &&skip_10g.TO_CHAR(sql_exec_start,'YYYYMMDDHH24MISS'),
 			 session_id, session_serial#,
              sample_id
        FROM dba_hist_active_sess_history a,
@@ -67,6 +69,7 @@ BEGIN
             wait_class,
             &&skip_10g.sql_plan_line_id, 
             &&skip_10g.sql_exec_id,
+			&&skip_10g.TO_CHAR(sql_exec_start,'YYYYMMDDHH24MISS'),
 			session_id, session_serial#,
             sample_id          
        FROM gv$active_session_history a,

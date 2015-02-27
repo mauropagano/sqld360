@@ -3,31 +3,7 @@ DEF main_table = 'DBMS_UTILITY';
 
 @@sqld360_0s_pre_nondef
 
-VAR mysql CLOB;
 VAR myexpandedsql CLOB;
-EXEC :mysql := NULL;
-
-BEGIN
- -- if available from AWR then grab it from there
- BEGIN
-   SELECT sql_text
-     INTO :mysql
-     FROM dba_hist_sqltext
-    WHERE sql_id = '&&sqld360_sqlid.';
- EXCEPTION WHEN NO_DATA_FOUND THEN NULL;
- END;
-
-  IF :mysql IS NULL THEN
-   SELECT sql_fulltext
-     INTO :mysql
-     FROM gv$sql
-    WHERE sql_id = '&&sqld360_sqlid.'
-	  AND sql_fulltext IS NOT NULL
-	  AND ROWNUM = 1;
-  END IF;
-
-END;
-/
 
 SET SERVEROUT ON
 SET TERM OFF
@@ -41,9 +17,9 @@ DECLARE
 BEGIN
 
   IF '&&db_version.' LIKE '11.2.0.3%' OR '&&db_version.'  LIKE '11.2.0.4%' THEN
-    put('EXEC DBMS_SQL2.EXPAND_SQL_TEXT(:mysql,:myexpandedsql);');
+    put('EXEC DBMS_SQL2.EXPAND_SQL_TEXT(:sqld360_fullsql,:myexpandedsql);');
   ELSIF '&&db_version.' LIKE '12%' THEN 
-    put('EXEC DBMS_UTILITY.EXPAND_SQL_TEXT(:mysql,:myexpandedsql);'); 
+    put('EXEC DBMS_UTILITY.EXPAND_SQL_TEXT(:sqld360_fullsql,:myexpandedsql);'); 
   END IF;
 
 END;
