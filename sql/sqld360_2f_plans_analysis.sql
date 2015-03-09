@@ -297,7 +297,7 @@ BEGIN
     put('       num_samples,');
     put('       TRUNC(100*RATIO_TO_REPORT(num_samples) OVER (),2) percent,');
     put('       NULL dummy_01');	
-    put('  FROM (SELECT id||''''-''''||operation operation,');
+    put('  FROM (SELECT id||'''' - ''''||operation operation,');
     put('	            count(*) num_samples');
     put('		   FROM plan_table');
     put('         WHERE cost =  '||i.plan_hash_value||'');
