@@ -217,7 +217,7 @@ END;
 
 
 DEF title = 'Segments';
-DEF main_table = 'DBA_TAB_MODIFICATIONS';
+DEF main_table = 'DBA_SEGMENTS';
 BEGIN
   :sql_text := '
 SELECT /*+ &&top_level_hints. */
@@ -232,9 +232,30 @@ SELECT /*+ &&top_level_hints. */
 		 WHERE (b.table_owner, b.table_name) in &&tables_list.
 		   AND a.owner = b.owner
            AND a.segment_name = b.index_name)
- ORDER BY owner, segment_name, segment_type
+ ORDER BY owner, segment_name, segment_type desc
 ';
 END;
 /
 @@sqld360_9a_pre_one.sql
 
+DEF title = 'Objects';
+DEF main_table = 'DBA_OBJECTS';
+BEGIN
+  :sql_text := '
+SELECT /*+ &&top_level_hints. */
+       *
+  FROM (SELECT *
+	      FROM dba_objects
+         WHERE (owner, object_name) in &&tables_list.
+        UNION ALL
+		SELECT a.*
+		  FROM dba_objects a,
+		       dba_indexes b
+		 WHERE (b.table_owner, b.table_name) in &&tables_list.
+		   AND a.owner = b.owner
+           AND a.object_name = b.index_name)
+ ORDER BY owner, object_name, object_type desc
+';
+END;
+/
+@@sqld360_9a_pre_one.sql

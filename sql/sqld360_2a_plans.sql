@@ -168,3 +168,32 @@ PRO </li>
 SPO OFF;
 HOS zip -q &&sqld360_main_filename._&&sqld360_file_time. &&sqld360_main_report..html
 
+
+--------------------------------------
+--------------------------------------
+
+COL num_plans NEW_V num_plans
+SELECT TRIM(TO_CHAR(COUNT(plan_hash_value))) num_plans
+  FROM (SELECT plan_hash_value
+	      FROM gv$sql
+         WHERE sql_id = '&&sqld360_sqlid.'
+		UNION
+		SELECT plan_hash_value
+		  FROM dba_hist_sqlstat
+		 WHERE sql_id = '&&sqld360_sqlid.'
+           AND '&&diagnostics_pack.' = 'Y')
+/	
+
+DEF title= 'Plan Analysis'
+DEF main_table = 'GV$SQL_PLAN'	
+
+--this one initiated a new file name, need it in the next anchor
+@@sqld360_0s_pre_nondef
+SET TERM OFF ECHO OFF 
+-- need to fix the file name for the partitions
+SPO &&sqld360_main_report..html APP;
+PRO <li>Plans Analysis <small><em>(&&num_plans.)</em></small> 
+PRO <a href="&&one_spool_filename..html">page</a>
+PRO </li>
+SPO OFF;
+@@sqld360_2f_plans_analysis.sql

@@ -60,19 +60,19 @@ SELECT 0 snap_id,
        0 dummy_13,
        0 dummy_14,
        0 dummy_15
-  FROM (SELECT TRUNC(end_time, ''hh24'') end_time,
+  FROM (SELECT end_time,
                MAX(num_samples_min) num_samples_min,
                MAX(num_samples_oncpu_min) num_samples_oncpu_min
           FROM (SELECT TRUNC(timestamp, ''mi'') end_time,
-                       COUNT(*) num_samples_min, 
-                       SUM(CASE WHEN object_node = ''ON CPU'' THEN 1 ELSE 0 END) num_samples_oncpu_min
+                       COUNT(DISTINCT cpu_cost||''-''||io_cost||''-''||partition_id||''-''||distribution) num_samples_min, 
+                       COUNT(DISTINCT CASE WHEN object_node = ''ON CPU'' THEN cpu_cost||''-''||io_cost||''-''||partition_id||''-''||distribution ELSE NULL END) num_samples_oncpu_min
                   FROM plan_table
                  WHERE statement_id = ''SQLD360_ASH_DATA_MEM''
                    AND position =  @instance_number@
                    AND remarks = ''&&sqld360_sqlid.''
                    AND ''&&diagnostics_pack.'' = ''Y''
                  GROUP BY TRUNC(timestamp, ''mi''))
-         GROUP BY TRUNC(end_time, ''hh24''))
+         GROUP BY end_time)
  ORDER BY 3
 ';
 END;
@@ -194,8 +194,8 @@ SELECT b.snap_id snap_id,
                MAX(num_samples_oncpu_min) num_samples_oncpu_min
           FROM (SELECT cardinality snap_id,
                        TRUNC(timestamp, ''mi'') end_time,
-                       SUM(10) num_samples_min, 
-                       SUM(CASE WHEN object_node = ''ON CPU'' THEN 10 ELSE 0 END) num_samples_oncpu_min
+                       COUNT(DISTINCT cpu_cost||''-''||io_cost||''-''||partition_id||''-''||distribution) num_samples_min, 
+                       COUNT(DISTINCT CASE WHEN object_node = ''ON CPU'' THEN cpu_cost||''-''||io_cost||''-''||partition_id||''-''||distribution ELSE NULL END) num_samples_oncpu_min
                   FROM plan_table
                  WHERE statement_id = ''SQLD360_ASH_DATA_HIST''
                    AND position =  @instance_number@
@@ -671,21 +671,21 @@ BEGIN
 SELECT 0 snap_id,
        TO_CHAR(end_time, ''YYYY-MM-DD HH24:MI'') begin_time, 
        TO_CHAR(end_time, ''YYYY-MM-DD HH24:MI'') end_time,
-       phv1  phv1_&&tit_01.  ,
-       phv2  phv2_&&tit_02.  ,
-       phv3  phv3_&&tit_03.  ,
-       phv4  phv4_&&tit_04.  ,
-       phv5  phv5_&&tit_05.  ,
-       phv6  phv6_&&tit_06.  ,
-       phv7  phv7_&&tit_07.  ,
-       phv8  phv8_&&tit_08.  ,
-       phv9  phv9_&&tit_09.  ,
-       phv10 phv10_&&tit_10. ,
-       phv11 phv11_&&tit_11. ,
-       phv12 phv12_&&tit_12. ,
-       phv13 phv13_&&tit_13. ,
-       phv14 phv14_&&tit_14. ,
-       phv15 phv15_&&tit_15. 
+       NVL(phv1 ,0) phv1_&&tit_01.  ,
+       NVL(phv2 ,0) phv2_&&tit_02.  ,
+       NVL(phv3 ,0) phv3_&&tit_03.  ,
+       NVL(phv4 ,0) phv4_&&tit_04.  ,
+       NVL(phv5 ,0) phv5_&&tit_05.  ,
+       NVL(phv6 ,0) phv6_&&tit_06.  ,
+       NVL(phv7 ,0) phv7_&&tit_07.  ,
+       NVL(phv8 ,0) phv8_&&tit_08.  ,
+       NVL(phv9 ,0) phv9_&&tit_09.  ,
+       NVL(phv10,0) phv10_&&tit_10. ,
+       NVL(phv11,0) phv11_&&tit_11. ,
+       NVL(phv12,0) phv12_&&tit_12. ,
+       NVL(phv13,0) phv13_&&tit_13. ,
+       NVL(phv14,0) phv14_&&tit_14. ,
+       NVL(phv15,0) phv15_&&tit_15. 
   FROM (SELECT TO_DATE(end_time,''YYYYMMDDHH24MI'') end_time,
                MAX(CASE WHEN phv = &&phv_01. THEN avg_et_per_exec ELSE NULL END) phv1,
                MAX(CASE WHEN phv = &&phv_02. THEN avg_et_per_exec ELSE NULL END) phv2, 
@@ -1049,6 +1049,7 @@ COL phv15_ PRI
 DEF main_table = 'V$ACTIVE_SESSION_HISTORY';
 DEF abstract = 'Elapsed Time per recent executions';
 DEF foot = 'Data rounded to the 1 second';
+DEF skip_lch = 'Y';
 
 BEGIN
   :sql_text_backup := '

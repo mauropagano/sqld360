@@ -6,27 +6,27 @@ SELECT LPAD(:file_seq, 5, '0')||'_&&spool_filename.' one_spool_filename FROM DUA
 SELECT TO_CHAR(SYSDATE, 'HH24:MI:SS') hh_mm_ss FROM DUAL;
 SET TERM ON;
 SPO &&sqld360_log..txt APP;
-PRO &&hh_mm_ss. col:&&column_number.of&&max_col_number. "&&one_spool_filename._bar_chart.html"
+PRO &&hh_mm_ss. col:&&column_number.of&&max_col_number. "&&one_spool_filename._org_chart.html"
 SPO OFF;
 SET TERM OFF;
 
 -- update main report
 SPO &&sqld360_main_report..html APP;
-PRO <a href="&&one_spool_filename._bar_chart.html">chart</a>
+PRO <a href="&&one_spool_filename._org_chart.html">chart</a>
 SPO OFF;
 
 -- get time t0
 EXEC :get_time_t0 := DBMS_UTILITY.get_time;
 
 -- header
-SPO &&one_spool_filename._bar_chart.html;
-@@sqld360_0d_html_header.sql
-PRO <!-- &&one_spool_filename._bar_chart.html $ -->
+SPO &&one_spool_filename._org_chart.html;
+@@sqld360_0o_html_header_org.sql
+PRO <!-- &&one_spool_filename._org_chart.html $ -->
 
 -- chart header
 PRO    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
 PRO    <script type="text/javascript">
-PRO      google.load("visualization", "1", {packages:["corechart"]});
+PRO      google.load("visualization", "1", {packages:["orgchart"]});
 PRO      google.setOnLoadCallback(drawChart);
 PRO      function drawChart() {
 PRO        var data = google.visualization.arrayToDataTable([
@@ -35,21 +35,19 @@ PRO        var data = google.visualization.arrayToDataTable([
 SET SERVEROUT ON;
 DECLARE
   cur SYS_REFCURSOR;
-  l_bar VARCHAR2(1000);
-  l_value NUMBER;
-  l_value2 NUMBER;
-  l_value3 VARCHAR2(1000);
+  l_step_id VARCHAR2(1000);
+  l_parent_id NUMBER;
   l_text VARCHAR2(1000);
   l_sql_text VARCHAR2(32767);
 BEGIN
-  DBMS_OUTPUT.PUT_LINE('[''Bucket'', ''Number of Rows'', { role: ''tooltip'' }]');
+  DBMS_OUTPUT.PUT_LINE('[''Step'', ''Parent Step'',''Tooltip'' ]');
   --OPEN cur FOR :sql_text;
   l_sql_text := DBMS_LOB.SUBSTR(:sql_text); -- needed for 10g
   OPEN cur FOR l_sql_text; -- needed for 10g
   LOOP
-    FETCH cur INTO l_bar, l_value, l_value2, l_text;
+    FETCH cur INTO l_step_id, l_parent_id, l_text;
     EXIT WHEN cur%NOTFOUND;
-    DBMS_OUTPUT.PUT_LINE(',['''||l_bar||''', '||l_value||', '''||l_text||''']');
+    DBMS_OUTPUT.PUT_LINE(',['||l_step_id||', '''||NVL(l_parent_id,'')||''', '''||l_text||''']');
   END LOOP;
   CLOSE cur;
 END;
@@ -64,10 +62,11 @@ PRO          backgroundColor: {fill: '#fcfcf0', stroke: '#336699', strokeWidth: 
 PRO          title: '&&title.&&title_suffix.',
 PRO          titleTextStyle: {fontSize: 16, bold: false},
 PRO          legend: {position: 'none'},
+PRO          allowHtml:true,
 PRO          tooltip: {textStyle: {fontSize: 14}}
 PRO        };
 PRO
-PRO        var chart = new google.visualization.ColumnChart(document.getElementById('barchart'));
+PRO        var chart = new google.visualization.OrgChart(document.getElementById('orgchart'));
 PRO        chart.draw(data, options);
 PRO      }
 PRO    </script>
@@ -79,12 +78,10 @@ PRO <br>
 PRO &&abstract.
 PRO &&abstract2.
 PRO
-PRO    <div id="barchart" style="width: 900px; height: 500px;"></div>
+PRO    <div id="orgchart"></div>
 PRO
 
 -- footer
-PRO<font class="n">Notes:<br>1) Values are approximated<br>2) Hovering on the bars show more info.</font>
-PRO<font class="n"><br>3) &&foot.</font>
 PRO <pre>
 SET LIN 80;
 DESC &&main_table.
@@ -106,11 +103,11 @@ SET HEA OFF;
 SPO &&sqld360_log2..txt APP;
 SELECT TO_CHAR(SYSDATE, 'YYYY-MM-DD HH24:MI:SS')||' , '||
        TO_CHAR((:get_time_t1 - :get_time_t0)/100, '999999990.00')||' , '||
-       :row_count||' , &&main_table. , &&title_no_spaces., bar_chart , &&one_spool_filename._bar_chart.html'
+       :row_count||' , &&main_table. , &&title_no_spaces., org_chart , &&one_spool_filename._org_chart.html'
   FROM DUAL
 /
 SPO OFF;
 SET HEA OFF;
 
 -- zip
-HOS zip -mq &&sqld360_main_filename._&&sqld360_file_time. &&one_spool_filename._bar_chart.html
+HOS zip -mq &&sqld360_main_filename._&&sqld360_file_time. &&one_spool_filename._org_chart.html

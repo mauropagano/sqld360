@@ -214,8 +214,8 @@ END;
 /
 
 -- get exact_matching_signature, force_matching_signature
-COL exact_matching_signature NEW_V exact_matching_signature FOR 999999999999999999
-COL force_matching_signature NEW_V force_matching_signature FOR 999999999999999999
+COL exact_matching_signature NEW_V exact_matching_signature FOR 99999999999999999999999
+COL force_matching_signature NEW_V force_matching_signature FOR 99999999999999999999999
 
 SELECT DBMS_SQLTUNE.SQLTEXT_TO_SIGNATURE(:sqld360_fullsql,0) exact_matching_signature,
        DBMS_SQLTUNE.SQLTEXT_TO_SIGNATURE(:sqld360_fullsql,1) force_matching_signature
@@ -224,8 +224,8 @@ SELECT DBMS_SQLTUNE.SQLTEXT_TO_SIGNATURE(:sqld360_fullsql,0) exact_matching_sign
 
 
 -- setup
-DEF sqld360_vYYNN = 'v1503';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-02-27)';
+DEF sqld360_vYYNN = 'v1504';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-03-09)';
 DEF sqld360_prefix = 'sqld360';
 DEF sql_trace_level = '8';
 DEF main_table = '';
@@ -257,12 +257,6 @@ DEF ash_html = 'Y';
 DEF ash_mem = 'Y';
 DEF ash_awr = 'Y';
 DEF ash_max_reports = '12';
---DEF exclusion_list = "(''ANONYMOUS'',''APEX_030200'',''APEX_040000'',''APEX_SSO'',''APPQOSSYS'',''CTXSYS'',''DBSNMP'',''DIP'',''EXFSYS'',''FLOWS_FILES'',''MDSYS'',''OLAPSYS'',''ORACLE_OCM'',''ORDDATA'',''ORDPLUGINS'',''ORDSYS'',''OUTLN'',''OWBSYS'')";
---DEF exclusion_list2 = "(''SI_INFORMTN_SCHEMA'',''SQLTXADMIN'',''SQLTXPLAIN'',''SYS'',''SYSMAN'',''SYSTEM'',''TRCANLZR'',''WMSYS'',''XDB'',''XS$NULL'')";
---COL exclusion_list_single_quote NEW_V exclusion_list_single_quote;
---COL exclusion_list2_single_quote NEW_V exclusion_list2_single_quote;
---SELECT REPLACE('&&exclusion_list.', '''''', '''') exclusion_list_single_quote FROM DUAL;
---SELECT REPLACE('&&exclusion_list2.', '''''', '''') exclusion_list2_single_quote FROM DUAL;
 --DEF skip_tcb = '';
 DEF skip_html = '';
 DEF skip_text = '';
@@ -270,6 +264,7 @@ DEF skip_csv = '';
 DEF skip_lch = 'Y';
 DEF skip_pch = 'Y';
 DEF skip_bch = 'Y';
+DEF skip_och = 'Y';
 DEF skip_all = '';
 DEF abstract = '';
 DEF abstract2 = '';
@@ -295,36 +290,9 @@ DEF tit_12 = '';
 DEF tit_13 = '';
 DEF tit_14 = '';
 DEF tit_15 = '';
---DEF wait_class_01 = '';
---DEF event_name_01 = '';
---DEF wait_class_02 = '';
---DEF event_name_02 = '';
---DEF wait_class_03 = '';
---DEF event_name_03 = '';
---DEF wait_class_04 = '';
---DEF event_name_04 = '';
---DEF wait_class_05 = '';
---DEF event_name_05 = '';
---DEF wait_class_06 = '';
---DEF event_name_06 = '';
---DEF wait_class_07 = '';
---DEF event_name_07 = '';
---DEF wait_class_08 = '';
---DEF event_name_08 = '';
---DEF wait_class_09 = '';
---DEF event_name_09 = '';
---DEF wait_class_10 = '';
---DEF event_name_10 = '';
---DEF wait_class_11 = '';
---DEF event_name_11 = '';
---DEF wait_class_12 = '';
---DEF event_name_12 = '';
 DEF exadata = '';
 DEF max_col_number = '1';
 DEF column_number = '1';
---COL recovery NEW_V recovery;
---SELECT CHR(38)||' recovery' recovery FROM DUAL;
--- this above is to handle event "RMAN backup & recovery I/O"
 COL skip_html NEW_V skip_html;
 COL skip_text NEW_V skip_text;
 COL skip_csv NEW_V skip_csv;

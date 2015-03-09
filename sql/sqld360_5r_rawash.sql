@@ -17,6 +17,8 @@
 -- io_cost          session_serial#
 -- parent_id        sample_id
 
+SET PAGES 50000
+
 DEF section_name = 'ASH Raw Data';
 SPO &&sqld360_main_report..html APP;
 PRO <h2>&&section_name.</h2>
@@ -52,5 +54,3 @@ SELECT /*+ &&top_level_hints. */
 END;
 /
 @@sqld360_9a_pre_one.sql
-
-
