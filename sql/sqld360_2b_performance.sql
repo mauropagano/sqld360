@@ -87,6 +87,21 @@ COL sql_text PRI
 COL sql_fulltext PRI
 
 
+DEF title = 'SQL Optimizer Environment';
+DEF main_table = 'GV$SQL_OPTIMIZER_ENV';
+BEGIN
+  :sql_text := '
+SELECT /*+ &&top_level_hints. */
+       *
+  FROM gv$sql_optimizer_end
+ WHERE sql_id = ''&&sqld360_sqlid.''
+ ORDER BY inst_id, sql_id, child_number, id
+';
+END;
+/
+@@sqld360_9a_pre_one.sql
+
+
 COL bind_data NOPRI
 
 DEF title = 'SQL Statistics from History';

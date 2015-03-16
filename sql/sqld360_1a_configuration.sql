@@ -181,3 +181,14 @@ END;
 /
 @@sqld360_9a_pre_one.sql
 
+DEF title = 'IO Calibration';
+DEF main_table = 'DBA_RSRC_IO_CALIBRATE';
+BEGIN
+  :sql_text := '
+SELECT /*+ &&top_level_hints. */ 
+       *
+  FROM dba_rsrc_io_calibrate
+';
+END;
+/
+@@sqld360_9a_pre_one.sql

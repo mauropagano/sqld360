@@ -224,8 +224,8 @@ SELECT DBMS_SQLTUNE.SQLTEXT_TO_SIGNATURE(:sqld360_fullsql,0) exact_matching_sign
 
 
 -- setup
-DEF sqld360_vYYNN = 'v1504';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-03-09)';
+DEF sqld360_vYYNN = 'v1505';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-03-15)';
 DEF sqld360_prefix = 'sqld360';
 DEF sql_trace_level = '8';
 DEF main_table = '';
@@ -258,6 +258,7 @@ DEF ash_mem = 'Y';
 DEF ash_awr = 'Y';
 DEF ash_max_reports = '12';
 --DEF skip_tcb = '';
+--DEF skip_ash_rpt = '--';
 DEF skip_html = '';
 DEF skip_text = '';
 DEF skip_csv = '';

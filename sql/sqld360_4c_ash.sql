@@ -17,6 +17,9 @@
 -- cpu_cost         session_id
 -- io_cost          session_serial#
 -- parent_id        sample_id
+-- partition_start  seq#,p1,p2,p3,current_file#,current_block#, --current_row#
+-- partition_stop   --in_parse, --in_hard_parse, --in_sql_execution, qc_instance_id, qc_session_id, --qc_session_serial#, 
+--                  blocking_session_status, blocking_session, blocking_session_serial#, --blocking_inst_id
 
 DEF skip_lch = 'Y';
 DEF skip_pch = 'Y';
@@ -35,9 +38,275 @@ COL cpu_time FOR 999999990;
 ------------------------------
 
 
+DEF abstract = 'Number of executions (regardless of elapsed time) per PHV';
+DEF main_table = 'DBA_HIST_ACTIVE_SESS_HISTORY';
+DEF foot = 'Higher number of execs doesn''t imply higher impact if the plan is optimal';
+DEF slices = '15';
+BEGIN
+ :sql_text_backup := '
+SELECT phv,
+       num_execs,
+       TRUNC(100*RATIO_TO_REPORT(num_execs) OVER (),2) percent,
+       NULL dummy_01
+  FROM (SELECT cost phv,
+               COUNT(DISTINCT cpu_cost||''-''||io_cost||''-''||partition_id||''-''||distribution ) num_execs
+          FROM plan_table
+         WHERE remarks = ''&&sqld360_sqlid.'' 
+           AND statement_id LIKE ''SQLD360_ASH_DATA%'' 
+           AND position =  @instance_number@
+           AND ''&&diagnostics_pack.'' = ''Y''
+         GROUP BY cost)
+';
+END;
+/ 
+
+DEF skip_pch='';
+DEF skip_all = '&&is_single_instance.';
+DEF title = 'Number of execs per PHV for Cluster';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', 'position');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_pch='';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 1;
+DEF title = 'Number of execs per PHV for Instance 1';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '1');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_pch='';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 2;
+DEF title = 'Number of execs per PHV for Instance 2';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '2');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_pch='';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 3;
+DEF title = 'Number of execs per PHV for Instance 3';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '3');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_pch='';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 4;
+DEF title = 'Number of execs per PHV for Instance 4';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '4');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_pch='';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 5;
+DEF title = 'Number of execs per PHV for Instance 5';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '5');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_pch='';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 6;
+DEF title = 'Number of execs per PHV for Instance 6';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '6');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_pch='';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 7;
+DEF title = 'Number of execs per PHV for Instance 7';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '7');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_pch='';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 8;
+DEF title = 'Number of execs per PHV for Instance 8';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '8');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+
+DEF skip_pch='Y';
+---------------------
+---------------------
+
+DEF abstract = 'Total elapsed time (regardless of number of execs) for recent execs per PHV';
 DEF main_table = 'V$ACTIVE_SESSION_HISTORY';
-DEF abstract = 'SQL Peak Demand for recent executions';
-DEF foot = 'Data rounded to the 1 second'
+DEF foot = 'A single exec with a poor plan impacts more than N execs with a good plan, bigger slice means higher impact';
+DEF slices = '15';
+BEGIN
+ :sql_text_backup := '
+SELECT phv,
+       num_samples,
+       TRUNC(100*RATIO_TO_REPORT(num_samples) OVER (),2) percent,
+       NULL dummy_01	
+  FROM (SELECT cost phv,
+	           COUNT(*) num_samples
+		  FROM plan_table
+         WHERE remarks = ''&&sqld360_sqlid.'' 
+		   AND statement_id = ''SQLD360_ASH_DATA_MEM'' 
+		   AND position =  @instance_number@
+           AND ''&&diagnostics_pack.'' = ''Y''
+         GROUP BY cost)
+';
+END;
+/ 
+
+DEF skip_pch='';
+DEF skip_all = '&&is_single_instance.';
+DEF title = 'Total et for recent execs per PHV for Cluster';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', 'position');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_pch='';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 1;
+DEF title = 'Total et for recent execs per PHV for Instance 1';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '1');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_pch='';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 2;
+DEF title = 'Total et for recent execs per PHV for Instance 2';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '2');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_pch='';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 3;
+DEF title = 'Total et for recent execs per PHV for Instance 3';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '3');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_pch='';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 4;
+DEF title = 'Total et for recent execs per PHV for Instance 4';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '4');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_pch='';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 5;
+DEF title = 'Total et for recent execs per PHV for Instance 5';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '5');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_pch='';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 6;
+DEF title = 'Total et for recent execs per PHV for Instance 6';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '6');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_pch='';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 7;
+DEF title = 'Total et for recent execs per PHV for Instance 7';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '7');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_pch='';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 8;
+DEF title = 'Total et for recent execs per PHV for Instance 8';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '8');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_pch='Y';
+---------------------
+---------------------
+
+DEF abstract = 'Total elapsed time (regardless of number of execs) for historical execs per PHV';
+DEF main_table = 'DBA_HIST_ACTIVE_SESS_HISTORY';
+DEF foot = 'A single exec with a poor plan impacts more than N execs with a good plan, bigger slice means higher impact';
+DEF slices = '15';
+BEGIN
+ :sql_text_backup := '
+SELECT phv,
+       num_samples,
+       TRUNC(100*RATIO_TO_REPORT(num_samples) OVER (),2) percent,
+       NULL dummy_01	
+  FROM (SELECT cost phv,
+	           SUM(10) num_samples
+		  FROM plan_table
+         WHERE remarks = ''&&sqld360_sqlid.'' 
+		   AND statement_id = ''SQLD360_ASH_DATA_HIST'' 
+		   AND position =  @instance_number@
+           AND ''&&diagnostics_pack.'' = ''Y''
+         GROUP BY cost)
+';
+END;
+/ 
+
+DEF skip_pch='';
+DEF skip_all = '&&is_single_instance.';
+DEF title = 'Total et for historical execs per PHV for Cluster';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', 'position');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_pch='';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 1;
+DEF title = 'Total et for historical execs per PHV for Instance 1';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '1');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_pch='';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 2;
+DEF title = 'Total et for historical execs per PHV for Instance 2';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '2');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_pch='';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 3;
+DEF title = 'Total et for historical execs per PHV for Instance 3';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '3');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_pch='';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 4;
+DEF title = 'Total et for historical execs per PHV for Instance 4';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '4');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_pch='';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 5;
+DEF title = 'Total et for historical execs per PHV for Instance 5';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '5');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_pch='';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 6;
+DEF title = 'Total et for historical execs per PHV for Instance 6';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '6');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_pch='';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 7;
+DEF title = 'Total et for historical execs per PHV for Instance 7';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '7');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_pch='';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 8;
+DEF title = 'Total et for historical execs per PHV for Instance 8';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '8');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_pch='Y';
+----------------------------
+----------------------------
+
+
+DEF main_table = 'V$ACTIVE_SESSION_HISTORY';
+DEF abstract = 'Peak Demand for recent executions';
+DEF foot = 'Chart represents how many CPUs are busy running the SQL at peak per time'
 
 
 BEGIN
@@ -80,7 +349,7 @@ END;
 
 DEF chartype = 'LineChart';
 DEF stacked = '';
-DEF skip_lch = '';
+
 DEF tit_01 = 'Peak Demand';
 DEF tit_02 = 'Peak CPU Demand';
 DEF tit_03 = '';
@@ -99,74 +368,74 @@ DEF tit_15 = '';
 
 DEF skip_lch = '';
 DEF skip_all = '&&is_single_instance.';
-DEF title = 'SQL Peak Demand for recent execs for Cluster';
+DEF title = 'Peak Demand for recent execs for Cluster';
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', 'position');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
 
 DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 1;
-DEF title = 'SQL Peak Demand for recent execs for Instance 1';
+DEF title = 'Peak Demand for recent execs for Instance 1';
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '1');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
 
 DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 2;
-DEF title = 'SQL Peak Demand for recent execs for Instance 2';
+DEF title = 'Peak Demand for recent execs for Instance 2';
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '2');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
 
 DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 3;
-DEF title = 'SQL Peak Demand for recent execs for Instance 3';
+DEF title = 'Peak Demand for recent execs for Instance 3';
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '3');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
 
 DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 4;
-DEF title = 'SQL Peak Demand for recent execs for Instance 4';
+DEF title = 'Peak Demand for recent execs for Instance 4';
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '4');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
 
 DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 5;
-DEF title = 'SQL Peak Demand for recent execs for Instance 5';
+DEF title = 'Peak Demand for recent execs for Instance 5';
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '5');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
 
 DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 6;
-DEF title = 'SQL Peak Demand for recent execs for Instance 6';
+DEF title = 'Peak Demand for recent execs for Instance 6';
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '6');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
 
 DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 7;
-DEF title = 'SQL Peak Demand for recent execs for Instance 7';
+DEF title = 'Peak Demand for recent execs for Instance 7';
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '7');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
 
 DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 8;
-DEF title = 'SQL Peak Demand for recent execs for Instance 8';
+DEF title = 'Peak Demand for recent execs for Instance 8';
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '8');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
 
-
+DEF skip_lch = 'Y';
 ------------------------------
 ------------------------------
 
 
 DEF main_table = 'DBA_HIST_ACTIVE_SESS_HISTORY';
-DEF abstract = 'SQL Peak Demand for historical executions';
-DEF foot = 'Data rounded to the 10 seconds'
+DEF abstract = 'Peak Demand for historical executions';
+DEF foot = 'Chart represents how many CPUs are busy running the SQL at peak per time'
 
 
 BEGIN
@@ -232,68 +501,68 @@ DEF tit_15 = '';
 
 DEF skip_lch = '';
 DEF skip_all = '&&is_single_instance.';
-DEF title = 'SQL Peak Demand for historical execs for Cluster';
+DEF title = 'Peak Demand for historical execs for Cluster';
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', 'position');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
 
 DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 1;
-DEF title = 'SQL Peak Demand for historical execs for Instance 1';
+DEF title = 'Peak Demand for historical execs for Instance 1';
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '1');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
 
 DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 2;
-DEF title = 'SQL Peak Demand for historical execs for Instance 2';
+DEF title = 'Peak Demand for historical execs for Instance 2';
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '2');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
 
 DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 3;
-DEF title = 'SQL Peak Demand for historical execs for Instance 3';
+DEF title = 'Peak Demand for historical execs for Instance 3';
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '3');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
 
 DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 4;
-DEF title = 'SQL Peak Demand for historical execs for Instance 4';
+DEF title = 'Peak Demand for historical execs for Instance 4';
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '4');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
 
 DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 5;
-DEF title = 'SQL Peak Demand for historical execs for Instance 5';
+DEF title = 'Peak Demand for historical execs for Instance 5';
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '5');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
 
 DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 6;
-DEF title = 'SQL Peak Demand for historical execs for Instance 6';
+DEF title = 'Peak Demand for historical execs for Instance 6';
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '6');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
 
 DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 7;
-DEF title = 'SQL Peak Demand for historical execs for Instance 7';
+DEF title = 'Peak Demand for historical execs for Instance 7';
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '7');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
 
 DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 8;
-DEF title = 'SQL Peak Demand for historical execs for Instance 8';
+DEF title = 'Peak Demand for historical execs for Instance 8';
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '8');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
 
 
-
+DEF skip_lch = 'Y';
 ------------------------------
 ------------------------------
 
@@ -425,7 +694,7 @@ EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '8');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
 
 
-
+DEF skip_lch = 'Y';
 ------------------------------
 ------------------------------
 
@@ -568,6 +837,7 @@ EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '8');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
 
 
+DEF skip_lch = 'Y';
 -------------------------
 -------------------------
 
@@ -803,6 +1073,7 @@ COL phv13_ PRI
 COL phv14_ PRI
 COL phv15_ PRI
 
+DEF skip_lch = 'Y';
 ---------------------------
 ---------------------------
 
@@ -1043,6 +1314,7 @@ COL phv13_ PRI
 COL phv14_ PRI
 COL phv15_ PRI
 
+DEF skip_lch = 'Y';
 ---------------------
 ---------------------
 

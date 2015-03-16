@@ -25,10 +25,19 @@ BEGIN
              FROM (SELECT owner object_owner, table_name object_name, 'TABLE' object_type
                      FROM dba_tables
                     WHERE (owner, table_name) IN &&tables_list_s.
-                   UNION ALL
+                   UNION 
                    SELECT owner object_owner, index_name object_name, 'INDEX' object_type
                      FROM dba_indexes
-                    WHERE (table_owner, table_name) IN &&tables_list_s.)
+                    WHERE (table_owner, table_name) IN &&tables_list_s.
+                   UNION 
+                   SELECT owner object_owner, name object_name, type object_type
+                     FROM gv$db_object_cache  
+                    WHERE type <> 'NONE'
+                      AND (inst_id, hash_value) IN (SELECT inst_id, to_hash
+                                                      FROM gv$object_dependency
+                                                     WHERE (inst_id, from_hash) IN (SELECT inst_id, hash_value
+                                                                                      FROM gv$sql
+                                                                                     WHERE sql_id = '&&sqld360_sqlid.')))
            ORDER BY 1,2,3 DESC) 
    LOOP
     put('BEGIN');

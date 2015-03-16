@@ -78,7 +78,7 @@ SPO OFF;
 
 @@&&skip_10g.&&skip_11r1.sqld360_5f_10053.sql
 @@&&skip_tuning.&&skip_10g.sqld360_5b_sqlmon.sql
-@@&&skip_diagnostics.sqld360_5c_ash.sql
+-- @@&&skip_diagnostics.sqld360_5c_ash.sql
 @@&&skip_tcb.&&skip_10g.sqld360_5a_tcb.sql
 @@&&skip_diagnostics.sqld360_5r_rawash.sql
 
