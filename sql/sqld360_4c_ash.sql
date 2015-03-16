@@ -127,9 +127,9 @@ DEF skip_pch='Y';
 ---------------------
 ---------------------
 
-DEF abstract = 'Total elapsed time (regardless of number of execs) for recent execs per PHV';
+DEF abstract = 'Total elapsed time (regardless of number of execs) for recent execs per PHV, in seconds';
 DEF main_table = 'V$ACTIVE_SESSION_HISTORY';
-DEF foot = 'A single exec with a poor plan impacts more than N execs with a good plan, bigger slice means higher impact';
+DEF foot = 'Time in seconds. A single exec with a poor plan impacts more than N execs with a good plan, bigger slice means higher impact';
 DEF slices = '15';
 BEGIN
  :sql_text_backup := '
@@ -215,9 +215,9 @@ DEF skip_pch='Y';
 ---------------------
 ---------------------
 
-DEF abstract = 'Total elapsed time (regardless of number of execs) for historical execs per PHV';
+DEF abstract = 'Total elapsed time (regardless of number of execs) for historical execs per PHV, in seconds.';
 DEF main_table = 'DBA_HIST_ACTIVE_SESS_HISTORY';
-DEF foot = 'A single exec with a poor plan impacts more than N execs with a good plan, bigger slice means higher impact';
+DEF foot = 'Time in seconds. A single exec with a poor plan impacts more than N execs with a good plan, bigger slice means higher impact';
 DEF slices = '15';
 BEGIN
  :sql_text_backup := '
@@ -567,7 +567,7 @@ DEF skip_lch = 'Y';
 ------------------------------
 
 DEF main_table = 'V$ACTIVE_SESSION_HISTORY';
-DEF abstract = 'Average and Median elapsed time per execution for recent executions';
+DEF abstract = 'Average and Median elapsed time per execution for recent executions, in seconds. ';
 DEF foot = 'Data rounded to the 1 second'
 
 BEGIN
@@ -699,7 +699,7 @@ DEF skip_lch = 'Y';
 ------------------------------
 
 DEF main_table = 'DBA_HIST_ACTIVE_SESS_HISTORY';
-DEF abstract = 'Average and Median elapsed time per execution for historical executions';
+DEF abstract = 'Average and Median elapsed time per execution for historical executions, in seconds.';
 DEF foot = 'Data rounded to the 10 seconds'
 
 BEGIN
@@ -842,7 +842,7 @@ DEF skip_lch = 'Y';
 -------------------------
 
 DEF main_table = 'V$ACTIVE_SESSION_HISTORY';
-DEF abstract = 'Average elapsed time per execution per Plan Hash Value for recent executions, top best 5 and worst 10';
+DEF abstract = 'Average elapsed time per execution per Plan Hash Value for recent executions in seconds, top best 5 and worst 10';
 DEF foot = 'Data rounded to the 1 second'
 
 COL tit_01 NEW_V tit_01 
@@ -1078,7 +1078,7 @@ DEF skip_lch = 'Y';
 ---------------------------
 
 DEF main_table = 'DBA_HIST_ACTIVE_SESS_HISTORY';
-DEF abstract = 'Average elapsed time per execution per Plan Hash Value for historical executions, top best 5 and worst 10';
+DEF abstract = 'Average elapsed time per execution per Plan Hash Value for historical executions in seconds, top best 5 and worst 10';
 DEF foot = 'Data rounded to the 10 second'
 
 COL tit_01 NEW_V tit_01 
@@ -1319,7 +1319,7 @@ DEF skip_lch = 'Y';
 ---------------------
 
 DEF main_table = 'V$ACTIVE_SESSION_HISTORY';
-DEF abstract = 'Elapsed Time per recent executions';
+DEF abstract = 'Elapsed Time per recent executions, in seconds';
 DEF foot = 'Data rounded to the 1 second';
 DEF skip_lch = 'Y';
 
@@ -1404,7 +1404,7 @@ EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '8');
 ------------------------------------------------
 
 DEF main_table = 'DBA_HIST_ACTIVE_SESS_HISTORY';
-DEF abstract = 'Elapsed Time per historical execution';
+DEF abstract = 'Elapsed Time per historical execution, in seconds';
 DEF foot = 'Data rounded to the 10 seconds';
 
 
