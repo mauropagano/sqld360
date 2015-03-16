@@ -93,7 +93,7 @@ BEGIN
   :sql_text := '
 SELECT /*+ &&top_level_hints. */
        *
-  FROM gv$sql_optimizer_end
+  FROM gv$sql_optimizer_env
  WHERE sql_id = ''&&sqld360_sqlid.''
  ORDER BY inst_id, sql_id, child_number, id
 ';
