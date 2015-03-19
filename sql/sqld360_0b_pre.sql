@@ -42,7 +42,7 @@ BEGIN
     INSERT INTO plan_table (statement_id, timestamp, operation, options) VALUES ('SQLD360_SQLID',sysdate,'&&sqld360_sqlid.','1');
     INSERT INTO plan_table (statement_id, timestamp, operation) VALUES ('SQLD360_ASH_LOAD',sysdate, NULL);
   END IF;
-  
+
 END;
 /  
   
@@ -217,6 +217,11 @@ END;
 COL exact_matching_signature NEW_V exact_matching_signature FOR 99999999999999999999999
 COL force_matching_signature NEW_V force_matching_signature FOR 99999999999999999999999
 
+-- this is to set a fake value in case SQL is not in memory and AWR
+SELECT 0 exact_matching_signature, 0 force_matching_signature
+  FROM DUAL
+/
+
 SELECT DBMS_SQLTUNE.SQLTEXT_TO_SIGNATURE(:sqld360_fullsql,0) exact_matching_signature,
        DBMS_SQLTUNE.SQLTEXT_TO_SIGNATURE(:sqld360_fullsql,1) force_matching_signature
   FROM dual
@@ -224,8 +229,8 @@ SELECT DBMS_SQLTUNE.SQLTEXT_TO_SIGNATURE(:sqld360_fullsql,0) exact_matching_sign
 
 
 -- setup
-DEF sqld360_vYYNN = 'v1505';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-03-15)';
+DEF sqld360_vYYNN = 'v1506';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-03-19)';
 DEF sqld360_prefix = 'sqld360';
 DEF sql_trace_level = '8';
 DEF main_table = '';
@@ -235,6 +240,8 @@ DEF title_suffix = '';
 DEF common_sqld360_prefix = '&&sqld360_prefix._&&database_name_short._&&sqld360_sqlid.';
 DEF sqld360_main_report = '00001_&&common_sqld360_prefix._index';
 DEF sqld360_log = '00002_&&common_sqld360_prefix._log';
+-- this is for eDB360 to pull the log in case the execution fails
+UPDATE plan_table SET remarks = '&&sqld360_log..txt'  WHERE statement_id = 'SQLD360_SQLID' and operation = '&&sqld360_sqlid.';
 DEF sqld360_tkprof = '00003_&&common_sqld360_prefix._tkprof';
 DEF sqld360_main_filename = '&&common_sqld360_prefix._&&host_name_short.';
 DEF sqld360_log2 = '00004_&&common_sqld360_prefix._log2';
@@ -393,5 +400,6 @@ SPO OFF;
 
 -- zip
 HOS zip -jq &&sqld360_main_filename._&&sqld360_file_time. js/sorttable.js
+HOS zip -jq &&sqld360_main_filename._&&sqld360_file_time. js/SQLd360_img.jpg
 
 --WHENEVER SQLERROR CONTINUE;
