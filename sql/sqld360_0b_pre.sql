@@ -229,8 +229,8 @@ SELECT DBMS_SQLTUNE.SQLTEXT_TO_SIGNATURE(:sqld360_fullsql,0) exact_matching_sign
 
 
 -- setup
-DEF sqld360_vYYNN = 'v1506';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-03-19)';
+DEF sqld360_vYYNN = 'v1507';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-03-24)';
 DEF sqld360_prefix = 'sqld360';
 DEF sql_trace_level = '8';
 DEF main_table = '';

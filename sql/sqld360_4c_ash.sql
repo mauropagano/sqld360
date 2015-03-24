@@ -307,6 +307,7 @@ DEF skip_pch='Y';
 DEF main_table = 'V$ACTIVE_SESSION_HISTORY';
 DEF abstract = 'Peak Demand for recent executions';
 DEF foot = 'Chart represents how many CPUs are busy running the SQL at peak per time'
+DEF vaxis = 'Active Sessions running the SQL'
 
 
 BEGIN
@@ -314,8 +315,8 @@ BEGIN
 SELECT 0 snap_id,
        TO_CHAR(end_time, ''YYYY-MM-DD HH24:MI'') begin_time, 
        TO_CHAR(end_time, ''YYYY-MM-DD HH24:MI'') end_time,
-       num_samples_min,
-       num_samples_oncpu_min,
+       num_sessions_min,
+       num_sessions_oncpu_min,
        0 dummy_03,
        0 dummy_04,
        0 dummy_05,
@@ -329,19 +330,19 @@ SELECT 0 snap_id,
        0 dummy_13,
        0 dummy_14,
        0 dummy_15
-  FROM (SELECT end_time,
-               MAX(num_samples_min) num_samples_min,
-               MAX(num_samples_oncpu_min) num_samples_oncpu_min
-          FROM (SELECT TRUNC(timestamp, ''mi'') end_time,
-                       COUNT(DISTINCT cpu_cost||''-''||io_cost||''-''||partition_id||''-''||distribution) num_samples_min, 
-                       COUNT(DISTINCT CASE WHEN object_node = ''ON CPU'' THEN cpu_cost||''-''||io_cost||''-''||partition_id||''-''||distribution ELSE NULL END) num_samples_oncpu_min
+  FROM (SELECT TRUNC(end_time,''mi'') end_time,
+               MAX(num_sessions) num_sessions_min,
+               MAX(num_sessions_oncpu) num_sessions_oncpu_min
+          FROM (SELECT timestamp end_time,
+                       COUNT(position||''-''||cpu_cost||''-''||io_cost) num_sessions, 
+                       COUNT(CASE WHEN object_node = ''ON CPU'' THEN position||''-''||cpu_cost||''-''||io_cost ELSE NULL END) num_sessions_oncpu
                   FROM plan_table
                  WHERE statement_id = ''SQLD360_ASH_DATA_MEM''
                    AND position =  @instance_number@
                    AND remarks = ''&&sqld360_sqlid.''
                    AND ''&&diagnostics_pack.'' = ''Y''
-                 GROUP BY TRUNC(timestamp, ''mi''))
-         GROUP BY end_time)
+                 GROUP BY timestamp)
+         GROUP BY TRUNC(end_time,''mi''))
  ORDER BY 3
 ';
 END;
@@ -436,6 +437,7 @@ DEF skip_lch = 'Y';
 DEF main_table = 'DBA_HIST_ACTIVE_SESS_HISTORY';
 DEF abstract = 'Peak Demand for historical executions';
 DEF foot = 'Chart represents how many CPUs are busy running the SQL at peak per time'
+DEF vaxis = 'Active Sessions running the SQL'
 
 
 BEGIN
@@ -443,8 +445,8 @@ BEGIN
 SELECT b.snap_id snap_id,
        TO_CHAR(b.begin_interval_time, ''YYYY-MM-DD HH24:MI'')  begin_time, 
        TO_CHAR(b.end_interval_time, ''YYYY-MM-DD HH24:MI'')  end_time,
-       NVL(num_samples_min,0) num_samples_min,
-       NVL(num_samples_oncpu_min,0) num_samples_oncpu_min,
+       NVL(num_sessions_hour,0) num_sessions_hour,
+       NVL(num_sessions_oncpu_hour,0) num_sessions_oncpu_hour,
        0 dummy_03,
        0 dummy_04,
        0 dummy_05,
@@ -459,18 +461,18 @@ SELECT b.snap_id snap_id,
        0 dummy_14,
        0 dummy_15
   FROM (SELECT snap_id,
-               MAX(num_samples_min) num_samples_min,
-               MAX(num_samples_oncpu_min) num_samples_oncpu_min
+               MAX(num_sessions) num_sessions_hour,
+               MAX(num_sessions_oncpu) num_sessions_oncpu_hour
           FROM (SELECT cardinality snap_id,
-                       TRUNC(timestamp, ''mi'') end_time,
-                       COUNT(DISTINCT cpu_cost||''-''||io_cost||''-''||partition_id||''-''||distribution) num_samples_min, 
-                       COUNT(DISTINCT CASE WHEN object_node = ''ON CPU'' THEN cpu_cost||''-''||io_cost||''-''||partition_id||''-''||distribution ELSE NULL END) num_samples_oncpu_min
+                       timestamp end_time,
+                       COUNT(position||''-''||cpu_cost||''-''||io_cost) num_sessions, 
+                       COUNT(CASE WHEN object_node = ''ON CPU'' THEN position||''-''||cpu_cost||''-''||io_cost ELSE NULL END) num_sessions_oncpu
                   FROM plan_table
                  WHERE statement_id = ''SQLD360_ASH_DATA_HIST''
                    AND position =  @instance_number@
                    AND remarks = ''&&sqld360_sqlid.''
                    AND ''&&diagnostics_pack.'' = ''Y''
-                 GROUP BY cardinality, TRUNC(timestamp, ''mi''))
+                 GROUP BY cardinality, timestamp)
          GROUP BY snap_id) ash,
        dba_hist_snapshot b
  WHERE ash.snap_id(+) = b.snap_id
@@ -569,6 +571,7 @@ DEF skip_lch = 'Y';
 DEF main_table = 'V$ACTIVE_SESSION_HISTORY';
 DEF abstract = 'Average and Median elapsed time per execution for recent executions, in seconds. ';
 DEF foot = 'Data rounded to the 1 second'
+DEF vaxis = 'Elapsed Time for the SQL'
 
 BEGIN
   :sql_text_backup := '

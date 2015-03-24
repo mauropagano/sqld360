@@ -22,6 +22,7 @@
 
 SET PAGES 50000
 
+DEF max_rows = '100000';
 DEF section_name = 'ASH Raw Data';
 SPO &&sqld360_main_report..html APP;
 PRO <h2>&&section_name.</h2>
@@ -48,27 +49,27 @@ SELECT /*+ &&top_level_hints. */
        options          sql_plan_options,  
        object_node      cpu_or_event,
        other_tag        wait_class,
-       SUBSTR(partition_start,1,INSTR(partition_start,'','',1,1)-1) seq#,
+       TO_NUMBER(SUBSTR(partition_start,1,INSTR(partition_start,'','',1,1)-1)) seq#,
        SUBSTR(partition_start,INSTR(partition_start,'','',1,1)+1,INSTR(partition_start,'','',1,2)-INSTR(partition_start,'','',1,1)-1) p1text,
-       SUBSTR(partition_start,INSTR(partition_start,'','',1,2)+1,INSTR(partition_start,'','',1,3)-INSTR(partition_start,'','',1,2)-1) p1,
+       TO_NUMBER(SUBSTR(partition_start,INSTR(partition_start,'','',1,2)+1,INSTR(partition_start,'','',1,3)-INSTR(partition_start,'','',1,2)-1)) p1,
        SUBSTR(partition_start,INSTR(partition_start,'','',1,3)+1,INSTR(partition_start,'','',1,4)-INSTR(partition_start,'','',1,3)-1) p2text,
-       SUBSTR(partition_start,INSTR(partition_start,'','',1,4)+1,INSTR(partition_start,'','',1,5)-INSTR(partition_start,'','',1,4)-1) p2,
+       TO_NUMBER(SUBSTR(partition_start,INSTR(partition_start,'','',1,4)+1,INSTR(partition_start,'','',1,5)-INSTR(partition_start,'','',1,4)-1)) p2,
        SUBSTR(partition_start,INSTR(partition_start,'','',1,5)+1,INSTR(partition_start,'','',1,6)-INSTR(partition_start,'','',1,5)-1) p3text,
-       SUBSTR(partition_start,INSTR(partition_start,'','',1,6)+1,INSTR(partition_start,'','',1,7)-INSTR(partition_start,'','',1,6)-1) p3,
+       TO_NUMBER(SUBSTR(partition_start,INSTR(partition_start,'','',1,6)+1,INSTR(partition_start,'','',1,7)-INSTR(partition_start,'','',1,6)-1)) p3,
        object_instance  current_obj#,
-       SUBSTR(partition_start,INSTR(partition_start,'','',1,7)+1,INSTR(partition_start,'','',1,8)-INSTR(partition_start,'','',1,7)-1) current_file#,
-       SUBSTR(partition_start,INSTR(partition_start,'','',1,8)+1,INSTR(partition_start,'','',1,9)-INSTR(partition_start,'','',1,8)-1) current_block#,
-       SUBSTR(partition_start,INSTR(partition_start,'','',1,9)+1) current_row#,
+       TO_NUMBER(SUBSTR(partition_start,INSTR(partition_start,'','',1,7)+1,INSTR(partition_start,'','',1,8)-INSTR(partition_start,'','',1,7)-1)) current_file#,
+       TO_NUMBER(SUBSTR(partition_start,INSTR(partition_start,'','',1,8)+1,INSTR(partition_start,'','',1,9)-INSTR(partition_start,'','',1,8)-1)) current_block#,
+       TO_NUMBER(SUBSTR(partition_start,INSTR(partition_start,'','',1,9)+1)) current_row#,
        SUBSTR(partition_stop,1,INSTR(partition_stop,'','',1,1)-1) in_parse,
        SUBSTR(partition_stop,INSTR(partition_stop,'','',1,1)+1,INSTR(partition_stop,'','',1,2)-INSTR(partition_stop,'','',1,1)-1) in_hard_parse,
        SUBSTR(partition_stop,INSTR(partition_stop,'','',1,2)+1,INSTR(partition_stop,'','',1,3)-INSTR(partition_stop,'','',1,2)-1) in_sql_execution,
-       SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INSTR(partition_stop,'','',1,4)-INSTR(partition_stop,'','',1,3)-1) qc_instance_id,
-       SUBSTR(partition_stop,INSTR(partition_stop,'','',1,4)+1,INSTR(partition_stop,'','',1,5)-INSTR(partition_stop,'','',1,4)-1) qc_session_id,
-       SUBSTR(partition_stop,INSTR(partition_stop,'','',1,5)+1,INSTR(partition_stop,'','',1,6)-INSTR(partition_stop,'','',1,5)-1) qc_session_serial#,
+       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INSTR(partition_stop,'','',1,4)-INSTR(partition_stop,'','',1,3)-1)) qc_instance_id,
+       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,4)+1,INSTR(partition_stop,'','',1,5)-INSTR(partition_stop,'','',1,4)-1)) qc_session_id,
+       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,5)+1,INSTR(partition_stop,'','',1,6)-INSTR(partition_stop,'','',1,5)-1)) qc_session_serial#,
        SUBSTR(partition_stop,INSTR(partition_stop,'','',1,6)+1,INSTR(partition_stop,'','',1,7)-INSTR(partition_stop,'','',1,6)-1) blocking_session_status,
-       SUBSTR(partition_stop,INSTR(partition_stop,'','',1,7)+1,INSTR(partition_stop,'','',1,8)-INSTR(partition_stop,'','',1,7)-1) blocking_session,
-       SUBSTR(partition_stop,INSTR(partition_stop,'','',1,8)+1,INSTR(partition_stop,'','',1,9)-INSTR(partition_stop,'','',1,8)-1) blocking_session_serial#,
-       SUBSTR(partition_stop,INSTR(partition_stop,'','',1,9)+1) blocking_inst_id
+       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,7)+1,INSTR(partition_stop,'','',1,8)-INSTR(partition_stop,'','',1,7)-1)) blocking_session,
+       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,8)+1,INSTR(partition_stop,'','',1,9)-INSTR(partition_stop,'','',1,8)-1)) blocking_session_serial#,
+       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,9)+1)) blocking_inst_id
   FROM plan_table
  WHERE remarks = ''&&sqld360_sqlid.''
    AND statement_id LIKE ''SQLD360_ASH_DATA%''

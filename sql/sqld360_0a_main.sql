@@ -90,6 +90,7 @@ SPO OFF;
 -- @@&&skip_diagnostics.sqld360_5c_ash.sql
 @@&&skip_tcb.&&skip_10g.sqld360_5a_tcb.sql
 @@&&skip_diagnostics.sqld360_5r_rawash.sql
+@@&&from_edb360.&&skip_diagnostics.sqld360_5e_eadam_ash.sql
 
 PRO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
