@@ -74,15 +74,15 @@ BEGIN
 	put('DEF skip_och=''''');
     put('BEGIN');
     put(' :sql_text := ''');
-    put('SELECT id, parent_id, id2');
+    put('SELECT id, parent_id, id2, id3');
     put('  FROM (SELECT ''''{v: ''''''''''''||id||'''''''''''',f: ''''''''''''||operation||'''' ''''||options||''''<br>''''||object_name||''''''''''''}'''' id, ');
-    put('               parent_id, ''''Step ID: ''''||id id2');
+    put('               parent_id, ''''Step ID: ''''||id id2, id id3');
     put('		   FROM gv$sql_plan_statistics_all');
     put('         WHERE plan_hash_value =  '||i.plan_hash_value||'');
     put('           AND sql_id = ''''&&sqld360_sqlid.'''''); 
     put('        UNION ');
     put('        SELECT ''''{v: ''''''''''''||id||'''''''''''',f: ''''''''''''||operation||'''' ''''||options||''''<br>''''||object_name||''''''''''''}'''' id, ');
-    put('               parent_id, ''''Step ID: ''''||id id2');
+    put('               parent_id, ''''Step ID: ''''||id id2, id id3');
     put('		   FROM dba_hist_sql_plan');
     put('         WHERE plan_hash_value =  '||i.plan_hash_value||'');
     put('           AND sql_id = ''''&&sqld360_sqlid.'''''); 	
@@ -91,7 +91,7 @@ BEGIN
     put('                            WHERE plan_hash_value =  '||i.plan_hash_value||'');
     put('                              AND sql_id = ''''&&sqld360_sqlid.'''')');
     put('           AND ''''&&diagnostics_pack.'''' = ''''Y'''')');
-    put(' ORDER BY 1');
+    put(' ORDER BY id3');
     put(''';');
     put('END;');
     put('/ ');

@@ -39,13 +39,14 @@ DECLARE
   l_parent_id NUMBER;
   l_text VARCHAR2(1000);
   l_sql_text VARCHAR2(32767);
+  l_sort NUMBER;
 BEGIN
   DBMS_OUTPUT.PUT_LINE('[''Step'', ''Parent Step'',''Tooltip'' ]');
   --OPEN cur FOR :sql_text;
   l_sql_text := DBMS_LOB.SUBSTR(:sql_text); -- needed for 10g
   OPEN cur FOR l_sql_text; -- needed for 10g
   LOOP
-    FETCH cur INTO l_step_id, l_parent_id, l_text;
+    FETCH cur INTO l_step_id, l_parent_id, l_text, l_sort;
     EXIT WHEN cur%NOTFOUND;
     DBMS_OUTPUT.PUT_LINE(',['||l_step_id||', '''||NVL(l_parent_id,'')||''', '''||l_text||''']');
   END LOOP;
