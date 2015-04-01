@@ -178,6 +178,10 @@ SELECT toolsrel psft_tools_rel FROM &&psft_schema..psstatus WHERE ROWNUM = 1;
 COL sqld360_udump_path NEW_V sqld360_udump_path FOR A500;
 SELECT value||DECODE(INSTR(value, '/'), 0, '\', '/') sqld360_udump_path FROM v$parameter2 WHERE name = 'user_dump_dest';
 
+-- get diag_trace path
+COL sqld360_diagtrace_path NEW_V sqld360_diagtrace_path FOR A500;
+SELECT value||DECODE(INSTR(value, '/'), 0, '\', '/') sqld360_diagtrace_path FROM v$diag_info WHERE name = 'Diag Trace';
+
 -- get pid
 COL sqld360_spid NEW_V sqld360_spid FOR A5;
 SELECT TO_CHAR(spid) sqld360_spid FROM v$session s, v$process p WHERE s.sid = SYS_CONTEXT('USERENV', 'SID') AND p.addr = s.paddr;
@@ -227,12 +231,16 @@ SELECT DBMS_SQLTUNE.SQLTEXT_TO_SIGNATURE(:sqld360_fullsql,0) exact_matching_sign
   FROM dual
 /
 
+COL skip_force_match NEW_V skip_force_match
+SELECT CASE WHEN '&&exact_matching_signature.' = '&&force_matching_signature.' THEN '--' END skip_force_match 
+  FROM DUAL
+/
 
 -- setup
-DEF sqld360_vYYNN = 'v1507';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-03-24)';
+DEF sqld360_vYYNN = 'v1508';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-04-01)';
 DEF sqld360_prefix = 'sqld360';
-DEF sql_trace_level = '8';
+DEF sql_trace_level = '1';
 DEF main_table = '';
 DEF title = '';
 DEF title_no_spaces = '';
@@ -353,8 +361,11 @@ ALTER SESSION SET NLS_COMP = 'BINARY';
 -- to work around bug 12672969
 ALTER SESSION SET "_optimizer_order_by_elimination_enabled"=false; 
 -- to work around Siebel
---ALTER SESSION SET optimizer_index_cost_adj = 100;
---ALTER SESSION SET optimizer_dynamic_sampling = 2;
+ALTER SESSION SET optimizer_index_cost_adj = 100;
+ALTER SESSION SET optimizer_dynamic_sampling = 2;
+ALTER SESSION SET "_always_semi_join" = CHOOSE;
+ALTER SESSION SET "_and_pruning_enabled" = TRUE;
+ALTER SESSION SET "_subquery_pruning_enabled" = TRUE;
 -- tracing script in case it takes long to execute so we can diagnose it
 ALTER SESSION SET MAX_DUMP_FILE_SIZE = '1G';
 ALTER SESSION SET TRACEFILE_IDENTIFIER = "&&sqld360_tracefile_identifier.";
@@ -372,7 +383,7 @@ SET TRIMS ON;
 SET TRIM ON; 
 SET TI OFF; 
 SET TIMI OFF; 
-SET ARRAY 100; 
+SET ARRAY 1000; 
 SET NUM 20; 
 SET SQLBL ON; 
 SET BLO .; 

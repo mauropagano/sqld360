@@ -16,7 +16,10 @@ BEGIN
 END;
 /
 
+-- one of the next two command will fail depending on the version
 HOS cp &&sqld360_udump_path.*_ora_&&sqld360_spid._sqld360_10053_&&sqld360_sqlid..trc &&one_spool_filename..trc
+HOS cp &&sqld360_diagtrace_path.*_ora_&&sqld360_spid._sqld360_10053_&&sqld360_sqlid..trc &&one_spool_filename..trc
+
 
 SET TERM ON
 -- get current time

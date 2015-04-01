@@ -29,7 +29,7 @@ SELECT d.dbid,
  WHERE p.inst_id = i.inst_id
    AND p.name = ''cpu_count''
 ';
-END;				
+END;
 /
 @@sqld360_9a_pre_one.sql
 
@@ -41,7 +41,7 @@ SELECT /*+ &&top_level_hints. */
        *
   FROM v$version
 ';
-END;				
+END;
 /
 @@sqld360_9a_pre_one.sql
 
@@ -139,6 +139,62 @@ END;
 /
 @@_9a_pre_one.sql
 
+
+DEF title = 'System Stats';
+DEF main_table = 'AUX_STATS$';
+BEGIN
+  :sql_text := '
+SELECT /*+ &&top_level_hints. */ 
+       *
+  FROM sys.aux_stats$
+';
+END;
+/
+@@sqld360_9a_pre_one.sql
+
+
+DEF title = 'IO Calibration';
+DEF main_table = 'DBA_RSRC_IO_CALIBRATE';
+BEGIN
+  :sql_text := '
+SELECT /*+ &&top_level_hints. */ 
+       *
+  FROM dba_rsrc_io_calibrate
+';
+END;
+/
+@@sqld360_9a_pre_one.sql
+
+
+DEF title = 'Non-default Fix Controls';
+DEF main_table = 'DBA_RSRC_IO_CALIBRATE';
+BEGIN
+  :sql_text := '
+SELECT /*+ &&top_level_hints. */ 
+       *
+  FROM v$system_fix_control
+ WHERE is_default = 0
+ ORDER BY bugno
+';
+END;
+/
+@@sqld360_9a_pre_one.sql
+
+
+DEF title = 'All Fix Controls';
+DEF main_table = 'DBA_RSRC_IO_CALIBRATE';
+BEGIN
+  :sql_text := '
+SELECT /*+ &&top_level_hints. */ 
+       *
+  FROM v$system_fix_control
+ ORDER BY bugno
+';
+END;
+/
+@@sqld360_9a_pre_one.sql
+
+
 DEF title = 'Alert Log';
 DEF main_table = 'X$DBGALERTEXT';
 BEGIN
@@ -163,31 +219,6 @@ sqltxplain.sqlt$a.get_param(''tool_version'') sqlt_version,
 sqltxplain.sqlt$a.get_param(''tool_date'') sqlt_version_date,
 sqltxplain.sqlt$a.get_param(''install_date'') install_date
 FROM DUAL
-';
-END;
-/
-@@sqld360_9a_pre_one.sql
-
-
-DEF title = 'System Stats';
-DEF main_table = 'AUX_STATS$';
-BEGIN
-  :sql_text := '
-SELECT /*+ &&top_level_hints. */ 
-       *
-  FROM sys.aux_stats$
-';
-END;
-/
-@@sqld360_9a_pre_one.sql
-
-DEF title = 'IO Calibration';
-DEF main_table = 'DBA_RSRC_IO_CALIBRATE';
-BEGIN
-  :sql_text := '
-SELECT /*+ &&top_level_hints. */ 
-       *
-  FROM dba_rsrc_io_calibrate
 ';
 END;
 /

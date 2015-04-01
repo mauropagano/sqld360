@@ -15,15 +15,15 @@ SET SERVEROUT ON ECHO OFF FEEDBACK OFF TIMING OFF
 
 BEGIN
   FOR i IN (SELECT plan_hash_value
-	          FROM (SELECT plan_hash_value
-	                  FROM gv$sql
+              FROM (SELECT plan_hash_value
+                      FROM gv$sql
                      WHERE sql_id = '&&sqld360_sqlid.'
-	                UNION
-	                SELECT plan_hash_value
-	                  FROM dba_hist_sqlstat
-	                 WHERE sql_id = '&&sqld360_sqlid.'
+                    UNION
+                    SELECT plan_hash_value
+                      FROM dba_hist_sqlstat
+                     WHERE sql_id = '&&sqld360_sqlid.'
                        AND '&&diagnostics_pack.' = 'Y') 
-			 ORDER BY 1)
+             ORDER BY 1)
   LOOP
     DBMS_OUTPUT.PUT_LINE('<td class="c">PHV '||i.plan_hash_value||'</td>');
   END LOOP;
@@ -51,41 +51,41 @@ BEGIN
 -- this is intentional, showing all the tables including the ones with no histograms
 -- so it's easier to spot the ones with no histograms too
   FOR i IN (SELECT plan_hash_value
-	          FROM (SELECT plan_hash_value
-	                  FROM gv$sql
+              FROM (SELECT plan_hash_value
+                      FROM gv$sql
                      WHERE sql_id = '&&sqld360_sqlid.'
-	                UNION
-	                SELECT plan_hash_value
-	                  FROM dba_hist_sqlstat
-	                 WHERE sql_id = '&&sqld360_sqlid.'
+                    UNION
+                    SELECT plan_hash_value
+                      FROM dba_hist_sqlstat
+                     WHERE sql_id = '&&sqld360_sqlid.'
                        AND '&&diagnostics_pack.' = 'Y') 
-			 ORDER BY 1) 
-  LOOP	
+             ORDER BY 1) 
+  LOOP
     put('SET PAGES 50000');
-    put('SPO &&sqld360_main_report..html APP;');	
+    put('SPO &&sqld360_main_report..html APP;');
     put('PRO <td>');
     put('SPO OFF');
 
-    put('DEF title=''Plan Tree''');
+    put('DEF title=''Plan Tree for PHV '||i.plan_hash_value||'''');
     put('DEF main_table = ''DBA_HIST_SQL_PLAN''');
     put('DEF skip_html=''Y''');
     put('DEF skip_text=''Y''');
     put('DEF skip_csv=''Y''');
-	put('DEF skip_och=''''');
+    put('DEF skip_och=''''');
     put('BEGIN');
     put(' :sql_text := ''');
     put('SELECT id, parent_id, id2, id3');
     put('  FROM (SELECT ''''{v: ''''''''''''||id||'''''''''''',f: ''''''''''''||operation||'''' ''''||options||''''<br>''''||object_name||''''''''''''}'''' id, ');
     put('               parent_id, ''''Step ID: ''''||id id2, id id3');
-    put('		   FROM gv$sql_plan_statistics_all');
+    put('          FROM gv$sql_plan_statistics_all');
     put('         WHERE plan_hash_value =  '||i.plan_hash_value||'');
     put('           AND sql_id = ''''&&sqld360_sqlid.'''''); 
     put('        UNION ');
     put('        SELECT ''''{v: ''''''''''''||id||'''''''''''',f: ''''''''''''||operation||'''' ''''||options||''''<br>''''||object_name||''''''''''''}'''' id, ');
     put('               parent_id, ''''Step ID: ''''||id id2, id id3');
-    put('		   FROM dba_hist_sql_plan');
+    put('          FROM dba_hist_sql_plan');
     put('         WHERE plan_hash_value =  '||i.plan_hash_value||'');
-    put('           AND sql_id = ''''&&sqld360_sqlid.'''''); 	
+    put('           AND sql_id = ''''&&sqld360_sqlid.'''''); 
     put('           AND NOT EXISTS (SELECT 1 ');
     put('                             FROM gv$sql_plan_statistics_all ');
     put('                            WHERE plan_hash_value =  '||i.plan_hash_value||'');
@@ -95,13 +95,13 @@ BEGIN
     put(''';');
     put('END;');
     put('/ ');
-    put('@sql/sqld360_9a_pre_one.sql');		
+    put('@sql/sqld360_9a_pre_one.sql');
 
-	put('----------------------------');
+    put('----------------------------');
 
-    put('DEF title=''Avg et/exec for recent execs''');
+    put('DEF title=''Avg et/exec for recent execs for PHV '||i.plan_hash_value||'''');
     put('DEF main_table = ''V$ACTIVE_SESSION_HISTORY''');
-	put('DEF skip_lch=''''');
+    put('DEF skip_lch=''''');
     put('DEF chartype = ''LineChart''');
     put('DEF stacked = ''''');
     put('DEF tit_01 = ''Average Elapsed Time''');
@@ -118,7 +118,7 @@ BEGIN
     put('DEF tit_12 = ''''');
     put('DEF tit_13 = ''''');
     put('DEF tit_14 = ''''');
-    put('DEF tit_15 = ''''');	
+    put('DEF tit_15 = ''''');
     put('BEGIN');
     put(' :sql_text := ''');
     put('SELECT 0 snap_id,');
@@ -127,7 +127,7 @@ BEGIN
     put('       avg_et,');
     put('       avg_cpu_time,');
     put('       0 dummy_03,');
-	put('       0 dummy_04,');
+    put('       0 dummy_04,');
     put('       0 dummy_05,');
     put('       0 dummy_06,');
     put('       0 dummy_07,');
@@ -160,11 +160,11 @@ BEGIN
     put('/ ');
     put('@sql/sqld360_9a_pre_one.sql');
 
-	put('----------------------------');
+    put('----------------------------');
 
-    put('DEF title=''Avg et/exec for historical execs''');
+    put('DEF title=''Avg et/exec for historical execs for PHV '||i.plan_hash_value||'''');
     put('DEF main_table = ''DBA_HIST_ACTIVE_SESS_HISTORY''');
-	put('DEF skip_lch=''''');
+    put('DEF skip_lch=''''');
     put('DEF chartype = ''LineChart''');
     put('DEF stacked = ''''');
     put('DEF tit_01 = ''Average Elapsed Time''');
@@ -181,16 +181,16 @@ BEGIN
     put('DEF tit_12 = ''''');
     put('DEF tit_13 = ''''');
     put('DEF tit_14 = ''''');
-    put('DEF tit_15 = ''''');	
+    put('DEF tit_15 = ''''');
     put('BEGIN');
     put(' :sql_text := ''');
     put('SELECT b.snap_id snap_id,');
     put('       TO_CHAR(b.begin_interval_time, ''''YYYY-MM-DD HH24:MI'''') begin_time,'); 
-	put('       TO_CHAR(b.end_interval_time, ''''YYYY-MM-DD HH24:MI'''') end_time,');
+    put('       TO_CHAR(b.end_interval_time, ''''YYYY-MM-DD HH24:MI'''') end_time,');
     put('       NVL(avg_et,0) avg_et,');
     put('       NVL(avg_cpu_time,0) avg_cpu_time,');
     put('       0 dummy_03,');
-	put('       0 dummy_04,');
+    put('       0 dummy_04,');
     put('       0 dummy_05,');
     put('       0 dummy_06,');
     put('       0 dummy_07,');
@@ -232,21 +232,21 @@ BEGIN
     put('/ ');
     put('@sql/sqld360_9a_pre_one.sql');
 
-	put('----------------------------');
+    put('----------------------------');
 
-    put('DEF title=''Top 15 Wait events''');
+    put('DEF title=''Top 15 Wait events for PHV '||i.plan_hash_value||'''');
     put('DEF main_table = ''DBA_HIST_ACTIVE_SESS_HISTORY''');
-	put('DEF skip_pch=''''');
+    put('DEF skip_pch=''''');
     put('DEF slices = ''15''');
     put('BEGIN');
     put(' :sql_text := ''');
     put('SELECT cpu_or_event,');
     put('       num_samples,');
     put('       TRUNC(100*RATIO_TO_REPORT(num_samples) OVER (),2) percent,');
-    put('       NULL dummy_01');	
+    put('       NULL dummy_01');
     put('  FROM (SELECT object_node cpu_or_event,');
-    put('	            count(*) num_samples');
-    put('		   FROM plan_table');
+    put('               count(*) num_samples');
+    put('          FROM plan_table');
     put('         WHERE cost =  '||i.plan_hash_value||'');
     put('           AND remarks = ''''&&sqld360_sqlid.'''''); 
     put('           AND ''''&&diagnostics_pack.'''' = ''''Y''''');
@@ -256,24 +256,24 @@ BEGIN
     put(''';');
     put('END;');
     put('/ ');
-    put('@sql/sqld360_9a_pre_one.sql');	
+    put('@sql/sqld360_9a_pre_one.sql');
 
-	put('----------------------------');
+    put('----------------------------');
 
-    put('DEF title=''Top 15 Objects accessed''');
+    put('DEF title=''Top 15 Objects accessed by PHV '||i.plan_hash_value||'''');
     put('DEF main_table = ''DBA_HIST_ACTIVE_SESS_HISTORY''');
-	put('DEF skip_pch=''''');
+    put('DEF skip_pch=''''');
     put('DEF slices = ''15''');
     put('BEGIN');
     put(' :sql_text := ''');
     put('SELECT obj#,');
     put('       num_samples,');
     put('       TRUNC(100*RATIO_TO_REPORT(num_samples) OVER (),2) percent,');
-    put('       NULL dummy_01');	
+    put('       NULL dummy_01');
     put('  FROM (SELECT NVL2(b.owner,b.owner||''''.''''||b.object_name,a.object_instance) obj#,');
-    put('	            count(*) num_samples');
-    put('		   FROM plan_table a,');
-    put('		        dba_objects b');
+    put('               count(*) num_samples');
+    put('          FROM plan_table a,');
+    put('               dba_objects b');
     put('         WHERE a.cost =  '||i.plan_hash_value||'');
     put('           AND a.remarks = ''''&&sqld360_sqlid.'''''); 
     put('           AND ''''&&diagnostics_pack.'''' = ''''Y''''');
@@ -285,23 +285,23 @@ BEGIN
     put(''';');
     put('END;');
     put('/ ');
-    put('@sql/sqld360_9a_pre_one.sql');		
+    put('@sql/sqld360_9a_pre_one.sql');
 
-	put('----------------------------');
+    put('----------------------------');
 
-    put('DEF title=''Top 15 Plan Steps''');
+    put('DEF title=''Top 15 Plan Steps for PHV '||i.plan_hash_value||'''');
     put('DEF main_table = ''DBA_HIST_ACTIVE_SESS_HISTORY''');
-	put('DEF skip_pch=''''');
+    put('DEF skip_pch=''''');
     put('DEF slices = ''15''');
     put('BEGIN');
     put(' :sql_text := ''');
     put('SELECT operation,');
     put('       num_samples,');
     put('       TRUNC(100*RATIO_TO_REPORT(num_samples) OVER (),2) percent,');
-    put('       NULL dummy_01');	
+    put('       NULL dummy_01');
     put('  FROM (SELECT id||'''' - ''''||operation operation,');
-    put('	            count(*) num_samples');
-    put('		   FROM plan_table');
+    put('               count(*) num_samples');
+    put('          FROM plan_table');
     put('         WHERE cost =  '||i.plan_hash_value||'');
     put('           AND remarks = ''''&&sqld360_sqlid.'''''); 
     put('           AND ''''&&diagnostics_pack.'''' = ''''Y''''');
@@ -311,9 +311,9 @@ BEGIN
     put(''';');
     put('END;');
     put('/ ');
-    put('@sql/sqld360_9a_pre_one.sql');	
+    put('@sql/sqld360_9a_pre_one.sql');
 
-	put('----------------------------');
+    put('----------------------------');
 
     put('SPO &&sqld360_main_report..html APP;');
     put('PRO </td>');
