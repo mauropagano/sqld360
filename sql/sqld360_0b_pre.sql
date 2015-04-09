@@ -237,8 +237,8 @@ SELECT CASE WHEN '&&exact_matching_signature.' = '&&force_matching_signature.' T
 /
 
 -- setup
-DEF sqld360_vYYNN = 'v1508';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-04-01)';
+DEF sqld360_vYYNN = 'v1509';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-04-08)';
 DEF sqld360_prefix = 'sqld360';
 DEF sql_trace_level = '1';
 DEF main_table = '';
@@ -260,6 +260,7 @@ DEF sq_fact_hints = 'MATERIALIZE NO_MERGE';
 DEF ds_hint = 'DYNAMIC_SAMPLING(4)';
 DEF def_max_rows = '10000';
 DEF max_rows = '1e4';
+DEF num_parts = '100';
 DEF translate_lowhigh = 'Y';
 DEF default_dir = 'SQLD360_DIR'
 DEF sqlmon_date_mask = 'YYYYMMDDHH24MISS';

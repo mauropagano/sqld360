@@ -14,7 +14,7 @@ PRO <table><tr class="main">
 SET SERVEROUT ON ECHO OFF FEEDBACK OFF TIMING OFF 
 
 BEGIN
-  FOR i IN (SELECT DISTINCT table_name, owner 
+  FOR i IN (SELECT table_name, owner 
               FROM dba_tables 
              WHERE (owner, table_name) in &&tables_list_s. 
 			   AND partitioned = 'YES'
@@ -84,7 +84,7 @@ BEGIN
   put('END;');
   put('/');	
 
-  FOR i IN (SELECT DISTINCT table_name, owner 
+  FOR i IN (SELECT table_name, owner 
               FROM dba_tables 
              WHERE (owner, table_name) in &&tables_list_s. 
 			   AND partitioned = 'YES'
@@ -94,15 +94,14 @@ BEGIN
     put('SPO &&sqld360_main_report..html APP;');	
     put('PRO <td>');
     put('SPO OFF');
-    FOR j IN (SELECT DISTINCT a.owner, a.table_name, a.partition_name, b.partition_position 
-                FROM dba_part_col_statistics a,
-      		         dba_tab_partitions b
-               WHERE a.owner = i.owner
-                 AND a.table_name = i.table_name			
-			     AND a.owner = b.table_owner
-      	         AND a.table_name = b.table_name
-      	         AND a.partition_name = b.partition_name	
-               ORDER BY a.owner, a.table_name, b.partition_position DESC) 
+    FOR j IN (SELECT table_owner, table_name, partition_name, partition_position
+		        FROM (SELECT table_owner, table_name, partition_name, partition_position,
+	                         ROW_NUMBER() OVER (ORDER BY partition_position) rn, COUNT(*) OVER () num_part	
+      		            FROM dba_tab_partitions 
+                       WHERE table_owner = i.owner
+                         AND table_name = i.table_name)
+               WHERE (rn <= &&num_parts OR rn >= num_part-&&num_parts)			
+               ORDER BY partition_position DESC) 
     LOOP
 
       put('DEF title= ''Partition '||j.partition_name||'''');
@@ -113,7 +112,7 @@ BEGIN
       put('       a.*,b.partition_start low_value_translated, b.partition_stop high_value_translated');
       put('  FROM dba_part_col_statistics a,');
       put('       plan_table b');
-      put(' WHERE a.owner = '''''||j.owner||''''''); 
+      put(' WHERE a.owner = '''''||j.table_owner||''''''); 
 	  put('   AND a.table_name = '''''||j.table_name||'''''');
 	  put('   AND a.partition_name = '''''||j.partition_name||'''''');
       put('   AND a.owner = b.object_owner(+)');
