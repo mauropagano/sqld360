@@ -76,7 +76,7 @@ BEGIN
   FOR i IN (SELECT owner, table_name, column_name, data_type, low_value, high_value
               FROM dba_tab_cols
              WHERE (owner, table_name) IN &&tables_list_s.
-               AND '&&translate_lowhigh.' = 'Y')
+               AND '&&sqld360_conf_translate_lowhigh.' = 'Y')
   LOOP
     l_low := compute_low_high(i.data_type, i.low_value);
     l_high := compute_low_high(i.data_type, i.high_value);

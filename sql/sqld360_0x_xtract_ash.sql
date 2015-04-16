@@ -44,7 +44,7 @@ BEGIN
                             parent_id,                                     -- sample_id
                             partition_start,                               -- seq#,p1text,p1,p2text,p2,p3text,p3,current_file#,current_block#, --current_row#
                             partition_stop                                 -- --in_parse, --in_hard_parse, --in_sql_execution, qc_instance_id, qc_session_id, --qc_session_serial#, 
-                                                                           -- blocking_session_status, blocking_session, blocking_session_serial#, --blocking_inst_id (11gR1 also)
+                                                                           -- blocking_session_status, blocking_session, blocking_session_serial#, --blocking_inst_id (11gR1 also), --px_flags (11gR201 also)
                            )
      SELECT 'SQLD360_ASH_DATA_HIST', sample_time, sql_id, 
             snap_id, dbid,
@@ -67,8 +67,9 @@ BEGIN
             &&skip_10g.in_sql_execution||
             ','||qc_instance_id||','||qc_session_id||','||
             &&skip_10g.qc_session_serial#||
-            ','||blocking_session_status||','||blocking_session||','||blocking_session_serial#||','
-            &&skip_10g.&&skip_11r1.||blocking_inst_id
+            ','||blocking_session_status||','||blocking_session||','||blocking_session_serial#||','||
+            &&skip_10g.&&skip_11r1.blocking_inst_id||
+		    ','&&skip_10g.&&skip_11r1.&&skip_11r201.||px_flags
        FROM dba_hist_active_sess_history a,
             plan_table b
       WHERE a.sql_id = b.operation -- plan table has the SQL ID to load
@@ -97,8 +98,9 @@ BEGIN
             &&skip_10g.in_sql_execution||
             ','||qc_instance_id||','||qc_session_id||','||
             &&skip_10g.qc_session_serial#||
-            ','||blocking_session_status||','||blocking_session||','||blocking_session_serial#||','
-            &&skip_10g.&&skip_11r1.||blocking_inst_id
+            ','||blocking_session_status||','||blocking_session||','||blocking_session_serial#||','||
+            &&skip_10g.&&skip_11r1.blocking_inst_id||
+		    ','&&skip_10g.&&skip_11r1.&&skip_11r201.||px_flags
        FROM gv$active_session_history a,
             plan_table b
       WHERE a.sql_id = b.operation -- plan table has the SQL ID to load

@@ -1,4 +1,4 @@
-SQLd360 v1501 (2015-02-15) by Mauro Pagano
+SQLd360 v1510 (2015-04-16) by Mauro Pagano
 
 SQLd360 is a "free to use" tool to perform an in-depth investigation of a SQL statement. 
 It collects detailed information around the SQL. It also helps to document any findings.
@@ -19,12 +19,11 @@ Steps
 2. Execute sqld360.sql indicating three input parameters. The first one is to specify 
    the SQL ID for the SQL you want to analyze. The second one is to specify if your 
    database is licensed for the Oracle Tuning Pack, the Diagnostics Pack or None 
-   [ T | D | N ]. The third parameter indicates up to how many days of history you
-   want sqld360 to query. Example below specifies SQL ID 0vy6pt4krb3gm, Tuning Pack 
-   and 31 days of history. Actual days of history used depends on retention period. 
-   Value used is raised up to 31 days if history permits.
+   [ T | D | N ]. Example below specifies SQL ID 0vy6pt4krb3gm, Tuning Pack. 
+   Actual days of history used depends on retention period, SQLd360 uses 31 days by default. 
+   Edit sql/sqld360_00_config.sql in case a shorter/longer period is desired.
 
-   SQL> @sqld360.sql 0vy6pt4krb3gm T 31
+   SQL> @sqld360.sql 0vy6pt4krb3gm T 
    
 3. Unzip output sqld360_<dbname>_<sqlid>_<host>_YYYYMMDD_HH24MI.zip into a directory on your PC
 

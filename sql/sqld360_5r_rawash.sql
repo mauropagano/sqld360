@@ -18,7 +18,7 @@
 -- parent_id        sample_id
 -- partition_start  seq#,p1text,p1,p2text,p2,p3text,p3,current_file#,current_block#, --current_row#
 -- partition_stop   --in_parse, --in_hard_parse, --in_sql_execution, qc_instance_id, qc_session_id, --qc_session_serial#, 
---                  blocking_session_status, blocking_session, blocking_session_serial#, --blocking_inst_id
+--                  blocking_session_status, blocking_session, blocking_session_serial#, --blocking_inst_id, --px_flags
 
 SET PAGES 50000
 
@@ -69,7 +69,8 @@ SELECT /*+ &&top_level_hints. */
        SUBSTR(partition_stop,INSTR(partition_stop,'','',1,6)+1,INSTR(partition_stop,'','',1,7)-INSTR(partition_stop,'','',1,6)-1) blocking_session_status,
        TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,7)+1,INSTR(partition_stop,'','',1,8)-INSTR(partition_stop,'','',1,7)-1)) blocking_session,
        TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,8)+1,INSTR(partition_stop,'','',1,9)-INSTR(partition_stop,'','',1,8)-1)) blocking_session_serial#,
-       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,9)+1)) blocking_inst_id
+       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,9)+1,INSTR(partition_stop,'','',1,10)-INSTR(partition_stop,'','',1,9)-1)) blocking_inst_id,
+       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,10)+1)) px_flags 
   FROM plan_table
  WHERE remarks = ''&&sqld360_sqlid.''
    AND statement_id LIKE ''SQLD360_ASH_DATA%''

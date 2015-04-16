@@ -140,6 +140,47 @@ END;
 @@_9a_pre_one.sql
 
 
+COL address NOPRI
+COL hash_value NOPRI
+COL sql_id NOPRI
+COL child_address NOPRI
+
+DEF title = 'Optimizer Environment';
+DEF main_table = 'GV$SQL_OPTIMIZER_ENV';
+BEGIN
+  :sql_text := '
+SELECT /*+ &&top_level_hints. */
+       *
+  FROM gv$sql_optimizer_env
+ WHERE sql_id = ''&&sqld360_sqlid.''
+ ORDER BY inst_id, sql_id, child_number, id
+';
+END;
+/
+@@sqld360_9a_pre_one.sql
+
+DEF title = 'Non-default Optimizer Environment';
+DEF main_table = 'GV$SQL_OPTIMIZER_ENV';
+BEGIN
+  :sql_text := '
+SELECT /*+ &&top_level_hints. */
+       *
+  FROM gv$sql_optimizer_env
+ WHERE sql_id = ''&&sqld360_sqlid.''
+   AND isdefault = ''NO''
+ ORDER BY inst_id, sql_id, child_number, id
+';
+END;
+/
+@@sqld360_9a_pre_one.sql
+
+COL address PRI
+COL hash_value PRI
+COL sql_id PRI
+COL child_address PRI
+
+
+
 DEF title = 'System Stats';
 DEF main_table = 'AUX_STATS$';
 BEGIN
@@ -195,31 +236,31 @@ END;
 @@sqld360_9a_pre_one.sql
 
 
-DEF title = 'Alert Log';
-DEF main_table = 'X$DBGALERTEXT';
-BEGIN
-  :sql_text := '
-SELECT /*+ &&top_level_hints. */ 
-       originating_timestamp,
-       message_text
-FROM sys.x$dbgalertext
-WHERE originating_timestamp > SYSDATE - &&history_days.
-ORDER BY originating_timestamp DESC
-';
-END;
-/
-@@&&skip_10g.sqld360_9a_pre_one.sql
+--DEF title = 'Alert Log';
+--DEF main_table = 'X$DBGALERTEXT';
+--BEGIN
+--  :sql_text := '
+--SELECT /*+ &&top_level_hints. */ 
+--       originating_timestamp,
+--       message_text
+--FROM sys.x$dbgalertext
+--WHERE originating_timestamp > SYSDATE - &&history_days.
+--ORDER BY originating_timestamp DESC
+--';
+--END;
+--/
+--@@&&skip_10g.sqld360_9a_pre_one.sql
 
-DEF title = 'SQLTXPLAIN Version';
-DEF main_table = 'SQLTXPLAIN.SQLI$_PARAMETER';
-BEGIN
-  :sql_text := '
-SELECT /*+ &&top_level_hints. */ 
-sqltxplain.sqlt$a.get_param(''tool_version'') sqlt_version,
-sqltxplain.sqlt$a.get_param(''tool_date'') sqlt_version_date,
-sqltxplain.sqlt$a.get_param(''install_date'') install_date
-FROM DUAL
-';
-END;
-/
-@@sqld360_9a_pre_one.sql
+--DEF title = 'SQLTXPLAIN Version';
+--DEF main_table = 'SQLTXPLAIN.SQLI$_PARAMETER';
+--BEGIN
+--  :sql_text := '
+--SELECT /*+ &&top_level_hints. */ 
+--sqltxplain.sqlt$a.get_param(''tool_version'') sqlt_version,
+--sqltxplain.sqlt$a.get_param(''tool_date'') sqlt_version_date,
+--sqltxplain.sqlt$a.get_param(''install_date'') install_date
+--FROM DUAL
+--';
+--END;
+--/
+--@@sqld360_9a_pre_one.sql

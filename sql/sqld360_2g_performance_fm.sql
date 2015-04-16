@@ -14,7 +14,7 @@ BEGIN
 SELECT /*+ &&top_level_hints. */
        *
   FROM gv$sql
- WHERE force_matching_signature = ''&&force_matching_signature.''
+ WHERE force_matching_signature = TRIM(''&&force_matching_signature.'')
    AND sql_id <> ''&&sqld360_sqlid.''
  ORDER BY inst_id, sql_id, child_number
 ';
@@ -59,7 +59,7 @@ SELECT /*+ &&top_level_hints. */
   FROM gv$sql_plan_statistics_all
  WHERE sql_id IN (SELECT sql_id 
 	                  FROM gv$sql 
-				     WHERE force_matching_signature = ''&&force_matching_signature.''
+				     WHERE force_matching_signature = TRIM(''&&force_matching_signature.'')
                      AND sql_id <> ''&&sqld360_sqlid.'')
  ORDER BY inst_id, sql_id, plan_hash_value, child_number, id
 ';
@@ -99,7 +99,7 @@ BEGIN
 SELECT /*+ &&top_level_hints. */
        *
   FROM dba_hist_sqlstat
- WHERE force_matching_signature = ''&&force_matching_signature.''
+ WHERE force_matching_signature = TRIM(''&&force_matching_signature.'')
    AND sql_id <> ''&&sqld360_sqlid.''
    AND ''&&diagnostics_pack.'' = ''Y''
    AND snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id. 
@@ -122,7 +122,7 @@ SELECT /*+ &&top_level_hints. */
   FROM dba_hist_sql_plan
  WHERE sql_id IN (SELECT sql_id 
 	                FROM dba_hist_sqlstat 
-				   WHERE force_matching_signature = ''&&force_matching_signature.''
+				   WHERE force_matching_signature = TRIM(''&&force_matching_signature.'')
                      AND sql_id <> ''&&sqld360_sqlid.'')
    AND ''&&diagnostics_pack.'' = ''Y''
  ORDER BY plan_hash_value, id

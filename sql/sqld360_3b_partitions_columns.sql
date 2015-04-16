@@ -71,7 +71,7 @@ BEGIN
   put('              FROM dba_part_col_statistics a,');
   put('                   dba_tab_cols b');
   put('             WHERE (a.owner, a.table_name) IN &&tables_list.');
-  put('		          AND ''&&translate_lowhigh.'' = ''Y''');
+  put('		          AND ''&&sqld360_conf_translate_lowhigh.'' = ''Y''');
   put('               AND a.owner = b.owner');
   put('               AND a.table_name = b.table_name');
   put('               AND a.column_name = b.column_name)');
@@ -100,7 +100,7 @@ BEGIN
       		            FROM dba_tab_partitions 
                        WHERE table_owner = i.owner
                          AND table_name = i.table_name)
-               WHERE (rn <= &&num_parts OR rn >= num_part-&&num_parts)			
+               WHERE (rn <= &&sqld360_conf_first_part OR rn >= num_part-&&sqld360_conf_last_part)			
                ORDER BY partition_position DESC) 
     LOOP
 

@@ -7,6 +7,12 @@ SET TIM OFF;
 SET TIMI OFF;
 CL COL;
 COL row_num FOR 9999999 HEA '#' PRI;
+
+-- version
+DEF sqld360_vYYNN = 'v1510';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-04-15)';
+DEF sqld360_prefix = 'sqld360';
+
 -- get dbid
 COL sqld360_dbid NEW_V sqld360_dbid;
 SELECT TRIM(TO_CHAR(dbid)) sqld360_dbid FROM v$database;
@@ -24,17 +30,9 @@ BEGIN
   :sqld360_sqlid := '&&sqld360_sqlid.';
 END;
 /
--- check if SQLD360 is getting called by EDB360
-COL from_edb360 NEW_V from_edb360;
-SELECT CASE WHEN count(*) > 0 THEN '--' END from_edb360
-  FROM plan_table
- WHERE statement_id = 'SQLD360_SQLID' -- SQL IDs list flag
-   AND operation = '&&sqld360_sqlid.'
-   AND rownum = 1;
+
 
 BEGIN  
-  -- the check from_edb360 was here before
-  
   -- if standalone execution then need to insert metadata   
   IF '&&from_edb360.' = '' THEN
     -- no need to clean, it's a GTT
@@ -42,7 +40,6 @@ BEGIN
     INSERT INTO plan_table (statement_id, timestamp, operation, options) VALUES ('SQLD360_SQLID',sysdate,'&&sqld360_sqlid.','1');
     INSERT INTO plan_table (statement_id, timestamp, operation) VALUES ('SQLD360_ASH_LOAD',sysdate, NULL);
   END IF;
-
 END;
 /  
   
@@ -80,13 +77,10 @@ BEGIN
   END IF;
 END;
 /
-PRO
-PRO Parameter 3: Days of History? (default 31)
-PRO Use default value of 31 unless you have been instructed otherwise.
-PRO
+
 COL history_days NEW_V history_days;
 -- range: takes at least 31 days and at most as many as actual history, with a default of 31. parameter restricts within that range. 
-SELECT TO_CHAR(LEAST(CEIL(SYSDATE - CAST(MIN(begin_interval_time) AS DATE)), GREATEST(31, TO_NUMBER(NVL(TRIM('&3.'), '31'))))) history_days FROM dba_hist_snapshot WHERE '&&diagnostics_pack.' = 'Y' AND dbid = &&sqld360_dbid.;
+SELECT TO_CHAR(LEAST(CEIL(SYSDATE - CAST(MIN(begin_interval_time) AS DATE)),  TO_NUMBER(NVL('&&sqld360_fromedb360_days.', '&&sqld360_conf_days.')))) history_days FROM dba_hist_snapshot WHERE '&&diagnostics_pack.' = 'Y' AND dbid = &&sqld360_dbid.;
 SELECT '0' history_days FROM DUAL WHERE NVL(TRIM('&&diagnostics_pack.'), 'N') = 'N';
 
 DEF skip_script = 'sql/sqld360_0f_skip_script.sql ';
@@ -120,6 +114,9 @@ SELECT '--' skip_10g FROM v$instance WHERE version LIKE '10%';
 DEF skip_11r1 = '';
 COL skip_11r1 NEW_V skip_11r1;
 SELECT '--' skip_11r1 FROM v$instance WHERE version LIKE '11.1%';
+DEF skip_11r201 = '';
+COL skip_11r201 NEW_V skip_11r201;
+SELECT '--' skip_11r201 FROM v$instance WHERE version LIKE '11.2.0.1%';
 
 -- get average number of CPUs
 COL avg_cpu_count NEW_V avg_cpu_count FOR A3;
@@ -236,10 +233,36 @@ SELECT CASE WHEN '&&exact_matching_signature.' = '&&force_matching_signature.' T
   FROM DUAL
 /
 
+-- inclusion config determine skip flags
+COL sqld360_skip_html NEW_V sqld360_skip_html;
+COL sqld360_skip_text NEW_V sqld360_skip_text;
+COL sqld360_skip_csv  NEW_V sqld360_skip_csv;
+COL sqld360_skip_line NEW_V sqld360_skip_line;
+COL sqld360_skip_pie  NEW_V sqld360_skip_pie;
+COL sqld360_skip_bar  NEW_V sqld360_skip_bar;
+COL sqld360_skip_tree NEW_V sqld360_skip_tree;
+
+SELECT CASE '&&sqld360_conf_incl_html.' WHEN 'N' THEN '--' END sqld360_skip_html FROM DUAL;
+SELECT CASE '&&sqld360_conf_incl_text.' WHEN 'N' THEN '--' END sqld360_skip_text FROM DUAL;
+SELECT CASE '&&sqld360_conf_incl_csv.'  WHEN 'N' THEN '--' END sqld360_skip_csv  FROM DUAL;
+SELECT CASE '&&sqld360_conf_incl_line.' WHEN 'N' THEN '--' END sqld360_skip_line FROM DUAL;
+SELECT CASE '&&sqld360_conf_incl_pie.'  WHEN 'N' THEN '--' END sqld360_skip_pie  FROM DUAL;
+SELECT CASE '&&sqld360_conf_incl_bar.'  WHEN 'N' THEN '--' END sqld360_skip_bar  FROM DUAL;
+SELECT CASE '&&sqld360_conf_incl_tree.' WHEN 'N' THEN '--' END sqld360_skip_tree FROM DUAL;
+
+COL sqld360_skip_ashrpt NEW_V sqld360_skip_ashrpt;
+SELECT CASE '&&sqld360_conf_incl_ashrpt.' WHEN 'N' THEN '--' END sqld360_skip_ashrpt FROM DUAL;
+
+COL sqld360_skip_sqlmon NEW_V sqld360_skip_sqlmon;
+SELECT CASE '&&sqld360_conf_incl_sqlmon.' WHEN 'N' THEN '--' END sqld360_skip_sqlmon FROM DUAL;
+
+COL sqld360_skip_eadam NEW_V sqld360_skip_eadam;
+SELECT CASE '&&sqld360_conf_incl_eadam.' WHEN 'N' THEN '--' END sqld360_skip_eadam FROM DUAL;
+
+COL sqld360_skip_rawash NEW_V sqld360_skip_rawash;
+SELECT CASE '&&sqld360_conf_incl_rawash.' WHEN 'N' THEN '--' END sqld360_skip_rawash FROM DUAL;
+
 -- setup
-DEF sqld360_vYYNN = 'v1509';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-04-08)';
-DEF sqld360_prefix = 'sqld360';
 DEF sql_trace_level = '1';
 DEF main_table = '';
 DEF title = '';
@@ -261,7 +284,7 @@ DEF ds_hint = 'DYNAMIC_SAMPLING(4)';
 DEF def_max_rows = '10000';
 DEF max_rows = '1e4';
 DEF num_parts = '100';
-DEF translate_lowhigh = 'Y';
+--DEF translate_lowhigh = 'Y';
 DEF default_dir = 'SQLD360_DIR'
 DEF sqlmon_date_mask = 'YYYYMMDDHH24MISS';
 DEF sqlmon_text = 'Y';
@@ -281,7 +304,7 @@ DEF skip_csv = '';
 DEF skip_lch = 'Y';
 DEF skip_pch = 'Y';
 DEF skip_bch = 'Y';
-DEF skip_och = 'Y';
+DEF skip_tch = 'Y';
 DEF skip_all = '';
 DEF abstract = '';
 DEF abstract2 = '';

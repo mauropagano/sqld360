@@ -71,7 +71,7 @@ BEGIN
     put('DEF skip_html=''Y''');
     put('DEF skip_text=''Y''');
     put('DEF skip_csv=''Y''');
-    put('DEF skip_och=''''');
+    put('DEF skip_tch=''''');
     put('BEGIN');
     put(' :sql_text := ''');
     put('SELECT id, parent_id, id2, id3');
@@ -266,26 +266,76 @@ BEGIN
     put('DEF slices = ''15''');
     put('BEGIN');
     put(' :sql_text := ''');
-    put('SELECT obj#,');
+--    put('SELECT obj#,');
+--    put('       num_samples,');
+--    put('       TRUNC(100*RATIO_TO_REPORT(num_samples) OVER (),2) percent,');
+--    put('       NULL dummy_01');
+--    put('  FROM (SELECT NVL2(b.owner,b.owner||''''.''''||b.object_name,a.object_instance) obj#,');
+--    put('               count(*) num_samples');
+--    put('          FROM plan_table a,');
+--    put('               dba_objects b');
+--    put('         WHERE a.cost =  '||i.plan_hash_value||'');
+--    put('           AND a.remarks = ''''&&sqld360_sqlid.'''''); 
+--    put('           AND ''''&&diagnostics_pack.'''' = ''''Y''''');
+--    put('           AND a.object_instance = b.data_object_id(+)');
+--    put('           AND a.other_tag IN (''''Application'''',''''Cluster'''', ''''Concurrency'''', ''''User I/O'''', ''''System I/O'''')');
+--    put('         GROUP BY NVL2(b.owner,b.owner||''''.''''||b.object_name,a.object_instance)'); 
+--    put('         ORDER BY 2 DESC)');
+--    put(' WHERE rownum <= 15');
+
+--    put('SELECT object_name,');
+--    put('       num_samples,');
+--    put('       TRUNC(100*RATIO_TO_REPORT(num_samples) OVER (),2) percent,');
+--    put('       NULL dummy_01');
+--    put('  FROM (SELECT CASE WHEN data.object_name_sofar IS NOT NULL AND data.object_name_sofar <> ''''.'''' THEN data.object_name_sofar');
+--    put('                    ELSE CASE WHEN o.owner||''''.''''||o.object_name <> ''''.'''' THEN o.owner||''''.''''||o.object_name'); 
+--    put('                              ELSE TO_CHAR(data.obj#) ');
+--    put('                         END ');
+--    put('               END object_name,');
+--    put('               data.num_samples');
+--    put('          FROM (SELECT a.object_instance obj#,');
+--    put('                       b.owner||''''.''''||b.object_name object_name_sofar,');
+--    put('                       count(*) num_samples');
+--    put('                  FROM plan_table a,');
+--    put('                       dba_objects b');
+--    put('                 WHERE a.cost =  '||i.plan_hash_value||'');
+--    put('                   AND a.remarks = ''''&&sqld360_sqlid.'''''); 
+--    put('                   AND ''''&&diagnostics_pack.'''' = ''''Y''''');
+--    put('                   AND a.object_instance = b.object_id(+)');
+--    put('                   AND a.other_tag IN (''''Application'''',''''Cluster'''', ''''Concurrency'''', ''''User I/O'''', ''''System I/O'''')');
+--    put('                 GROUP BY b.owner||''''.''''||b.object_name,a.object_instance) data,');
+--    put('                dba_objects o');
+--    put('         WHERE data.obj# = o.data_object_id(+)');
+--    put('         ORDER BY 2 DESC)');
+--    put(' WHERE rownum <= 15');
+
+    put('SELECT data.obj#||');
+    put('       NVL(');
+    put('       (SELECT TRIM(''''.'''' FROM '''' ''''||o.owner||''''.''''||o.object_name||''''.''''||o.subobject_name) FROM dba_objects o WHERE o.object_id = data.obj# AND ROWNUM = 1),'); 
+    put('       (SELECT TRIM(''''.'''' FROM '''' ''''||o.owner||''''.''''||o.object_name||''''.''''||o.subobject_name) FROM dba_objects o WHERE o.data_object_id = data.obj# AND ROWNUM = 1)'); 
+    put('       ) data_object,');
     put('       num_samples,');
     put('       TRUNC(100*RATIO_TO_REPORT(num_samples) OVER (),2) percent,');
     put('       NULL dummy_01');
-    put('  FROM (SELECT NVL2(b.owner,b.owner||''''.''''||b.object_name,a.object_instance) obj#,');
+    put('  FROM (SELECT a.object_instance obj#,');
     put('               count(*) num_samples');
-    put('          FROM plan_table a,');
-    put('               dba_objects b');
+    put('          FROM plan_table a');
     put('         WHERE a.cost =  '||i.plan_hash_value||'');
     put('           AND a.remarks = ''''&&sqld360_sqlid.'''''); 
     put('           AND ''''&&diagnostics_pack.'''' = ''''Y''''');
-    put('           AND a.object_instance = b.data_object_id(+)');
-    put('           AND a.other_tag IN (''''Application'''',''''Cluster'''', ''''Concurrency'''', ''''User I/O'''')');
-    put('         GROUP BY NVL2(b.owner,b.owner||''''.''''||b.object_name,a.object_instance)'); 
-    put('         ORDER BY 2 DESC)');
+    put('           AND a.other_tag IN (''''Application'''',''''Cluster'''', ''''Concurrency'''', ''''User I/O'''', ''''System I/O'''')');
+    put('         GROUP BY a.object_instance'); 
+    put('         ORDER BY 2 DESC) data');
     put(' WHERE rownum <= 15');
+
     put(''';');
-    put('END;');
+	put('END;');
     put('/ ');
     put('@sql/sqld360_9a_pre_one.sql');
+
+
+
+
 
     put('----------------------------');
 

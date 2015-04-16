@@ -30,7 +30,7 @@ BEGIN
                      FROM dba_indexes
                     WHERE (table_owner, table_name) IN &&tables_list_s.
                    UNION 
-                   SELECT owner object_owner, name object_name, type object_type
+                   SELECT SUBSTR(owner,1,30) object_owner, SUBSTR(name,1,30) object_name, SUBSTR(type,1,30) object_type
                      FROM gv$db_object_cache  
                     WHERE type IN ('INDEX', 'TABLE', 'CLUSTER', 'VIEW', 'SYNONYM', 'SEQUENCE', 'PROCEDURE', 'FUNCTION', 'PACKAGE', 'PACKAGE BODY' ) 
                       AND (inst_id, hash_value) IN (SELECT inst_id, to_hash
