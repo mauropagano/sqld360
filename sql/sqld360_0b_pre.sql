@@ -395,6 +395,8 @@ ALTER SESSION SET NLS_SORT = 'BINARY';
 ALTER SESSION SET NLS_COMP = 'BINARY';
 -- to work around bug 12672969
 ALTER SESSION SET "_optimizer_order_by_elimination_enabled"=false; 
+-- to work around bug 19567916
+ALTER SESSION SET "_optimizer_aggr_groupby_elim"=false; 
 -- to work around Siebel
 ALTER SESSION SET optimizer_index_cost_adj = 100;
 ALTER SESSION SET optimizer_dynamic_sampling = 2;

@@ -437,9 +437,9 @@ BEGIN
     put('               MAX(write_io_requests) write_io_requests_min');
     put('          FROM (SELECT timestamp end_time,');
     put('                       SUM(NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,14)+1,INSTR(partition_stop,'''','''',1,15)-INSTR(partition_stop,'''','''',1,14)-1)),0)/ ');
-    put('                               ROUND(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,13)+1,INSTR(partition_stop,'''','''',1,14)-INSTR(partition_stop,'''','''',1,13)-1))/1e6)) read_io_requests,'); 
+    put('                           NVL(NULLIF(ROUND(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,13)+1,INSTR(partition_stop,'''','''',1,14)-INSTR(partition_stop,'''','''',1,13)-1))/1e6),0),1)) read_io_requests,'); 
     put('                       SUM(NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,15)+1,INSTR(partition_stop,'''','''',1,16)-INSTR(partition_stop,'''','''',1,15)-1)),0)/ ');
-    put('                               ROUND(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,13)+1,INSTR(partition_stop,'''','''',1,14)-INSTR(partition_stop,'''','''',1,13)-1))/1e6)) write_io_requests'); 
+    put('                           NVL(NULLIF(ROUND(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,13)+1,INSTR(partition_stop,'''','''',1,14)-INSTR(partition_stop,'''','''',1,13)-1))/1e6),0),1)) write_io_requests'); 
     put('                  FROM plan_table');
     put('                 WHERE statement_id = ''''SQLD360_ASH_DATA_MEM''''');
     put('                   AND cost =  '||i.plan_hash_value||'');
@@ -569,11 +569,11 @@ BEGIN
     put('               MAX(interconnect_io_bytes) interconnect_io_bytes_min');
     put('          FROM (SELECT timestamp end_time,');
     put('                       SUM(NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,16)+1,INSTR(partition_stop,'''','''',1,17)-INSTR(partition_stop,'''','''',1,16)-1)),0)/ ');
-    put('                               ROUND(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,13)+1,INSTR(partition_stop,'''','''',1,14)-INSTR(partition_stop,'''','''',1,13)-1))/1e6)) read_io_bytes,'); 
+    put('                           NVL(NULLIF(ROUND(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,13)+1,INSTR(partition_stop,'''','''',1,14)-INSTR(partition_stop,'''','''',1,13)-1))/1e6),0),1)) read_io_bytes,'); 
     put('                       SUM(NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,17)+1,INSTR(partition_stop,'''','''',1,18)-INSTR(partition_stop,'''','''',1,17)-1)),0)/ ');
-    put('                               ROUND(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,13)+1,INSTR(partition_stop,'''','''',1,14)-INSTR(partition_stop,'''','''',1,13)-1))/1e6)) write_io_bytes,'); 
+    put('                           NVL(NULLIF(ROUND(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,13)+1,INSTR(partition_stop,'''','''',1,14)-INSTR(partition_stop,'''','''',1,13)-1))/1e6),0),1)) write_io_bytes,'); 
     put('                       SUM(NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,18)+1)),0)/ ');
-    put('                               ROUND(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,13)+1,INSTR(partition_stop,'''','''',1,14)-INSTR(partition_stop,'''','''',1,13)-1))/1e6)) interconnect_io_bytes'); 
+    put('                           NVL(NULLIF(ROUND(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,13)+1,INSTR(partition_stop,'''','''',1,14)-INSTR(partition_stop,'''','''',1,13)-1))/1e6),0),1)) interconnect_io_bytes'); 
     put('                  FROM plan_table');
     put('                 WHERE statement_id = ''''SQLD360_ASH_DATA_MEM''''');
     put('                   AND cost =  '||i.plan_hash_value||'');

@@ -236,6 +236,24 @@ END;
 @@sqld360_9a_pre_one.sql
 
 
+COL addr NOPRI
+
+DEF title = 'Optimizer Processing Rate';
+DEF main_table = 'V$OPTIMIZER_PROCESSING_RATE';
+BEGIN
+  :sql_text := '
+SELECT /*+ &&top_level_hints. */ 
+       *
+  FROM v$optimizer_processing_rate
+ ORDER BY operation_name 
+';
+END;
+/
+@@sqld360_9a_pre_one.sql
+
+COL addr PRI
+
+
 --DEF title = 'Alert Log';
 --DEF main_table = 'X$DBGALERTEXT';
 --BEGIN
