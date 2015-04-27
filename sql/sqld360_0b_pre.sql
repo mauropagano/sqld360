@@ -9,8 +9,8 @@ CL COL;
 COL row_num FOR 9999999 HEA '#' PRI;
 
 -- version
-DEF sqld360_vYYNN = 'v1510';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-04-15)';
+DEF sqld360_vYYNN = 'v1511';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-04-26)';
 DEF sqld360_prefix = 'sqld360';
 
 -- get dbid
@@ -88,6 +88,10 @@ DEF skip_script = 'sql/sqld360_0f_skip_script.sql ';
 -- get instance number
 COL connect_instance_number NEW_V connect_instance_number;
 SELECT TO_CHAR(instance_number) connect_instance_number FROM v$instance;
+
+-- get instance name 
+COL connect_instance_name NEW_V connect_instance_name;
+SELECT TO_CHAR(instance_name) connect_instance_name FROM v$instance;
 
 -- get database name (up to 10, stop before first '.', no special characters)
 COL database_name_short NEW_V database_name_short FOR A10;
@@ -169,6 +173,13 @@ COL psft_schema NEW_V psft_schema;
 COL psft_tools_rel NEW_V psft_tools_rel;
 SELECT owner psft_schema FROM sys.dba_tab_columns WHERE table_name = 'PSSTATUS' AND column_name = 'TOOLSREL' AND data_type = 'VARCHAR2' AND ROWNUM = 1;
 SELECT toolsrel psft_tools_rel FROM &&psft_schema..psstatus WHERE ROWNUM = 1;
+
+-- local or remote exec (local will be --) 
+COL sqld360_remote_exec NEW_V sqld360_remote_exec FOR A20;
+SELECT '--' sqld360_remote_exec FROM dual;
+-- this SQL errors out in 11.1.0.6 and < 10.2.0.5, this is expected, the value is used only >= 11.2
+SELECT CASE WHEN a.port <> 0 AND a.machine <> b.host_name THEN NULL ELSE '--' END sqld360_remote_exec FROM v$session a, v$instance b WHERE sid = USERENV('SID');
+
 
 -- udump mnd pid, oved here from 0c_post
 -- get udump directory path
