@@ -311,6 +311,7 @@ DEF default_dir = 'SQLD360_DIR'
 DEF sqlmon_date_mask = 'YYYYMMDDHH24MISS';
 DEF sqlmon_text = 'Y';
 DEF sqlmon_active = 'Y';
+DEF sqlmon_hist = 'Y';
 DEF sqlmon_max_reports = '12';
 DEF ash_date_mask = 'YYYYMMDDHH24MISS';
 DEF ash_text = 'Y';
