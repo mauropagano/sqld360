@@ -22,7 +22,13 @@ BEGIN
                     SELECT plan_hash_value
                       FROM dba_hist_sqlstat
                      WHERE sql_id = '&&sqld360_sqlid.'
-                       AND '&&diagnostics_pack.' = 'Y') 
+                       AND '&&diagnostics_pack.' = 'Y'
+                    UNION
+                   SELECT cost plan_hash_value
+                     FROM plan_table
+                    WHERE statement_id LIKE 'SQLD360_ASH_DATA%'
+                      AND '&&diagnostics_pack.' = 'Y'
+                      AND remarks = '&&sqld360_sqlid.') 
              ORDER BY 1)
   LOOP
     DBMS_OUTPUT.PUT_LINE('<td class="c">PHV '||i.plan_hash_value||'</td>');
@@ -58,7 +64,13 @@ BEGIN
                     SELECT plan_hash_value
                       FROM dba_hist_sqlstat
                      WHERE sql_id = '&&sqld360_sqlid.'
-                       AND '&&diagnostics_pack.' = 'Y') 
+                       AND '&&diagnostics_pack.' = 'Y'
+                    UNION
+                    SELECT cost plan_hash_value
+                      FROM plan_table
+                     WHERE statement_id LIKE 'SQLD360_ASH_DATA%'
+                       AND '&&diagnostics_pack.' = 'Y'
+                       AND remarks = '&&sqld360_sqlid.') 
              ORDER BY 1) 
   LOOP
     put('SET PAGES 50000');
@@ -114,7 +126,7 @@ BEGIN
     put('DEF stacked = ''''');
     put('DEF tit_01 = ''Average Elapsed Time''');
     put('DEF tit_02 = ''Average Time on CPU''');
-    put('DEF tit_03 = ''''');
+    put('DEF tit_03 = ''Average DB Time''');
     put('DEF tit_04 = ''''');
     put('DEF tit_05 = ''''');
     put('DEF tit_06 = ''''');
@@ -134,7 +146,7 @@ BEGIN
     put('       TO_CHAR(start_time, ''''YYYY-MM-DD HH24:MI'''') end_time,');
     put('       avg_et,');
     put('       avg_cpu_time,');
-    put('       0 dummy_03,');
+    put('       avg_db_time,');
     put('       0 dummy_04,');
     put('       0 dummy_05,');
     put('       0 dummy_06,');
@@ -149,14 +161,16 @@ BEGIN
     put('       0 dummy_15');
     put('  FROM (SELECT start_time,');
     put('               AVG(et) avg_et,');
-    put('               AVG(cpu_time) avg_cpu_time');
+    put('               AVG(cpu_time) avg_cpu_time,');
+    put('               AVG(db_time) avg_db_time');
     put('          FROM (SELECT TO_DATE(SUBSTR(distribution,1,12),''''YYYYMMDDHH24MI'''') start_time,');
     put('                       NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,3)+1,INSTR(partition_stop,'''','''',1,4)-INSTR(partition_stop,'''','''',1,3)-1)),position)||''''-''''||'); 
     put('                        NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,4)+1,INSTR(partition_stop,'''','''',1,5)-INSTR(partition_stop,'''','''',1,4)-1)),cpu_cost)||''''-''''||'); 
     put('                        NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,5)+1,INSTR(partition_stop,'''','''',1,6)-INSTR(partition_stop,'''','''',1,5)-1)),io_cost)||''''-''''||');
     put('                        NVL(partition_id,0)||''''-''''||NVL(distribution,''''x'''') uniq_exec,'); 
-    put('                       86400*(MAX(timestamp)-MIN(timestamp)) et,'); 
-    put('                       SUM(CASE WHEN object_node = ''''ON CPU'''' THEN 1 ELSE 0 END) cpu_time'); 
+    put('                       1+86400*(MAX(timestamp)-MIN(timestamp)) et,'); 
+    put('                       SUM(CASE WHEN object_node = ''''ON CPU'''' THEN 1 ELSE 0 END) cpu_time,'); 
+    put('                       COUNT(*) db_time'); 
     put('                  FROM plan_table');
     put('                 WHERE statement_id = ''''SQLD360_ASH_DATA_MEM''''');
     put('                   AND cost =  '||i.plan_hash_value||'');
@@ -184,7 +198,7 @@ BEGIN
     put('DEF stacked = ''''');
     put('DEF tit_01 = ''Average Elapsed Time''');
     put('DEF tit_02 = ''Average Time on CPU''');
-    put('DEF tit_03 = ''''');
+    put('DEF tit_03 = ''Average DB Time''');
     put('DEF tit_04 = ''''');
     put('DEF tit_05 = ''''');
     put('DEF tit_06 = ''''');
@@ -204,7 +218,7 @@ BEGIN
     put('       TO_CHAR(b.end_interval_time, ''''YYYY-MM-DD HH24:MI'''') end_time,');
     put('       NVL(avg_et,0) avg_et,');
     put('       NVL(avg_cpu_time,0) avg_cpu_time,');
-    put('       0 dummy_03,');
+    put('       NVL(avg_db_time,0) avg_db_time,');
     put('       0 dummy_04,');
     put('       0 dummy_05,');
     put('       0 dummy_06,');
@@ -219,19 +233,22 @@ BEGIN
     put('       0 dummy_15');
     put('  FROM (SELECT snap_id,');
     put('               MAX(avg_et) avg_et,');
-    put('               MAX(avg_cpu_time) avg_cpu_time');
+    put('               MAX(avg_cpu_time) avg_cpu_time,');
+    put('               MAX(avg_db_time) avg_db_time');
     put('          FROM (SELECT start_time,');
     put('                       MIN(start_snap_id) snap_id,');
     put('                       AVG(et) avg_et,');
-    put('                       AVG(cpu_time) avg_cpu_time');
+    put('                       AVG(cpu_time) avg_cpu_time,');
+    put('                       AVG(db_time) avg_db_time');
     put('                  FROM (SELECT TO_DATE(SUBSTR(distribution,1,12),''''YYYYMMDDHH24MI'''') start_time,');
     put('                               NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,3)+1,INSTR(partition_stop,'''','''',1,4)-INSTR(partition_stop,'''','''',1,3)-1)),position)||''''-''''||'); 
     put('                                NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,4)+1,INSTR(partition_stop,'''','''',1,5)-INSTR(partition_stop,'''','''',1,4)-1)),cpu_cost)||''''-''''||'); 
     put('                                NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,5)+1,INSTR(partition_stop,'''','''',1,6)-INSTR(partition_stop,'''','''',1,5)-1)),io_cost)||''''-''''||');
     put('                                NVL(partition_id,0)||''''-''''||NVL(distribution,''''x'''') uniq_exec,'); 
     put('                               MIN(cardinality) start_snap_id,');
-    put('                               86400*(MAX(timestamp)-MIN(timestamp)) et, ');
-    put('                               SUM(CASE WHEN object_node = ''''ON CPU'''' THEN 10 ELSE 0 END) cpu_time'); 
+    put('                               10+86400*(MAX(timestamp)-MIN(timestamp)) et, ');
+    put('                               SUM(CASE WHEN object_node = ''''ON CPU'''' THEN 10 ELSE 0 END) cpu_time,'); 
+    put('                               SUM(10) db_time'); 
     put('                          FROM plan_table');
     put('                         WHERE statement_id = ''''SQLD360_ASH_DATA_HIST''''');
     put('                           AND partition_id IS NOT NULL');
@@ -759,7 +776,7 @@ BEGIN
     put(' WHERE rownum <= 15');
 
     put(''';');
-	put('END;');
+    put('END;');
     put('/ ');
     put('@sql/sqld360_9a_pre_one.sql');
 
@@ -788,6 +805,32 @@ BEGIN
     put('END;');
     put('/ ');
     put('@sql/sqld360_9a_pre_one.sql');
+
+    put('----------------------------');
+
+    put('DEF title=''Top 15 Step/Event for PHV '||i.plan_hash_value||'''');
+    put('DEF main_table = ''DBA_HIST_ACTIVE_SESS_HISTORY''');
+    put('DEF skip_pch=''''');
+    put('DEF slices = ''15''');
+    put('BEGIN');
+    put(' :sql_text := ''');
+    put('SELECT step_event,');
+    put('       num_samples,');
+    put('       TRUNC(100*RATIO_TO_REPORT(num_samples) OVER (),2) percent,');
+    put('       NULL dummy_01');
+    put('  FROM (SELECT id||'''' - ''''||operation||'''' / ''''||object_node step_event,');
+    put('               count(*) num_samples');
+    put('          FROM plan_table');
+    put('         WHERE cost =  '||i.plan_hash_value||'');
+    put('           AND remarks = ''''&&sqld360_sqlid.'''''); 
+    put('           AND ''''&&diagnostics_pack.'''' = ''''Y''''');
+    put('         GROUP BY id||'''' - ''''||operation||'''' / ''''||object_node'); 
+    put('         ORDER BY 2 DESC)');
+    put(' WHERE rownum <= 15');
+    put(''';');
+    put('END;');
+    put('/ ');
+    put('@sql/sqld360_9a_pre_one.sql');	
 
     put('----------------------------');
 

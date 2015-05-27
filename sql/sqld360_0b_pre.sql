@@ -9,8 +9,8 @@ CL COL;
 COL row_num FOR 9999999 HEA '#' PRI;
 
 -- version
-DEF sqld360_vYYNN = 'v1511';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-04-26)';
+DEF sqld360_vYYNN = 'v1512';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-05-27)';
 DEF sqld360_prefix = 'sqld360';
 
 -- get dbid
@@ -115,12 +115,17 @@ SELECT version db_version FROM v$instance;
 DEF skip_10g = '';
 COL skip_10g NEW_V skip_10g;
 SELECT '--' skip_10g FROM v$instance WHERE version LIKE '10%';
+COL skip_11g NEW_V skip_11g;
+SELECT '--' skip_11g FROM v$instance WHERE version LIKE '11%';
 DEF skip_11r1 = '';
 COL skip_11r1 NEW_V skip_11r1;
 SELECT '--' skip_11r1 FROM v$instance WHERE version LIKE '11.1%';
 DEF skip_11r201 = '';
 COL skip_11r201 NEW_V skip_11r201;
 SELECT '--' skip_11r201 FROM v$instance WHERE version LIKE '11.2.0.1%';
+DEF skip_12r101 = '';
+COL skip_12r101 NEW_V skip_12r101;
+SELECT '--' skip_12r101 FROM v$instance WHERE version LIKE '12.1.0.1%';
 
 -- get average number of CPUs
 COL avg_cpu_count NEW_V avg_cpu_count FOR A3;
@@ -272,6 +277,12 @@ SELECT CASE '&&sqld360_conf_incl_eadam.' WHEN 'N' THEN '--' END sqld360_skip_ead
 
 COL sqld360_skip_rawash NEW_V sqld360_skip_rawash;
 SELECT CASE '&&sqld360_conf_incl_rawash.' WHEN 'N' THEN '--' END sqld360_skip_rawash FROM DUAL;
+
+COL sqld360_skip_stats_h NEW_V sqld360_skip_stats_h;
+SELECT CASE '&&sqld360_conf_incl_stats_h.' WHEN 'N' THEN '--' END sqld360_skip_stats_h FROM DUAL;
+
+COL sqld360_skip_tcb NEW_V sqld360_skip_tcb;
+SELECT CASE '&&sqld360_conf_incl_tcb.' WHEN 'N' THEN '--' END sqld360_skip_tcb FROM DUAL;
 
 -- setup
 DEF sql_trace_level = '1';

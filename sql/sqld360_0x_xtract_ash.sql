@@ -91,6 +91,7 @@ BEGIN
         AND b.statement_id = 'SQLD360_SQLID' -- flag to identify the rows that stores SQL ID info
         AND a.sample_time > systimestamp-&&history_days.  -- extract only data of interest
         AND SUBSTR(b.options,1,1) = '1'  -- load data only for those SQL IDs that have diagnostics enabled
+        AND '&&sqld360_conf_incl_ash_hist.' = 'Y'
      UNION ALL
      SELECT 'SQLD360_ASH_DATA_MEM', sample_time, sql_id, 
             NULL, NULL,

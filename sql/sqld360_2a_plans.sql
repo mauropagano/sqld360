@@ -175,17 +175,23 @@ HOS zip -q &&sqld360_main_filename._&&sqld360_file_time. &&sqld360_main_report..
 COL num_plans NEW_V num_plans
 SELECT TRIM(TO_CHAR(COUNT(plan_hash_value))) num_plans
   FROM (SELECT plan_hash_value
-	      FROM gv$sql
+          FROM gv$sql
          WHERE sql_id = '&&sqld360_sqlid.'
-		UNION
-		SELECT plan_hash_value
-		  FROM dba_hist_sqlstat
-		 WHERE sql_id = '&&sqld360_sqlid.'
-           AND '&&diagnostics_pack.' = 'Y')
-/	
+        UNION
+        SELECT plan_hash_value
+          FROM dba_hist_sqlstat
+         WHERE sql_id = '&&sqld360_sqlid.'
+           AND '&&diagnostics_pack.' = 'Y'
+        UNION
+        SELECT cost plan_hash_value
+          FROM plan_table
+         WHERE statement_id LIKE 'SQLD360_ASH_DATA%'
+           AND '&&diagnostics_pack.' = 'Y'
+           AND remarks = '&&sqld360_sqlid.')
+/
 
 DEF title= 'Plan Analysis'
-DEF main_table = 'GV$SQL_PLAN'	
+DEF main_table = 'GV$SQL_PLAN'
 
 --this one initiated a new file name, need it in the next anchor
 @@sqld360_0s_pre_nondef

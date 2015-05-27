@@ -125,6 +125,9 @@ SELECT DBMS_SQLTUNE.report_sql_detail(sql_id => '&&sqld360_sqlid.', report_level
    AND '&&sqlmon_active.' = 'Y';
 SPO OFF;
 
+
+-- here goes the historical part, based on elapsed time
+
 SET TERM ON
 -- get current time
 SPO &&sqld360_log..txt APP;
