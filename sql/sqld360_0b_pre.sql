@@ -9,8 +9,8 @@ CL COL;
 COL row_num FOR 9999999 HEA '#' PRI;
 
 -- version
-DEF sqld360_vYYNN = 'v1512';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-05-27)';
+DEF sqld360_vYYNN = 'v1513';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-05-28)';
 DEF sqld360_prefix = 'sqld360';
 
 -- get dbid
