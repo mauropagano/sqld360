@@ -9,8 +9,8 @@ CL COL;
 COL row_num FOR 9999999 HEA '#' PRI;
 
 -- version
-DEF sqld360_vYYNN = 'v1513';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-05-28)';
+DEF sqld360_vYYNN = 'v1514';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-05-29)';
 DEF sqld360_prefix = 'sqld360';
 
 -- get dbid
@@ -38,7 +38,8 @@ BEGIN
     -- no need to clean, it's a GTT
     -- column options set to 1 is safe here, if no diagnostics then ASH is not extracted at all anyway
     INSERT INTO plan_table (statement_id, timestamp, operation, options) VALUES ('SQLD360_SQLID',sysdate,'&&sqld360_sqlid.','1');
-    INSERT INTO plan_table (statement_id, timestamp, operation) VALUES ('SQLD360_ASH_LOAD',sysdate, NULL);
+    --INSERT INTO plan_table (statement_id, timestamp, operation) VALUES ('SQLD360_ASH_LOAD',sysdate, NULL);
+    INSERT INTO plan_table (statement_id, timestamp, operation, options) VALUES ('SQLD360_ASH_LOAD',sysdate, NULL, '&&sqld360_sqlid.');
   END IF;
 END;
 /  

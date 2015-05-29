@@ -579,7 +579,7 @@ DEF skip_lch = 'Y';
 DEF main_table = 'V$ACTIVE_SESSION_HISTORY';
 DEF abstract = 'Average and Median elapsed time per execution for recent executions, in seconds. ';
 DEF foot = 'Data rounded to the 1 second'
-DEF vaxis = 'Elapsed Time for the SQL'
+DEF vaxis = 'Average Elapsed Time in secs'
 
 BEGIN
   :sql_text_backup := '

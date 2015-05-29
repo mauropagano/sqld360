@@ -190,7 +190,7 @@ SELECT TRIM(TO_CHAR(COUNT(plan_hash_value))) num_plans
            AND remarks = '&&sqld360_sqlid.')
 /
 
-DEF title= 'Plan Analysis'
+DEF title= 'Plan Details'
 DEF main_table = 'GV$SQL_PLAN'
 
 --this one initiated a new file name, need it in the next anchor
@@ -198,7 +198,7 @@ DEF main_table = 'GV$SQL_PLAN'
 SET TERM OFF ECHO OFF 
 -- need to fix the file name for the partitions
 SPO &&sqld360_main_report..html APP;
-PRO <li>Plans Analysis <small><em>(&&num_plans.)</em></small> 
+PRO <li>Plans Details <small><em>(&&num_plans.)</em></small> 
 PRO <a href="&&one_spool_filename..html">page</a>
 PRO </li>
 SPO OFF;

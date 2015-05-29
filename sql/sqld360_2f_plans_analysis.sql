@@ -2,7 +2,7 @@ SPO &&one_spool_filename..html APP;
 PRO </head>
 @sql/sqld360_0d_html_header.sql
 PRO <body>
-PRO <h1><a href="http://www.enkitec.com" target="_blank">Enkitec</a>: SQL 360-degree view <em>(<a href="http://www.enkitec.com/products/sqld360" target="_blank">SQLd360</a>)</em> &&sqld360_vYYNN. - Plans Analysis Page</h1>
+PRO <h1><a href="http://www.enkitec.com" target="_blank">Enkitec</a>: SQL 360-degree view <em>(<a href="http://www.enkitec.com/products/sqld360" target="_blank">SQLd360</a>)</em> &&sqld360_vYYNN. - Plans Details Page</h1>
 PRO
 PRO <pre>
 PRO sqlid:&&sqld360_sqlid. dbname:&&database_name_short. version:&&db_version. host:&&host_name_short. license:&&license_pack. days:&&history_days. today:&&sqld360_time_stamp.
@@ -124,6 +124,7 @@ BEGIN
     put('DEF skip_lch=''''');
     put('DEF chartype = ''LineChart''');
     put('DEF stacked = ''''');
+    put('DEF vaxis = ''Average Elapsed Time in secs''');
     put('DEF tit_01 = ''Average Elapsed Time''');
     put('DEF tit_02 = ''Average Time on CPU''');
     put('DEF tit_03 = ''Average DB Time''');
@@ -196,6 +197,7 @@ BEGIN
     put('DEF skip_lch=''''');
     put('DEF chartype = ''LineChart''');
     put('DEF stacked = ''''');
+    put('DEF vaxis = ''Average Elapsed Time in secs''');
     put('DEF tit_01 = ''Average Elapsed Time''');
     put('DEF tit_02 = ''Average Time on CPU''');
     put('DEF tit_03 = ''Average DB Time''');
@@ -282,6 +284,7 @@ BEGIN
     put('DEF skip_lch=''''');
     put('DEF chartype = ''LineChart''');
     put('DEF stacked = ''''');
+    put('DEF vaxis = ''Bytes''');
     put('DEF tit_01 = ''PGA Usage''');
     put('DEF tit_02 = ''TEMP Usage''');
     put('DEF tit_03 = ''''');
@@ -344,6 +347,7 @@ BEGIN
     put('DEF skip_lch=''''');
     put('DEF chartype = ''LineChart''');
     put('DEF stacked = ''''');
+    put('DEF vaxis = ''Bytes''');
     put('DEF tit_01 = ''PGA Usage''');
     put('DEF tit_02 = ''TEMP Usage''');
     put('DEF tit_03 = ''''');
@@ -414,6 +418,7 @@ BEGIN
     put('DEF skip_lch=''''');
     put('DEF chartype = ''LineChart''');
     put('DEF stacked = ''''');
+    put('DEF vaxis = ''Number of I/O requests''');
     put('DEF tit_01 = ''Read I/O Request''');
     put('DEF tit_02 = ''Write I/O Request''');
     put('DEF tit_03 = ''''');
@@ -478,6 +483,7 @@ BEGIN
     put('DEF skip_lch=''''');
     put('DEF chartype = ''LineChart''');
     put('DEF stacked = ''''');
+    put('DEF vaxis = ''Number of I/O requests''');
     put('DEF tit_01 = ''Read I/O Request''');
     put('DEF tit_02 = ''Write I/O Request''');
     put('DEF tit_03 = ''''');
@@ -545,6 +551,7 @@ BEGIN
     put('DEF skip_lch=''''');
     put('DEF chartype = ''LineChart''');
     put('DEF stacked = ''''');
+    put('DEF vaxis = ''I/O bytes''');
     put('DEF tit_01 = ''Read I/O Bytes''');
     put('DEF tit_02 = ''Write I/O Bytes''');
     put('DEF tit_03 = ''Interconnect I/O Bytes''');
@@ -612,6 +619,7 @@ BEGIN
     put('DEF skip_lch=''''');
     put('DEF chartype = ''LineChart''');
     put('DEF stacked = ''''');
+    put('DEF vaxis = ''I/O bytes''');
     put('DEF tit_01 = ''Read I/O Bytes''');
     put('DEF tit_02 = ''Write I/O Bytes''');
     put('DEF tit_03 = ''Interconnect I/O Bytes''');
@@ -831,6 +839,378 @@ BEGIN
     put('END;');
     put('/ ');
     put('@sql/sqld360_9a_pre_one.sql');	
+
+    put('----------------------------');
+
+    put('DEF title=''Top 15 Wait events over recent time for PHV '||i.plan_hash_value||'''');
+    put('DEF main_table = ''GV$ACTIVE_SESSION_HISTORY''');
+    put('DEF skip_lch=''''');
+    put('DEF chartype = ''AreaChart''');
+    put('DEF stacked = ''isStacked: true,''');
+    put('DEF abstract = ''AAS (stacked) per top 15 wait events over time''');
+    put('DEF vaxis = ''Average Active Sessions - AAS (stacked)''');
+
+    -- this looks confusing but it actually has a reason :-)
+    -- tit_n is used to show / hide the column in the chart (in case of nulls)
+    -- evt_n is used as filter value (populated dynamically)
+    -- evtn  is used to hosw / hide the column in the resultset (in case of nulls)
+
+    put('COL evt_01 NEW_V evt_01'); 
+    put('COL evt_02 NEW_V evt_02'); 
+    put('COL evt_03 NEW_V evt_03'); 
+    put('COL evt_04 NEW_V evt_04'); 
+    put('COL evt_05 NEW_V evt_05'); 
+    put('COL evt_06 NEW_V evt_06'); 
+    put('COL evt_07 NEW_V evt_07'); 
+    put('COL evt_08 NEW_V evt_08'); 
+    put('COL evt_09 NEW_V evt_09'); 
+    put('COL evt_10 NEW_V evt_10'); 
+    put('COL evt_11 NEW_V evt_11'); 
+    put('COL evt_12 NEW_V evt_12'); 
+    put('COL evt_13 NEW_V evt_13'); 
+    put('COL evt_14 NEW_V evt_14'); 
+    put('COL evt_15 NEW_V evt_15');
+    put('COL tit_01 NEW_V tit_01'); 
+    put('COL tit_02 NEW_V tit_02'); 
+    put('COL tit_03 NEW_V tit_03'); 
+    put('COL tit_04 NEW_V tit_04'); 
+    put('COL tit_05 NEW_V tit_05'); 
+    put('COL tit_06 NEW_V tit_06'); 
+    put('COL tit_07 NEW_V tit_07'); 
+    put('COL tit_08 NEW_V tit_08'); 
+    put('COL tit_09 NEW_V tit_09'); 
+    put('COL tit_10 NEW_V tit_10'); 
+    put('COL tit_11 NEW_V tit_11'); 
+    put('COL tit_12 NEW_V tit_12'); 
+    put('COL tit_13 NEW_V tit_13'); 
+    put('COL tit_14 NEW_V tit_14'); 
+    put('COL tit_15 NEW_V tit_15'); 
+
+    put('SELECT MAX(CASE WHEN ranking = 1  THEN cpu_or_event ELSE '''' END) evt_01,');
+    put('       MAX(CASE WHEN ranking = 2  THEN cpu_or_event ELSE '''' END) evt_02,');              
+    put('       MAX(CASE WHEN ranking = 3  THEN cpu_or_event ELSE '''' END) evt_03,'); 
+    put('       MAX(CASE WHEN ranking = 4  THEN cpu_or_event ELSE '''' END) evt_04,'); 
+    put('       MAX(CASE WHEN ranking = 5  THEN cpu_or_event ELSE '''' END) evt_05,'); 
+    put('       MAX(CASE WHEN ranking = 6  THEN cpu_or_event ELSE '''' END) evt_06,'); 
+    put('       MAX(CASE WHEN ranking = 7  THEN cpu_or_event ELSE '''' END) evt_07,'); 
+    put('       MAX(CASE WHEN ranking = 8  THEN cpu_or_event ELSE '''' END) evt_08,'); 
+    put('       MAX(CASE WHEN ranking = 9  THEN cpu_or_event ELSE '''' END) evt_09,'); 
+    put('       MAX(CASE WHEN ranking = 10 THEN cpu_or_event ELSE '''' END) evt_10,');
+    put('       MAX(CASE WHEN ranking = 11 THEN cpu_or_event ELSE '''' END) evt_11,');
+    put('       MAX(CASE WHEN ranking = 12 THEN cpu_or_event ELSE '''' END) evt_12,');
+    put('       MAX(CASE WHEN ranking = 13 THEN cpu_or_event ELSE '''' END) evt_13,');
+    put('       MAX(CASE WHEN ranking = 14 THEN cpu_or_event ELSE '''' END) evt_14,');
+    put('       MAX(CASE WHEN ranking = 15 THEN cpu_or_event ELSE '''' END) evt_15 ');
+    put('  FROM (SELECT 1 fake, object_node cpu_or_event,');
+    put('               ROW_NUMBER() OVER (ORDER BY COUNT(*) DESC) ranking');
+    put('          FROM plan_table'); 
+    put('         WHERE statement_id = ''SQLD360_ASH_DATA_MEM''');
+    put('           AND cost = '||i.plan_hash_value);
+    put('           AND remarks = ''&&sqld360_sqlid.''');
+    put('         GROUP BY object_node) ash,');
+    put('       (SELECT 1 fake FROM dual) b'); -- this is in case there is no row in ASH
+    put(' WHERE ash.fake(+) = b.fake');
+    put('   AND ranking <= 15');
+    put('/');
+
+    put('SET DEF @');
+
+    put('SELECT ''@evt_01.'' tit_01,'); 
+    put('       ''@evt_02.'' tit_02,');
+    put('       ''@evt_03.'' tit_03,');
+    put('       ''@evt_04.'' tit_04,');
+    put('       ''@evt_05.'' tit_05,');
+    put('       ''@evt_06.'' tit_06,');
+    put('       ''@evt_07.'' tit_07,');
+    put('       ''@evt_08.'' tit_08,');
+    put('       ''@evt_09.'' tit_09,');
+    put('       ''@evt_10.'' tit_10,'); 
+    put('       ''@evt_11.'' tit_11,');
+    put('       ''@evt_12.'' tit_12,');
+    put('       ''@evt_13.'' tit_13,');
+    put('       ''@evt_14.'' tit_14,');
+    put('       ''@evt_15.'' tit_15');
+    put('  FROM DUAL');
+    put('/');
+
+    put('COL evt01_ NOPRI');
+    put('COL evt02_ NOPRI');
+    put('COL evt03_ NOPRI');
+    put('COL evt04_ NOPRI');
+    put('COL evt05_ NOPRI');
+    put('COL evt06_ NOPRI');
+    put('COL evt07_ NOPRI');
+    put('COL evt08_ NOPRI');
+    put('COL evt09_ NOPRI');
+    put('COL evt10_ NOPRI');
+    put('COL evt11_ NOPRI');
+    put('COL evt12_ NOPRI');
+    put('COL evt13_ NOPRI');
+    put('COL evt14_ NOPRI');
+    put('COL evt15_ NOPRI');
+
+    put('BEGIN');
+    put(' :sql_text := ''');
+    put('SELECT 0 snap_id,');
+    put('       TO_CHAR(sample_time, ''''YYYY-MM-DD HH24:MI'''') begin_time,'); 
+    put('       TO_CHAR(sample_time, ''''YYYY-MM-DD HH24:MI'''') end_time,');
+    put('       NVL(aas_01,0) "evt01_@tit_01." ,');
+    put('       NVL(aas_02,0) "evt02_@tit_02." ,');
+    put('       NVL(aas_03,0) "evt03_@tit_03." ,');
+    put('       NVL(aas_04,0) "evt04_@tit_04." ,');
+    put('       NVL(aas_05,0) "evt05_@tit_05." ,');
+    put('       NVL(aas_06,0) "evt06_@tit_06." ,');
+    put('       NVL(aas_07,0) "evt07_@tit_07." ,');
+    put('       NVL(aas_08,0) "evt08_@tit_08." ,');
+    put('       NVL(aas_09,0) "evt09_@tit_09." ,');
+    put('       NVL(aas_10,0) "evt10_@tit_10." ,');
+    put('       NVL(aas_11,0) "evt11_@tit_11." ,');
+    put('       NVL(aas_12,0) "evt12_@tit_12." ,');
+    put('       NVL(aas_13,0) "evt13_@tit_13." ,');
+    put('       NVL(aas_14,0) "evt14_@tit_14." ,');
+    put('       NVL(aas_15,0) "evt15_@tit_15." ');
+    put('  FROM (SELECT sample_time,');
+    put('               MAX(CASE WHEN cpu_or_event  = ''''@evt_01.'''' THEN aas ELSE NULL END) aas_01,'); 
+    put('               MAX(CASE WHEN cpu_or_event  = ''''@evt_02.'''' THEN aas ELSE NULL END) aas_02,'); 
+    put('               MAX(CASE WHEN cpu_or_event  = ''''@evt_03.'''' THEN aas ELSE NULL END) aas_03,'); 
+    put('               MAX(CASE WHEN cpu_or_event  = ''''@evt_04.'''' THEN aas ELSE NULL END) aas_04,'); 
+    put('               MAX(CASE WHEN cpu_or_event  = ''''@evt_05.'''' THEN aas ELSE NULL END) aas_05,'); 
+    put('               MAX(CASE WHEN cpu_or_event  = ''''@evt_06.'''' THEN aas ELSE NULL END) aas_06,'); 
+    put('               MAX(CASE WHEN cpu_or_event  = ''''@evt_07.'''' THEN aas ELSE NULL END) aas_07,'); 
+    put('               MAX(CASE WHEN cpu_or_event  = ''''@evt_08.'''' THEN aas ELSE NULL END) aas_08,'); 
+    put('               MAX(CASE WHEN cpu_or_event  = ''''@evt_09.'''' THEN aas ELSE NULL END) aas_09,'); 
+    put('               MAX(CASE WHEN cpu_or_event  = ''''@evt_10.'''' THEN aas ELSE NULL END) aas_10,'); 
+    put('               MAX(CASE WHEN cpu_or_event  = ''''@evt_11.'''' THEN aas ELSE NULL END) aas_11,');  
+    put('               MAX(CASE WHEN cpu_or_event  = ''''@evt_12.'''' THEN aas ELSE NULL END) aas_12,');  
+    put('               MAX(CASE WHEN cpu_or_event  = ''''@evt_13.'''' THEN aas ELSE NULL END) aas_13,');  
+    put('               MAX(CASE WHEN cpu_or_event  = ''''@evt_14.'''' THEN aas ELSE NULL END) aas_14,');  
+    put('               MAX(CASE WHEN cpu_or_event  = ''''@evt_15.'''' THEN aas ELSE NULL END) aas_15'); 
+    put('          FROM (SELECT TRUNC(sample_time, ''''mi'''') sample_time,');
+    put('                       cpu_or_event,');
+    put('                       ROUND(SUM(num_sess)/60,3) aas');
+    put('                  FROM (SELECT timestamp sample_time,');
+    put('                               object_node cpu_or_event,'); 
+    put('                               count(*) num_sess');
+    put('                          FROM plan_table');
+    put('                         WHERE statement_id = ''''SQLD360_ASH_DATA_MEM''''');
+    put('                           AND remarks = ''''&&sqld360_sqlid.''''');
+    put('                           AND ''''&&diagnostics_pack.'''' = ''''Y''''');
+    put('                           AND cost = '||i.plan_hash_value);
+    put('                           AND object_node IN (''''@evt_01.'''',''''@evt_02.'''',''''@evt_03.'''',''''@evt_04.'''',''''@evt_05.'''',''''@evt_06.'''',');
+    put('                                               ''''@evt_07.'''',''''@evt_08.'''',''''@evt_09.'''',''''@evt_10.'''',''''@evt_11.'''',''''@evt_12.'''',');
+    put('                                               ''''@evt_13.'''',''''@evt_14.'''',''''@evt_15.'''')');
+    put('                         GROUP BY timestamp, object_node)');
+    put('                 GROUP BY TRUNC(sample_time, ''''mi''''), cpu_or_event)');
+    put('         GROUP BY sample_time)');
+    put(' ORDER BY 3 ');
+    put(''';');
+    put('END;');
+    put('/ ');
+
+    put('SET DEF &');
+    put('@sql/sqld360_9a_pre_one.sql');	
+
+    put('COL evt01_ PRI');
+    put('COL evt02_ PRI');
+    put('COL evt03_ PRI');
+    put('COL evt04_ PRI');
+    put('COL evt05_ PRI');
+    put('COL evt06_ PRI');
+    put('COL evt07_ PRI');
+    put('COL evt08_ PRI');
+    put('COL evt09_ PRI');
+    put('COL evt10_ PRI');
+    put('COL evt11_ PRI');
+    put('COL evt12_ PRI');
+    put('COL evt13_ PRI');
+    put('COL evt14_ PRI');
+    put('COL evt15_ PRI');
+
+    put('----------------------------');
+
+    put('DEF title=''Top 15 Wait events over historical time for PHV '||i.plan_hash_value||'''');
+    put('DEF main_table = ''DBA_HIST_ACTIVE_SESS_HISTORY''');
+    put('DEF skip_lch=''''');
+    put('DEF chartype = ''AreaChart''');
+    put('DEF stacked = ''isStacked: true,''');
+    put('DEF abstract = ''AAS (stacked) per top 15 wait events over time''');
+    put('DEF vaxis = ''Average Active Sessions - AAS (stacked)''');
+
+    -- this looks confusing but it actually has a reason :-)
+    -- tit_n is used to show / hide the column in the chart (in case of nulls)
+    -- evt_n is used as filter value (populated dynamically)
+    -- evtn  is used to hosw / hide the column in the resultset (in case of nulls)
+
+    put('COL evt_01 NEW_V evt_01'); 
+    put('COL evt_02 NEW_V evt_02'); 
+    put('COL evt_03 NEW_V evt_03'); 
+    put('COL evt_04 NEW_V evt_04'); 
+    put('COL evt_05 NEW_V evt_05'); 
+    put('COL evt_06 NEW_V evt_06'); 
+    put('COL evt_07 NEW_V evt_07'); 
+    put('COL evt_08 NEW_V evt_08'); 
+    put('COL evt_09 NEW_V evt_09'); 
+    put('COL evt_10 NEW_V evt_10'); 
+    put('COL evt_11 NEW_V evt_11'); 
+    put('COL evt_12 NEW_V evt_12'); 
+    put('COL evt_13 NEW_V evt_13'); 
+    put('COL evt_14 NEW_V evt_14'); 
+    put('COL evt_15 NEW_V evt_15');
+    put('COL tit_01 NEW_V tit_01'); 
+    put('COL tit_02 NEW_V tit_02'); 
+    put('COL tit_03 NEW_V tit_03'); 
+    put('COL tit_04 NEW_V tit_04'); 
+    put('COL tit_05 NEW_V tit_05'); 
+    put('COL tit_06 NEW_V tit_06'); 
+    put('COL tit_07 NEW_V tit_07'); 
+    put('COL tit_08 NEW_V tit_08'); 
+    put('COL tit_09 NEW_V tit_09'); 
+    put('COL tit_10 NEW_V tit_10'); 
+    put('COL tit_11 NEW_V tit_11'); 
+    put('COL tit_12 NEW_V tit_12'); 
+    put('COL tit_13 NEW_V tit_13'); 
+    put('COL tit_14 NEW_V tit_14'); 
+    put('COL tit_15 NEW_V tit_15'); 
+
+    put('SELECT MAX(CASE WHEN ranking = 1  THEN cpu_or_event ELSE '''' END) evt_01,');
+    put('       MAX(CASE WHEN ranking = 2  THEN cpu_or_event ELSE '''' END) evt_02,');              
+    put('       MAX(CASE WHEN ranking = 3  THEN cpu_or_event ELSE '''' END) evt_03,'); 
+    put('       MAX(CASE WHEN ranking = 4  THEN cpu_or_event ELSE '''' END) evt_04,'); 
+    put('       MAX(CASE WHEN ranking = 5  THEN cpu_or_event ELSE '''' END) evt_05,'); 
+    put('       MAX(CASE WHEN ranking = 6  THEN cpu_or_event ELSE '''' END) evt_06,'); 
+    put('       MAX(CASE WHEN ranking = 7  THEN cpu_or_event ELSE '''' END) evt_07,'); 
+    put('       MAX(CASE WHEN ranking = 8  THEN cpu_or_event ELSE '''' END) evt_08,'); 
+    put('       MAX(CASE WHEN ranking = 9  THEN cpu_or_event ELSE '''' END) evt_09,'); 
+    put('       MAX(CASE WHEN ranking = 10 THEN cpu_or_event ELSE '''' END) evt_10,');
+    put('       MAX(CASE WHEN ranking = 11 THEN cpu_or_event ELSE '''' END) evt_11,');
+    put('       MAX(CASE WHEN ranking = 12 THEN cpu_or_event ELSE '''' END) evt_12,');
+    put('       MAX(CASE WHEN ranking = 13 THEN cpu_or_event ELSE '''' END) evt_13,');
+    put('       MAX(CASE WHEN ranking = 14 THEN cpu_or_event ELSE '''' END) evt_14,');
+    put('       MAX(CASE WHEN ranking = 15 THEN cpu_or_event ELSE '''' END) evt_15 ');
+    put('  FROM (SELECT 1 fake, object_node cpu_or_event,');
+    put('               ROW_NUMBER() OVER (ORDER BY COUNT(*) DESC) ranking');
+    put('          FROM plan_table'); 
+    put('         WHERE statement_id = ''SQLD360_ASH_DATA_HIST''');
+    put('           AND cost = '||i.plan_hash_value);
+    put('           AND remarks = ''&&sqld360_sqlid.''');
+    put('         GROUP BY object_node) ash,');
+    put('       (SELECT 1 fake FROM dual) b'); -- this is in case there is no row in ASH
+    put(' WHERE ash.fake(+) = b.fake');
+    put('   AND ranking <= 15');
+    put('/');
+
+    put('SET DEF @');
+
+    put('SELECT ''@evt_01.'' tit_01,'); 
+    put('       ''@evt_02.'' tit_02,');
+    put('       ''@evt_03.'' tit_03,');
+    put('       ''@evt_04.'' tit_04,');
+    put('       ''@evt_05.'' tit_05,');
+    put('       ''@evt_06.'' tit_06,');
+    put('       ''@evt_07.'' tit_07,');
+    put('       ''@evt_08.'' tit_08,');
+    put('       ''@evt_09.'' tit_09,');
+    put('       ''@evt_10.'' tit_10,'); 
+    put('       ''@evt_11.'' tit_11,');
+    put('       ''@evt_12.'' tit_12,');
+    put('       ''@evt_13.'' tit_13,');
+    put('       ''@evt_14.'' tit_14,');
+    put('       ''@evt_15.'' tit_15');
+    put('  FROM DUAL');
+    put('/');
+
+    put('COL evt01_ NOPRI');
+    put('COL evt02_ NOPRI');
+    put('COL evt03_ NOPRI');
+    put('COL evt04_ NOPRI');
+    put('COL evt05_ NOPRI');
+    put('COL evt06_ NOPRI');
+    put('COL evt07_ NOPRI');
+    put('COL evt08_ NOPRI');
+    put('COL evt09_ NOPRI');
+    put('COL evt10_ NOPRI');
+    put('COL evt11_ NOPRI');
+    put('COL evt12_ NOPRI');
+    put('COL evt13_ NOPRI');
+    put('COL evt14_ NOPRI');
+    put('COL evt15_ NOPRI');
+
+    put('BEGIN');
+    put(' :sql_text := ''');
+    put('SELECT 0 snap_id,');
+    put('       TO_CHAR(sample_time, ''''YYYY-MM-DD HH24:MI'''') begin_time,'); 
+    put('       TO_CHAR(sample_time, ''''YYYY-MM-DD HH24:MI'''') end_time,');
+    put('       NVL(aas_01,0) "evt01_@tit_01." ,');
+    put('       NVL(aas_02,0) "evt02_@tit_02." ,');
+    put('       NVL(aas_03,0) "evt03_@tit_03." ,');
+    put('       NVL(aas_04,0) "evt04_@tit_04." ,');
+    put('       NVL(aas_05,0) "evt05_@tit_05." ,');
+    put('       NVL(aas_06,0) "evt06_@tit_06." ,');
+    put('       NVL(aas_07,0) "evt07_@tit_07." ,');
+    put('       NVL(aas_08,0) "evt08_@tit_08." ,');
+    put('       NVL(aas_09,0) "evt09_@tit_09." ,');
+    put('       NVL(aas_10,0) "evt10_@tit_10." ,');
+    put('       NVL(aas_11,0) "evt11_@tit_11." ,');
+    put('       NVL(aas_12,0) "evt12_@tit_12." ,');
+    put('       NVL(aas_13,0) "evt13_@tit_13." ,');
+    put('       NVL(aas_14,0) "evt14_@tit_14." ,');
+    put('       NVL(aas_15,0) "evt15_@tit_15." ');
+    put('  FROM (SELECT sample_time,');
+    put('               MAX(CASE WHEN cpu_or_event  = ''''@evt_01.'''' THEN aas ELSE NULL END) aas_01,'); 
+    put('               MAX(CASE WHEN cpu_or_event  = ''''@evt_02.'''' THEN aas ELSE NULL END) aas_02,'); 
+    put('               MAX(CASE WHEN cpu_or_event  = ''''@evt_03.'''' THEN aas ELSE NULL END) aas_03,'); 
+    put('               MAX(CASE WHEN cpu_or_event  = ''''@evt_04.'''' THEN aas ELSE NULL END) aas_04,'); 
+    put('               MAX(CASE WHEN cpu_or_event  = ''''@evt_05.'''' THEN aas ELSE NULL END) aas_05,'); 
+    put('               MAX(CASE WHEN cpu_or_event  = ''''@evt_06.'''' THEN aas ELSE NULL END) aas_06,'); 
+    put('               MAX(CASE WHEN cpu_or_event  = ''''@evt_07.'''' THEN aas ELSE NULL END) aas_07,'); 
+    put('               MAX(CASE WHEN cpu_or_event  = ''''@evt_08.'''' THEN aas ELSE NULL END) aas_08,'); 
+    put('               MAX(CASE WHEN cpu_or_event  = ''''@evt_09.'''' THEN aas ELSE NULL END) aas_09,'); 
+    put('               MAX(CASE WHEN cpu_or_event  = ''''@evt_10.'''' THEN aas ELSE NULL END) aas_10,'); 
+    put('               MAX(CASE WHEN cpu_or_event  = ''''@evt_11.'''' THEN aas ELSE NULL END) aas_11,');  
+    put('               MAX(CASE WHEN cpu_or_event  = ''''@evt_12.'''' THEN aas ELSE NULL END) aas_12,');  
+    put('               MAX(CASE WHEN cpu_or_event  = ''''@evt_13.'''' THEN aas ELSE NULL END) aas_13,');  
+    put('               MAX(CASE WHEN cpu_or_event  = ''''@evt_14.'''' THEN aas ELSE NULL END) aas_14,');  
+    put('               MAX(CASE WHEN cpu_or_event  = ''''@evt_15.'''' THEN aas ELSE NULL END) aas_15'); 
+    put('          FROM (SELECT TRUNC(sample_time, ''''hh24'''') sample_time,');
+    put('                       cpu_or_event,');
+    put('                       ROUND(SUM(num_sess)*10/3600,3) aas');  -- *10 because the best we can do is assume the session spent the whole 10 secs on that event
+    put('                  FROM (SELECT timestamp sample_time,');
+    put('                               object_node cpu_or_event,'); 
+    put('                               count(*) num_sess');
+    put('                          FROM plan_table');
+    put('                         WHERE statement_id = ''''SQLD360_ASH_DATA_HIST''''');
+    put('                           AND remarks = ''''&&sqld360_sqlid.''''');
+    put('                           AND ''''&&diagnostics_pack.'''' = ''''Y''''');
+    put('                           AND cost = '||i.plan_hash_value);
+    put('                           AND object_node IN (''''@evt_01.'''',''''@evt_02.'''',''''@evt_03.'''',''''@evt_04.'''',''''@evt_05.'''',''''@evt_06.'''',');
+    put('                                               ''''@evt_07.'''',''''@evt_08.'''',''''@evt_09.'''',''''@evt_10.'''',''''@evt_11.'''',''''@evt_12.'''',');
+    put('                                               ''''@evt_13.'''',''''@evt_14.'''',''''@evt_15.'''')');
+    put('                         GROUP BY timestamp, object_node)');
+    put('                 GROUP BY TRUNC(sample_time, ''''hh24''''), cpu_or_event)');
+    put('         GROUP BY sample_time)');
+    put(' ORDER BY 3 ');
+    put(''';');
+    put('END;');
+    put('/ ');
+
+    put('SET DEF &');
+    put('@sql/sqld360_9a_pre_one.sql');	
+
+    put('COL evt01_ PRI');
+    put('COL evt02_ PRI');
+    put('COL evt03_ PRI');
+    put('COL evt04_ PRI');
+    put('COL evt05_ PRI');
+    put('COL evt06_ PRI');
+    put('COL evt07_ PRI');
+    put('COL evt08_ PRI');
+    put('COL evt09_ PRI');
+    put('COL evt10_ PRI');
+    put('COL evt11_ PRI');
+    put('COL evt12_ PRI');
+    put('COL evt13_ PRI');
+    put('COL evt14_ PRI');
+    put('COL evt15_ PRI');
 
     put('----------------------------');
 
