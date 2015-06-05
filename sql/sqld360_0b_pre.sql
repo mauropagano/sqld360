@@ -9,8 +9,8 @@ CL COL;
 COL row_num FOR 9999999 HEA '#' PRI;
 
 -- version
-DEF sqld360_vYYNN = 'v1514';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-05-29)';
+DEF sqld360_vYYNN = 'v1515';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-06-05)';
 DEF sqld360_prefix = 'sqld360';
 
 -- get dbid
@@ -410,6 +410,15 @@ ALTER SESSION SET NLS_COMP = 'BINARY';
 ALTER SESSION SET "_optimizer_order_by_elimination_enabled"=false; 
 -- to work around bug 19567916
 ALTER SESSION SET "_optimizer_aggr_groupby_elim"=false; 
+-- workaround nigeria
+ALTER SESSION SET "_gby_hash_aggregation_enabled" = TRUE;
+ALTER SESSION SET "_hash_join_enabled" = TRUE;
+ALTER SESSION SET "_optim_peek_user_binds" = TRUE;
+ALTER SESSION SET "_optimizer_skip_scan_enabled" = TRUE;
+ALTER SESSION SET "_optimizer_sortmerge_join_enabled" = TRUE;
+ALTER SESSION SET cursor_sharing = EXACT;
+ALTER SESSION SET db_file_multiblock_read_count = 128;
+ALTER SESSION SET optimizer_index_caching = 0;
 -- to work around Siebel
 ALTER SESSION SET optimizer_index_cost_adj = 100;
 ALTER SESSION SET optimizer_dynamic_sampling = 2;
