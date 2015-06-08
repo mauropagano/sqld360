@@ -136,7 +136,7 @@ BEGIN
         AND b.statement_id = 'SQLD360_SQLID' -- flag to identify the rows that stores SQL ID info
         AND a.sample_time > systimestamp - &&history_days.  -- extract only data of interest
         AND SUBSTR(b.options,1,1) = '1'  -- load data only for those SQL IDs that have diagnostics enabled
-	&&from_edb360.AND b.operation = '&&sqld360_sqlid.'
+        &&from_edb360.AND b.operation = '&&sqld360_sqlid.'
      ;   
      
      --INSERT INTO plan_table (statement_id, timestamp, operation) VALUES ('SQLD360_ASH_LOAD',sysdate, 'Loaded');

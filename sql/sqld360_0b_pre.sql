@@ -9,8 +9,8 @@ CL COL;
 COL row_num FOR 9999999 HEA '#' PRI;
 
 -- version
-DEF sqld360_vYYNN = 'v1515';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-06-05)';
+DEF sqld360_vYYNN = 'v1516';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-06-08)';
 DEF sqld360_prefix = 'sqld360';
 
 -- get dbid
@@ -224,8 +224,8 @@ BEGIN
      INTO :sqld360_fullsql
      FROM gv$sql
     WHERE sql_id = '&&sqld360_sqlid.'
-	  AND sql_fulltext IS NOT NULL
-	  AND ROWNUM = 1;
+      AND sql_fulltext IS NOT NULL
+      AND ROWNUM = 1;
   END IF;
 
 END;

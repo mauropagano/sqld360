@@ -838,7 +838,7 @@ BEGIN
     put(''';');
     put('END;');
     put('/ ');
-    put('@sql/sqld360_9a_pre_one.sql');	
+    put('@sql/sqld360_9a_pre_one.sql');
 
     put('----------------------------');
 
@@ -853,7 +853,7 @@ BEGIN
     -- this looks confusing but it actually has a reason :-)
     -- tit_n is used to show / hide the column in the chart (in case of nulls)
     -- evt_n is used as filter value (populated dynamically)
-    -- evtn  is used to hosw / hide the column in the resultset (in case of nulls)
+    -- eN  is used to show / hide the column in the resultset (in case of nulls)
 
     put('COL evt_01 NEW_V evt_01'); 
     put('COL evt_02 NEW_V evt_02'); 
@@ -915,60 +915,60 @@ BEGIN
 
     put('SET DEF @');
 
-    put('SELECT ''@evt_01.'' tit_01,'); 
-    put('       ''@evt_02.'' tit_02,');
-    put('       ''@evt_03.'' tit_03,');
-    put('       ''@evt_04.'' tit_04,');
-    put('       ''@evt_05.'' tit_05,');
-    put('       ''@evt_06.'' tit_06,');
-    put('       ''@evt_07.'' tit_07,');
-    put('       ''@evt_08.'' tit_08,');
-    put('       ''@evt_09.'' tit_09,');
-    put('       ''@evt_10.'' tit_10,'); 
-    put('       ''@evt_11.'' tit_11,');
-    put('       ''@evt_12.'' tit_12,');
-    put('       ''@evt_13.'' tit_13,');
-    put('       ''@evt_14.'' tit_14,');
-    put('       ''@evt_15.'' tit_15');
+    put('SELECT SUBSTR(''@evt_01.'',1,27) tit_01,'); 
+    put('       SUBSTR(''@evt_02.'',1,27) tit_02,');
+    put('       SUBSTR(''@evt_03.'',1,27) tit_03,');
+    put('       SUBSTR(''@evt_04.'',1,27) tit_04,');
+    put('       SUBSTR(''@evt_05.'',1,27) tit_05,');
+    put('       SUBSTR(''@evt_06.'',1,27) tit_06,');
+    put('       SUBSTR(''@evt_07.'',1,27) tit_07,');
+    put('       SUBSTR(''@evt_08.'',1,27) tit_08,');
+    put('       SUBSTR(''@evt_09.'',1,27) tit_09,');
+    put('       SUBSTR(''@evt_10.'',1,27) tit_10,'); 
+    put('       SUBSTR(''@evt_11.'',1,27) tit_11,');
+    put('       SUBSTR(''@evt_12.'',1,27) tit_12,');
+    put('       SUBSTR(''@evt_13.'',1,27) tit_13,');
+    put('       SUBSTR(''@evt_14.'',1,27) tit_14,');
+    put('       SUBSTR(''@evt_15.'',1,27) tit_15');
     put('  FROM DUAL');
     put('/');
 
-    put('COL evt01_ NOPRI');
-    put('COL evt02_ NOPRI');
-    put('COL evt03_ NOPRI');
-    put('COL evt04_ NOPRI');
-    put('COL evt05_ NOPRI');
-    put('COL evt06_ NOPRI');
-    put('COL evt07_ NOPRI');
-    put('COL evt08_ NOPRI');
-    put('COL evt09_ NOPRI');
-    put('COL evt10_ NOPRI');
-    put('COL evt11_ NOPRI');
-    put('COL evt12_ NOPRI');
-    put('COL evt13_ NOPRI');
-    put('COL evt14_ NOPRI');
-    put('COL evt15_ NOPRI');
+    put('COL e01 NOPRI');
+    put('COL e02 NOPRI');
+    put('COL e03 NOPRI');
+    put('COL e04 NOPRI');
+    put('COL e05 NOPRI');
+    put('COL e06 NOPRI');
+    put('COL e07 NOPRI');
+    put('COL e08 NOPRI');
+    put('COL e09 NOPRI');
+    put('COL e10 NOPRI');
+    put('COL e11 NOPRI');
+    put('COL e12 NOPRI');
+    put('COL e13 NOPRI');
+    put('COL e14 NOPRI');
+    put('COL e15 NOPRI');
 
     put('BEGIN');
     put(' :sql_text := ''');
     put('SELECT 0 snap_id,');
     put('       TO_CHAR(sample_time, ''''YYYY-MM-DD HH24:MI'''') begin_time,'); 
     put('       TO_CHAR(sample_time, ''''YYYY-MM-DD HH24:MI'''') end_time,');
-    put('       NVL(aas_01,0) "evt01_@tit_01." ,');
-    put('       NVL(aas_02,0) "evt02_@tit_02." ,');
-    put('       NVL(aas_03,0) "evt03_@tit_03." ,');
-    put('       NVL(aas_04,0) "evt04_@tit_04." ,');
-    put('       NVL(aas_05,0) "evt05_@tit_05." ,');
-    put('       NVL(aas_06,0) "evt06_@tit_06." ,');
-    put('       NVL(aas_07,0) "evt07_@tit_07." ,');
-    put('       NVL(aas_08,0) "evt08_@tit_08." ,');
-    put('       NVL(aas_09,0) "evt09_@tit_09." ,');
-    put('       NVL(aas_10,0) "evt10_@tit_10." ,');
-    put('       NVL(aas_11,0) "evt11_@tit_11." ,');
-    put('       NVL(aas_12,0) "evt12_@tit_12." ,');
-    put('       NVL(aas_13,0) "evt13_@tit_13." ,');
-    put('       NVL(aas_14,0) "evt14_@tit_14." ,');
-    put('       NVL(aas_15,0) "evt15_@tit_15." ');
+    put('       NVL(aas_01,0) "e01@tit_01." ,');
+    put('       NVL(aas_02,0) "e02@tit_02." ,');
+    put('       NVL(aas_03,0) "e03@tit_03." ,');
+    put('       NVL(aas_04,0) "e04@tit_04." ,');
+    put('       NVL(aas_05,0) "e05@tit_05." ,');
+    put('       NVL(aas_06,0) "e06@tit_06." ,');
+    put('       NVL(aas_07,0) "e07@tit_07." ,');
+    put('       NVL(aas_08,0) "e08@tit_08." ,');
+    put('       NVL(aas_09,0) "e09@tit_09." ,');
+    put('       NVL(aas_10,0) "e10@tit_10." ,');
+    put('       NVL(aas_11,0) "e11@tit_11." ,');
+    put('       NVL(aas_12,0) "e12@tit_12." ,');
+    put('       NVL(aas_13,0) "e13@tit_13." ,');
+    put('       NVL(aas_14,0) "e14@tit_14." ,');
+    put('       NVL(aas_15,0) "e15@tit_15." ');
     put('  FROM (SELECT sample_time,');
     put('               MAX(CASE WHEN cpu_or_event  = ''''@evt_01.'''' THEN aas ELSE NULL END) aas_01,'); 
     put('               MAX(CASE WHEN cpu_or_event  = ''''@evt_02.'''' THEN aas ELSE NULL END) aas_02,'); 
@@ -1008,7 +1008,7 @@ BEGIN
     put('/ ');
 
     put('SET DEF &');
-    put('@sql/sqld360_9a_pre_one.sql');	
+    put('@sql/sqld360_9a_pre_one.sql');
 
     put('COL evt01_ PRI');
     put('COL evt02_ PRI');
@@ -1039,7 +1039,7 @@ BEGIN
     -- this looks confusing but it actually has a reason :-)
     -- tit_n is used to show / hide the column in the chart (in case of nulls)
     -- evt_n is used as filter value (populated dynamically)
-    -- evtn  is used to hosw / hide the column in the resultset (in case of nulls)
+    -- eN  is used to hosw / hide the column in the resultset (in case of nulls)
 
     put('COL evt_01 NEW_V evt_01'); 
     put('COL evt_02 NEW_V evt_02'); 
@@ -1101,60 +1101,60 @@ BEGIN
 
     put('SET DEF @');
 
-    put('SELECT ''@evt_01.'' tit_01,'); 
-    put('       ''@evt_02.'' tit_02,');
-    put('       ''@evt_03.'' tit_03,');
-    put('       ''@evt_04.'' tit_04,');
-    put('       ''@evt_05.'' tit_05,');
-    put('       ''@evt_06.'' tit_06,');
-    put('       ''@evt_07.'' tit_07,');
-    put('       ''@evt_08.'' tit_08,');
-    put('       ''@evt_09.'' tit_09,');
-    put('       ''@evt_10.'' tit_10,'); 
-    put('       ''@evt_11.'' tit_11,');
-    put('       ''@evt_12.'' tit_12,');
-    put('       ''@evt_13.'' tit_13,');
-    put('       ''@evt_14.'' tit_14,');
-    put('       ''@evt_15.'' tit_15');
+    put('SELECT SUBSTR(''@evt_01.'',1,27) tit_01,'); 
+    put('       SUBSTR(''@evt_02.'',1,27) tit_02,');
+    put('       SUBSTR(''@evt_03.'',1,27) tit_03,');
+    put('       SUBSTR(''@evt_04.'',1,27) tit_04,');
+    put('       SUBSTR(''@evt_05.'',1,27) tit_05,');
+    put('       SUBSTR(''@evt_06.'',1,27) tit_06,');
+    put('       SUBSTR(''@evt_07.'',1,27) tit_07,');
+    put('       SUBSTR(''@evt_08.'',1,27) tit_08,');
+    put('       SUBSTR(''@evt_09.'',1,27) tit_09,');
+    put('       SUBSTR(''@evt_10.'',1,27) tit_10,'); 
+    put('       SUBSTR(''@evt_11.'',1,27) tit_11,');
+    put('       SUBSTR(''@evt_12.'',1,27) tit_12,');
+    put('       SUBSTR(''@evt_13.'',1,27) tit_13,');
+    put('       SUBSTR(''@evt_14.'',1,27) tit_14,');
+    put('       SUBSTR(''@evt_15.'',1,27) tit_15');
     put('  FROM DUAL');
     put('/');
 
-    put('COL evt01_ NOPRI');
-    put('COL evt02_ NOPRI');
-    put('COL evt03_ NOPRI');
-    put('COL evt04_ NOPRI');
-    put('COL evt05_ NOPRI');
-    put('COL evt06_ NOPRI');
-    put('COL evt07_ NOPRI');
-    put('COL evt08_ NOPRI');
-    put('COL evt09_ NOPRI');
-    put('COL evt10_ NOPRI');
-    put('COL evt11_ NOPRI');
-    put('COL evt12_ NOPRI');
-    put('COL evt13_ NOPRI');
-    put('COL evt14_ NOPRI');
-    put('COL evt15_ NOPRI');
+    put('COL e01 NOPRI');
+    put('COL e02 NOPRI');
+    put('COL e03 NOPRI');
+    put('COL e04 NOPRI');
+    put('COL e05 NOPRI');
+    put('COL e06 NOPRI');
+    put('COL e07 NOPRI');
+    put('COL e08 NOPRI');
+    put('COL e09 NOPRI');
+    put('COL e10 NOPRI');
+    put('COL e11 NOPRI');
+    put('COL e12 NOPRI');
+    put('COL e13 NOPRI');
+    put('COL e14 NOPRI');
+    put('COL e15 NOPRI');
 
     put('BEGIN');
     put(' :sql_text := ''');
     put('SELECT 0 snap_id,');
     put('       TO_CHAR(sample_time, ''''YYYY-MM-DD HH24:MI'''') begin_time,'); 
     put('       TO_CHAR(sample_time, ''''YYYY-MM-DD HH24:MI'''') end_time,');
-    put('       NVL(aas_01,0) "evt01_@tit_01." ,');
-    put('       NVL(aas_02,0) "evt02_@tit_02." ,');
-    put('       NVL(aas_03,0) "evt03_@tit_03." ,');
-    put('       NVL(aas_04,0) "evt04_@tit_04." ,');
-    put('       NVL(aas_05,0) "evt05_@tit_05." ,');
-    put('       NVL(aas_06,0) "evt06_@tit_06." ,');
-    put('       NVL(aas_07,0) "evt07_@tit_07." ,');
-    put('       NVL(aas_08,0) "evt08_@tit_08." ,');
-    put('       NVL(aas_09,0) "evt09_@tit_09." ,');
-    put('       NVL(aas_10,0) "evt10_@tit_10." ,');
-    put('       NVL(aas_11,0) "evt11_@tit_11." ,');
-    put('       NVL(aas_12,0) "evt12_@tit_12." ,');
-    put('       NVL(aas_13,0) "evt13_@tit_13." ,');
-    put('       NVL(aas_14,0) "evt14_@tit_14." ,');
-    put('       NVL(aas_15,0) "evt15_@tit_15." ');
+    put('       NVL(aas_01,0) "e01@tit_01." ,');
+    put('       NVL(aas_02,0) "e02@tit_02." ,');
+    put('       NVL(aas_03,0) "e03@tit_03." ,');
+    put('       NVL(aas_04,0) "e04@tit_04." ,');
+    put('       NVL(aas_05,0) "e05@tit_05." ,');
+    put('       NVL(aas_06,0) "e06@tit_06." ,');
+    put('       NVL(aas_07,0) "e07@tit_07." ,');
+    put('       NVL(aas_08,0) "e08@tit_08." ,');
+    put('       NVL(aas_09,0) "e09@tit_09." ,');
+    put('       NVL(aas_10,0) "e10@tit_10." ,');
+    put('       NVL(aas_11,0) "e11@tit_11." ,');
+    put('       NVL(aas_12,0) "e12@tit_12." ,');
+    put('       NVL(aas_13,0) "e13@tit_13." ,');
+    put('       NVL(aas_14,0) "e14@tit_14." ,');
+    put('       NVL(aas_15,0) "e15@tit_15." ');
     put('  FROM (SELECT sample_time,');
     put('               MAX(CASE WHEN cpu_or_event  = ''''@evt_01.'''' THEN aas ELSE NULL END) aas_01,'); 
     put('               MAX(CASE WHEN cpu_or_event  = ''''@evt_02.'''' THEN aas ELSE NULL END) aas_02,'); 
@@ -1194,7 +1194,7 @@ BEGIN
     put('/ ');
 
     put('SET DEF &');
-    put('@sql/sqld360_9a_pre_one.sql');	
+    put('@sql/sqld360_9a_pre_one.sql');
 
     put('COL evt01_ PRI');
     put('COL evt02_ PRI');

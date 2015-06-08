@@ -71,8 +71,8 @@ SELECT /*+ &&top_level_hints. */
        * 
   FROM dba_sql_plan_directives
  WHERE directive_id IN (SELECT directive_id
-	                  FROM dba_sql_plan_dir_objects
-			 WHERE (owner, object_name) in &&tables_list.) 
+                          FROM dba_sql_plan_dir_objects
+                         WHERE (owner, object_name) in &&tables_list.) 
  ORDER BY directive_id
 ';
 END;
