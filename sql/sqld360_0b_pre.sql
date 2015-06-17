@@ -9,8 +9,8 @@ CL COL;
 COL row_num FOR 9999999 HEA '#' PRI;
 
 -- version
-DEF sqld360_vYYNN = 'v1516';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-06-08)';
+DEF sqld360_vYYNN = 'v1517';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-06-17)';
 DEF sqld360_prefix = 'sqld360';
 
 -- get dbid
@@ -284,6 +284,10 @@ SELECT CASE '&&sqld360_conf_incl_stats_h.' WHEN 'N' THEN '--' END sqld360_skip_s
 
 COL sqld360_skip_tcb NEW_V sqld360_skip_tcb;
 SELECT CASE '&&sqld360_conf_incl_tcb.' WHEN 'N' THEN '--' END sqld360_skip_tcb FROM DUAL;
+
+COL sqld360_tcb_exp_data NEW_V sqld360_tcb_exp_data;
+COL sqld360_tcb_exp_sample NEW_V sqld360_tcb_exp_sample;
+SELECT CASE '&&sqld360_conf_tcb_sample.' WHEN '0' THEN 'FALSE' ELSE 'TRUE' END sqld360_tcb_exp_data, LEAST(TO_NUMBER('&&sqld360_conf_tcb_sample.'),100) sqld360_tcb_exp_sample FROM dual;
 
 -- setup
 DEF sql_trace_level = '1';

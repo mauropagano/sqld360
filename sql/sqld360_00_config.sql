@@ -37,6 +37,9 @@ DEF sqld360_conf_incl_stats_h = 'Y';
 -- include/exclude Testcase Builder (only for standalone execs, always skipped for eDB360 execs) 
 DEF sqld360_conf_incl_tcb = 'Y';
 
+-- TCB data, sampling percentage, 0 means no data, any other value below 100 is ok (only for standalone execs, always skipped for eDB360 execs) 
+DEF sqld360_conf_tcb_sample = '0';
+
 -- include/exclude translate min/max/histograms endpoint values
 DEF sqld360_conf_translate_lowhigh = 'Y';
 

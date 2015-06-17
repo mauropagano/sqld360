@@ -121,12 +121,16 @@ DEF main_table = 'DBA_HIST_SQLSTAT';
 BEGIN
   :sql_text := '
 SELECT /*+ &&top_level_hints. */
-       *
-  FROM dba_hist_sqlstat
- WHERE sql_id = ''&&sqld360_sqlid.''
+       sn.begin_interval_time, sn.end_interval_time,
+       s.*
+  FROM dba_hist_sqlstat s,
+       dba_hist_snapshot sn
+ WHERE s.snap_id = sn.snap_id
+   AND s.instance_number = sn.instance_number
+   AND s.sql_id = ''&&sqld360_sqlid.''
    AND ''&&diagnostics_pack.'' = ''Y''
-   AND snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id. 
- ORDER BY snap_id desc, instance_number, plan_hash_value
+   AND s.snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id. 
+ ORDER BY s.snap_id desc, s.instance_number, s.plan_hash_value
 ';
 END;
 /

@@ -1392,7 +1392,7 @@ SELECT NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INS
        MIN(cost) plan_hash_value,
        COUNT(DISTINCT position||''-''||cpu_cost||''-''||io_cost) num_processes,
        MAX(TRUNC(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,10)+1,INSTR(partition_stop,'','',1,11)-INSTR(partition_stop,'','',1,10)-1)) / 2097152)) max_px_degree,
-       1+86400*(MAX(timestamp)-MIN(timestamp)) elapsed_time,
+       LEAST(1+86400*(MAX(timestamp)-MIN(timestamp)),COUNT(*)) elapsed_time,
        SUM(CASE WHEN object_node = ''ON CPU'' THEN 1 ELSE 0 END) cpu_time,
        COUNT(*) db_time
   FROM plan_table
@@ -1483,7 +1483,7 @@ SELECT NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INS
        MIN(cost) plan_hash_value,
        COUNT(DISTINCT position||''-''||cpu_cost||''-''||io_cost) num_processes,
        MAX(TRUNC(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,10)+1,INSTR(partition_stop,'','',1,11)-INSTR(partition_stop,'','',1,10)-1)) / 2097152)) max_px_degree,
-       10+86400*(MAX(timestamp)-MIN(timestamp)) elapsed_time, 
+       LEAST(10+86400*(MAX(timestamp)-MIN(timestamp)),SUM(10)) elapsed_time, 
        SUM(CASE WHEN object_node = ''ON CPU'' THEN 10 ELSE 0 END) cpu_time,
        SUM(10) db_time
   FROM plan_table

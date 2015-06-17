@@ -40,11 +40,13 @@ SET TIMI ON;
 SET SERVEROUT ON;
 BEGIN
   DBMS_SQLDIAG.EXPORT_SQL_TESTCASE(
-      directory     => :tcb_dir,
-      sql_text      => :sqld360_fullsql,
-      user_name     => :tc_user,
-      testcase_name => 'sqld360_&&sqld360_sqlid.',
-      testcase      => :tc
+      directory       => :tcb_dir,
+      sql_text        => :sqld360_fullsql,
+      user_name       => :tc_user,
+      testcase_name   => 'sqld360_&&sqld360_sqlid.',
+      exportData      => &&sqld360_tcb_exp_data.,
+      samplingPercent => &&sqld360_tcb_exp_sample.,
+      testcase        => :tc
   );
 END;
 /

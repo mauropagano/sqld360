@@ -106,6 +106,23 @@ END;
 @@sqld360_9a_pre_one.sql
 
 
+DEF title = 'Columns Usage';
+DEF main_table = 'COL_USAGE$';
+BEGIN
+  :sql_text := '
+SELECT o.object_name, cu.*
+  FROM sys.col_usage$ cu,
+       dba_objects o
+ WHERE cu.obj# = o.object_id
+   AND o.object_type = ''TABLE''
+   AND (o.owner, o.object_name) IN &&tables_list.
+ ORDER BY o.object_name, cu.intcol#
+';
+END;
+/
+@@sqld360_9a_pre_one.sql
+
+
 -- find if there are histograms 
 COL num_histograms NEW_V num_histograms
 SELECT TRIM(TO_CHAR(COUNT(DISTINCT owner||'.'||table_name))) num_histograms 

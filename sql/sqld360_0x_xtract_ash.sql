@@ -151,12 +151,12 @@ BEGIN
   
 END;
 /
-  
+
+SELECT COUNT(*)||' rows extracted.' FROM plan_table WHERE statement_id LIKE 'SQLD360_ASH_DATA%' AND remarks = '&&sqld360_sqlid.';  
 SELECT TO_CHAR(SYSDATE, 'YYYY-MM-DD/HH24:MI:SS') sqld360_time_stamp FROM DUAL;
 SELECT TO_CHAR(SYSDATE, 'HH24:MI:SS') hh_mm_ss FROM DUAL;  
 
 PRO Done exctrating ASH data
-PRO &&hh_mm_ss.
 PRO
 PRO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 PRO
