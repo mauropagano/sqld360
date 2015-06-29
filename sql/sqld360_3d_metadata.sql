@@ -36,7 +36,7 @@ BEGIN
 &&skip_10g.&&skip_11r1.      AND hash_value IN (SELECT to_hash
 &&skip_10g.&&skip_11r1.                           FROM v$object_dependency
 &&skip_10g.&&skip_11r1.                          WHERE from_hash IN (SELECT hash_value
-&&skip_10g.&&skip_11r1.                                                FROM v$sql
+&&skip_10g.&&skip_11r1.                                                FROM v$sqlarea
 &&skip_10g.&&skip_11r1.                                               WHERE sql_id = '&&sqld360_sqlid.'))
                   )
             WHERE object_owner NOT IN ('ANONYMOUS','APEX_030200','APEX_040000','APEX_SSO','APPQOSSYS','CTXSYS','DBSNMP','DIP','EXFSYS','FLOWS_FILES',

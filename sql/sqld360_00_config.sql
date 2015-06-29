@@ -34,6 +34,9 @@ DEF sqld360_conf_incl_rawash = 'Y';
 -- include/exclude stats history (always on by default, turned off only by eDB180) 
 DEF sqld360_conf_incl_stats_h = 'Y';
 
+-- include/exclude search for FORCE MATCHING SQLs (only for standalone execs, always skipped for eDB360 execs) 
+DEF sqld360_conf_incl_fmatch = 'Y';
+
 -- include/exclude Testcase Builder (only for standalone execs, always skipped for eDB360 execs) 
 DEF sqld360_conf_incl_tcb = 'Y';
 

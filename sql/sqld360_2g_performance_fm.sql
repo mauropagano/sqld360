@@ -58,7 +58,7 @@ SELECT /*+ &&top_level_hints. */
        *
   FROM gv$sql_plan_statistics_all
  WHERE sql_id IN (SELECT sql_id 
-                    FROM gv$sql 
+                    FROM gv$sqlarea 
                    WHERE force_matching_signature = TRIM(''&&force_matching_signature.'')
                      AND sql_id <> ''&&sqld360_sqlid.'')
  ORDER BY inst_id, sql_id, plan_hash_value, child_number, id

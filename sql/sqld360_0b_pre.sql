@@ -9,7 +9,7 @@ CL COL;
 COL row_num FOR 9999999 HEA '#' PRI;
 
 -- version
-DEF sqld360_vYYNN = 'v1517';
+DEF sqld360_vYYNN = 'v1518';
 DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-06-17)';
 DEF sqld360_prefix = 'sqld360';
 
@@ -281,6 +281,9 @@ SELECT CASE '&&sqld360_conf_incl_rawash.' WHEN 'N' THEN '--' END sqld360_skip_ra
 
 COL sqld360_skip_stats_h NEW_V sqld360_skip_stats_h;
 SELECT CASE '&&sqld360_conf_incl_stats_h.' WHEN 'N' THEN '--' END sqld360_skip_stats_h FROM DUAL;
+
+COL sqld360_skip_fmatch NEW_V sqld360_skip_fmatch;
+SELECT CASE '&&sqld360_conf_incl_fmatch.' WHEN 'N' THEN '--' END sqld360_skip_fmatch FROM DUAL;
 
 COL sqld360_skip_tcb NEW_V sqld360_skip_tcb;
 SELECT CASE '&&sqld360_conf_incl_tcb.' WHEN 'N' THEN '--' END sqld360_skip_tcb FROM DUAL;

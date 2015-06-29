@@ -233,6 +233,36 @@ END;
 @@sqld360_9a_pre_one.sql
 
 
+DEF title = 'Triggers';
+DEF main_table = 'DBA_TRIGGERS';
+BEGIN
+  :sql_text := '
+SELECT /*+ &&top_level_hints. */
+       *
+  FROM dba_triggers
+ WHERE (table_owner, table_name) in &&tables_list.
+ ORDER BY table_owner, table_name, trigger_name
+';
+END;
+/
+@@sqld360_9a_pre_one.sql
+
+
+DEF title = 'Policies';
+DEF main_table = 'DBA_POLICIES';
+BEGIN
+  :sql_text := '
+SELECT /*+ &&top_level_hints. */
+       *
+  FROM dba_policies
+ WHERE (object_owner, object_name) in &&tables_list.
+ ORDER BY object_owner, object_name, policy_group, policy_name
+';
+END;
+/
+@@sqld360_9a_pre_one.sql
+
+
 DEF title = 'Segments';
 DEF main_table = 'DBA_SEGMENTS';
 BEGIN

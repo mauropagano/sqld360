@@ -57,9 +57,19 @@ BEGIN
            AND pt.remarks = '&&sqld360_sqlid.'
            AND pt.object_instance > 0
            AND o.object_id = pt.object_instance
+&&skip_10g.&&skip_11r1.   UNION 
+&&skip_10g.&&skip_11r1.   SELECT SUBSTR(owner,1,30) object_owner, SUBSTR(name,1,30) object_name
+&&skip_10g.&&skip_11r1.     FROM v$db_object_cache -- it's intentional here to use V$ instead of GV$ to keep the plan easy 
+&&skip_10g.&&skip_11r1.    WHERE type = 'TABLE' 
+&&skip_10g.&&skip_11r1.      AND hash_value IN (SELECT to_hash
+&&skip_10g.&&skip_11r1.                           FROM v$object_dependency
+&&skip_10g.&&skip_11r1.                          WHERE from_hash IN (SELECT hash_value
+&&skip_10g.&&skip_11r1.                                                FROM v$sqlarea
+&&skip_10g.&&skip_11r1.                                               WHERE sql_id = '&&sqld360_sqlid.'))
         )
         SELECT 'TABLE', t.owner, t.table_name
-          FROM dba_tab_statistics t, -- include fixed objects
+          FROM dba_tables t,
+               --dba_tab_statistics t, -- include fixed objects
                object o
          WHERE t.owner = o.owner
            AND t.table_name = o.name

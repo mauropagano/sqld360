@@ -47,7 +47,7 @@ SPO OFF;
 @@sqld360_2a_plans.sql
 @@sqld360_2e_plan_control.sql
 @@sqld360_2b_performance.sql
-@@&&skip_force_match.sqld360_2g_performance_fm.sql
+@@&&from_edb360.&&skip_force_match.&&sqld360_skip_fmatch.sqld360_2g_performance_fm.sql
 @@&&skip_tuning.&&skip_10g.sqld360_2h_sql_monitor.sql
 @@sqld360_2c_binds.sql
 @@sqld360_2d_cursor_sharing.sql
