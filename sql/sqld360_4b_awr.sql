@@ -312,3 +312,149 @@ EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '8');
 
 DEF skip_lch = 'Y';
 DEF skip_pch = 'Y';
+
+------------------------------------
+------------------------------------
+
+DEF chartype = 'LineChart';
+DEF stacked = '';
+DEF tit_01 = 'Version Count';
+DEF tit_02 = '';
+DEF tit_03 = '';
+DEF tit_04 = '';
+DEF tit_05 = '';
+DEF tit_06 = '';
+DEF tit_07 = '';
+DEF tit_08 = '';
+DEF tit_09 = '';
+DEF tit_10 = '';
+DEF tit_11 = '';
+DEF tit_12 = '';
+DEF tit_13 = '';
+DEF tit_14 = '';
+DEF tit_15 = '';
+
+DEF main_table = 'DBA_HIST_SQLSTAT';
+DEF vaxis = 'Number of Versions';
+DEF vbaseline = '';
+BEGIN
+  :sql_text_backup := '
+SELECT MIN(a.snap_id) snap_id, 
+       TO_CHAR(a.begin_interval_time, ''YYYY-MM-DD HH24:MI'')  begin_time, 
+       TO_CHAR(a.end_interval_time, ''YYYY-MM-DD HH24:MI'')  end_time,
+       SUM(NVL(b.version_count,0)) version_count,
+       0 dummy_02, 
+       0 dummy_03,
+       0 dummy_04,
+       0 dummy_05,
+       0 dummy_06,
+       0 dummy_07,
+       0 dummy_08,
+       0 dummy_09,
+       0 dummy_10,
+       0 dummy_11,
+       0 dummy_12,
+       0 dummy_13,
+       0 dummy_14,
+       0 dummy_15
+  FROM (SELECT snap_id, instance_number, version_count
+          FROM dba_hist_sqlstat
+         WHERE sql_id = ''&&sqld360_sqlid.'') b,
+       (SELECT snap_id, instance_number, begin_interval_time, end_interval_time
+          FROM dba_hist_snapshot
+         WHERE snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.) a
+ WHERE a.snap_id = b.snap_id(+)
+   AND a.instance_number = b.instance_number(+)
+   AND ''&&diagnostics_pack.'' = ''Y''
+   AND a.instance_number = @instance_number@
+ GROUP BY
+       TO_CHAR(a.begin_interval_time, ''YYYY-MM-DD HH24:MI''), 
+       TO_CHAR(a.end_interval_time, ''YYYY-MM-DD HH24:MI'')
+ ORDER BY
+       TO_CHAR(a.end_interval_time, ''YYYY-MM-DD HH24:MI'')
+';
+END;
+/
+
+DEF skip_lch = '';
+DEF skip_all = '&&is_single_instance.';
+DEF title = 'Number of Child Cursors for Cluster';
+DEF abstract = 'Number of Child Cursors'
+DEF foot = 'SQL Execute Elapsed Time'
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', 'a.instance_number');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = '';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 1;
+DEF title = 'Number of Child Cursors for Instance 1';
+DEF abstract = 'Number of Child Cursors'
+DEF foot = 'Number of Child Cursors'
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '1');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = '';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 2;
+DEF title = 'Number of Child Cursors for Instance 2';
+DEF abstract = 'Number of Child Cursors'
+DEF foot = 'Number of Child Cursors'
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '2');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = '';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 3;
+DEF title = 'Number of Child Cursors for Instance 3';
+DEF abstract = 'Number of Child Cursors'
+DEF foot = 'Number of Child Cursors'
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '3');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = '';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 4;
+DEF title = 'Number of Child Cursors for Instance 4';
+DEF abstract = 'Number of Child Cursors'
+DEF foot = 'Number of Child Cursors'
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '4');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = '';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 5;
+DEF title = 'Number of Child Cursors for Instance 5';
+DEF abstract = 'Number of Child Cursors'
+DEF foot = 'Number of Child Cursors'
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '5');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = '';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 6;
+DEF title = 'Number of Child Cursors for Instance 6';
+DEF abstract = 'Number of Child Cursors'
+DEF foot = 'Number of Child Cursors'
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '6');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = '';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 7;
+DEF title = 'Number of Child Cursors for Instance 7';
+DEF abstract = 'Number of Child Cursors'
+DEF foot = 'Number of Child Cursors'
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '7');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = '';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 8;
+DEF title = 'Number of Child Cursors for Instance 8';
+DEF abstract = 'Number of Child Cursors'
+DEF foot = 'Number of Child Cursors'
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '8');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = 'Y';
+DEF skip_pch = 'Y';

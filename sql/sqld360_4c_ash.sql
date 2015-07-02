@@ -1555,3 +1555,170 @@ DEF title = 'Elapsed Time per historical execs for Instance 8';
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '8');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
 
+
+------------------------------------------------
+------------------------------------------------
+
+
+DEF main_table = 'V$ACTIVE_SESSION_HISTORY';
+DEF abstract = 'Streak of non-executing SQL for recent execs, in seconds, rounded to the 1 second';
+DEF foot = 'Usually refer to parsing SQL, data rounded to the 1 second';
+DEF skip_lch = 'Y';
+
+BEGIN
+  :sql_text_backup := '
+SELECT inst_id, session_id, session_serial#, MIN(sample_time) streak_start, MAX(sample_time) streak_end, COUNT(*) streak_num_samples
+  FROM (SELECT inst_id, session_id, session_serial#, sample_time, nvl(start_of_streak, 
+               MAX(start_of_streak) OVER (PARTITION BY inst_id, session_id, session_serial# ORDER BY sample_time ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING)) start_of_streak
+          FROM (SELECT inst_id, session_id, session_serial#, sample_time, 
+                       CASE WHEN diff_in_sample IS NULL OR diff_in_sample > 1 THEN sample_time ELSE NULL END start_of_streak
+                  FROM (SELECT position inst_id, cpu_cost session_id, io_cost session_serial#, timestamp sample_time, 
+                               TRUNC((timestamp-LAG(timestamp) OVER (PARTITION BY position, cpu_cost, io_cost ORDER BY timestamp))*86400) diff_in_sample
+                          FROM plan_table
+                         WHERE remarks = ''&&sqld360_sqlid.''
+                           AND statement_id = ''SQLD360_ASH_DATA_MEM''
+                           AND ''&&diagnostics_pack.'' = ''Y''
+                           AND position =  @instance_number@
+                           AND partition_id IS NULL)))
+ GROUP BY inst_id, session_id, session_serial#, start_of_streak 
+ ORDER BY start_of_streak, inst_id, session_id, session_serial#      
+';
+END;
+/
+
+DEF skip_all = '&&is_single_instance.';
+DEF title = 'Streak of non-executing SQL for recent execs for Cluster';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', 'position');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 1;
+DEF title = 'Streak of non-executing SQL for recent execs for Instance 1';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '1');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 2;
+DEF title = 'Streak of non-executing SQL for recent execs for Instance 2';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '2');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 3;
+DEF title = 'Streak of non-executing SQL for recent execs for Instance 3';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '3');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 4;
+DEF title = 'Streak of non-executing SQL for recent execs for Instance 4';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '4');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 5;
+DEF title = 'Streak of non-executing SQL for recent execs for Instance 5';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '5');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 6;
+DEF title = 'Streak of non-executing SQL for recent execs for Instance 6';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '6');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 7;
+DEF title = 'Streak of non-executing SQL for recent execs for Instance 7';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '7');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 8;
+DEF title = 'Streak of non-executing SQL for recent execs for Instance 8';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '8');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+
+-----------------------------------------
+-----------------------------------------
+
+
+DEF main_table = 'DBA_HIST_ACTIVE_SESS_HISTORY';
+DEF abstract = 'Streak of non-executing SQL for historical execs, in seconds, rounded to the 1 second';
+DEF foot = 'Usually refer to parsing SQL, data rounded to the 1 second';
+DEF skip_lch = 'Y';
+
+BEGIN
+  :sql_text_backup := '
+SELECT inst_id, session_id, session_serial#, MIN(sample_time) streak_start, MAX(sample_time) streak_end, COUNT(*) streak_num_samples
+  FROM (SELECT inst_id, session_id, session_serial#, sample_time, nvl(start_of_streak, 
+               MAX(start_of_streak) OVER (PARTITION BY inst_id, session_id, session_serial# ORDER BY sample_time ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING)) start_of_streak
+          FROM (SELECT inst_id, session_id, session_serial#, sample_time, 
+                       CASE WHEN diff_in_sample IS NULL OR diff_in_sample > 10 THEN sample_time ELSE NULL END start_of_streak
+                  FROM (SELECT position inst_id, cpu_cost session_id, io_cost session_serial#, timestamp sample_time, 
+                               TRUNC((timestamp-LAG(timestamp) OVER (PARTITION BY position, cpu_cost, io_cost ORDER BY timestamp))*86400) diff_in_sample
+                          FROM plan_table
+                         WHERE remarks = ''&&sqld360_sqlid.''
+                           AND statement_id = ''SQLD360_ASH_DATA_HIST''
+                           AND ''&&diagnostics_pack.'' = ''Y''
+                           AND position =  @instance_number@
+                           AND partition_id IS NULL)))
+ GROUP BY inst_id, session_id, session_serial#, start_of_streak 
+ ORDER BY start_of_streak, inst_id, session_id, session_serial#      
+';
+END;
+/
+
+DEF skip_all = '&&is_single_instance.';
+DEF title = 'Streak of non-executing SQL for historical execs for Cluster';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', 'position');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 1;
+DEF title = 'Streak of non-executing SQL for historical execs for Instance 1';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '1');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 2;
+DEF title = 'Streak of non-executing SQL for historical execs for Instance 2';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '2');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 3;
+DEF title = 'Streak of non-executing SQL for historical execs for Instance 3';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '3');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 4;
+DEF title = 'Streak of non-executing SQL for historical execs for Instance 4';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '4');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 5;
+DEF title = 'Streak of non-executing SQL for historical execs for Instance 5';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '5');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 6;
+DEF title = 'Streak of non-executing SQL for historical execs for Instance 6';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '6');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 7;
+DEF title = 'Streak of non-executing SQL for historical execs for Instance 7';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '7');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 8;
+DEF title = 'Streak of non-executing SQL for recent execs for Instance 8';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '8');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
