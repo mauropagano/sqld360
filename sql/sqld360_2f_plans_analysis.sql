@@ -2,7 +2,7 @@ SPO &&one_spool_filename..html APP;
 PRO </head>
 @sql/sqld360_0d_html_header.sql
 PRO <body>
-PRO <h1><a href="http://www.enkitec.com" target="_blank">Enkitec</a>: SQL 360-degree view <em>(<a href="http://www.enkitec.com/products/sqld360" target="_blank">SQLd360</a>)</em> &&sqld360_vYYNN. - Plans Details Page</h1>
+PRO <h1><em>&&sqld360_conf_tool_page.SQLd360</a></em> &&sqld360_vYYNN.: SQL 360-degree view - Plans Details Page &&sqld360_conf_all_pages_logo.</h1>
 PRO
 PRO <pre>
 PRO sqlid:&&sqld360_sqlid. dbname:&&database_name_short. version:&&db_version. host:&&host_name_short. license:&&license_pack. days:&&history_days. today:&&sqld360_time_stamp.

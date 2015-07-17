@@ -94,3 +94,22 @@ END;
 /
 @@&&skip_10g.&&skip_11g.sqld360_9a_pre_one.sql
 
+
+COL ADDRESS NOPRI
+
+DEF title = 'SQL ReOptimization Hints';
+DEF main_table = 'GV$SQL_REOPTIMIZATION_HINTS';
+BEGIN
+  :sql_text := '
+SELECT /*+ &&top_level_hints. */
+       * 
+  FROM gv$sql_reoptimization_hints
+ WHERE sql_id = ''&&sqld360_sqlid.'' 
+ ORDER BY inst_id, child_number, hint_id
+';
+END;
+/
+@@&&skip_10g.&&skip_11g.sqld360_9a_pre_one.sql
+
+COL ADDRESS PRI
+

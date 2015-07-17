@@ -12,14 +12,7 @@ PRO <td class="c">3/&&max_col_number.</td>
 PRO <td class="c">4/&&max_col_number.</td>
 PRO <td class="c">5/&&max_col_number.</td>
 PRO </tr><tr class="main"><td>
-PRO <img src="SQLd360_img.jpg" alt="SQLd360" height="102" width="165"
-PRO title="SQLd360 is a free tool that provides a 360-degree view of a SQL statement. 
-PRO Its output can be used for SQL tuning or to just collect a baseline for a critical statement.
-PRO
-PRO With SQLd360, a user with limited access can acquire a good understanding of a SQL statement 
-PRO without having to log into the server directly. 
-PRO This capability is of great value to developers, system administrators, 3rd party consultants, 
-PRO or any remote user with restricted access.">
+PRO &&sqld360_conf_tool_page.<img src="SQLd360_img.jpg" alt="SQLd360" height="102" width="165"></a>
 PRO <br>
 PRO
 SPO OFF;

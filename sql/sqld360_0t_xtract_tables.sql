@@ -53,7 +53,7 @@ BEGIN
           FROM plan_table pt,
                dba_objects o
          WHERE '&&diagnostics_pack.' = 'Y'
-           AND pt.statement_id = 'SQLD360_ASH_DATA'
+           AND pt.statement_id LIKE 'SQLD360_ASH_DATA%'
            AND pt.remarks = '&&sqld360_sqlid.'
            AND pt.object_instance > 0
            AND o.object_id = pt.object_instance

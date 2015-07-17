@@ -4,6 +4,7 @@ PRO <!-- Copyright&&sqld360_copyright., All rights reserved. -->
 PRO <!-- Author: mauro.pagano@gmail.com -->
 PRO
 PRO <head>
+PRO <link rel="icon" href="SQLd360_favicon.ico">
 PRO <title>&&title.&&title_suffix.</title>
 PRO
 PRO <style type="text/css">

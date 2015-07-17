@@ -24,7 +24,7 @@ SPO &&one_spool_filename._bar_chart.html;
 PRO <!-- &&one_spool_filename._bar_chart.html $ -->
 
 -- chart header
-PRO    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+PRO    &&sqld360_conf_google_charts.
 PRO    <script type="text/javascript">
 PRO      google.load("visualization", "1", {packages:["corechart"]});
 PRO      google.setOnLoadCallback(drawChart);
@@ -73,7 +73,7 @@ PRO      }
 PRO    </script>
 PRO  </head>
 PRO  <body>
-PRO<h1>&&title. <em>(&&main_table.)</em></h1>
+PRO <h1> &&sqld360_conf_all_pages_icon. &&title.&&title_suffix. <em>(&&main_table.)</em> &&sqld360_conf_all_pages_logo. </h1>
 PRO
 PRO <br>
 PRO &&abstract.

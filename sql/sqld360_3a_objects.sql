@@ -263,6 +263,22 @@ END;
 @@sqld360_9a_pre_one.sql
 
 
+DEF title = 'Audit Policies';
+DEF main_table = 'DBA_POLICIES';
+BEGIN
+  :sql_text := '
+SELECT /*+ &&top_level_hints. */
+       *
+  FROM dba_audit_policies
+ WHERE (object_schema, object_name) in &&tables_list.
+ ORDER BY object_schema, object_name, policy_owner, policy_name
+';
+END;
+/
+@@sqld360_9a_pre_one.sql
+
+
+
 DEF title = 'Segments';
 DEF main_table = 'DBA_SEGMENTS';
 BEGIN
