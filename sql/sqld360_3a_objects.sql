@@ -233,6 +233,24 @@ END;
 @@sqld360_9a_pre_one.sql
 
 
+DEF title = 'Table Stats Preferences';
+DEF main_table = 'OPTSTAT_USER_PREFS$';
+BEGIN
+  :sql_text := '
+SELECT /*+ &&top_level_hints. */
+       o.owner, o.object_name, pref.*
+  FROM sys.optstat_user_prefs$ pref,
+       dba_objects o
+ WHERE pref.obj# = o.object_id
+   AND o.object_type = ''TABLE''
+   AND (o.owner, o.object_name) IN &&tables_list.
+ ORDER BY o.owner, o.object_name, pref.pname
+';
+END;
+/
+@@sqld360_9a_pre_one.sql
+
+
 DEF title = 'Triggers';
 DEF main_table = 'DBA_TRIGGERS';
 BEGIN

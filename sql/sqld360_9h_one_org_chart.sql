@@ -64,6 +64,7 @@ PRO          title: '&&title.&&title_suffix.',
 PRO          titleTextStyle: {fontSize: 16, bold: false},
 PRO          legend: {position: 'none'},
 PRO          allowHtml:true,
+PRO          allowCollapse:true,
 PRO          tooltip: {textStyle: {fontSize: 14}}
 PRO        };
 PRO

@@ -9,8 +9,8 @@ CL COL;
 COL row_num FOR 9999999 HEA '#' PRI;
 
 -- version
-DEF sqld360_vYYNN = 'v1520';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-07-17)';
+DEF sqld360_vYYNN = 'v1521';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-08-05)';
 DEF sqld360_prefix = 'sqld360';
 
 -- get dbid
@@ -432,6 +432,10 @@ ALTER SESSION SET optimizer_dynamic_sampling = 2;
 ALTER SESSION SET "_always_semi_join" = CHOOSE;
 ALTER SESSION SET "_and_pruning_enabled" = TRUE;
 ALTER SESSION SET "_subquery_pruning_enabled" = TRUE;
+-- workaround fairpoint
+COL db_vers_ofe NEW_V db_vers_ofe;
+SELECT TRIM('.' FROM TRIM('0' FROM version)) db_vers_ofe FROM v$instance;
+ALTER SESSION SET optimizer_features_enable = '&&db_vers_ofe.';
 -- tracing script in case it takes long to execute so we can diagnose it
 ALTER SESSION SET MAX_DUMP_FILE_SIZE = '1G';
 ALTER SESSION SET TRACEFILE_IDENTIFIER = "&&sqld360_tracefile_identifier.";
