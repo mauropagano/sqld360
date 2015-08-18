@@ -253,8 +253,8 @@ DEF main_table = 'GV$SQL_PLAN'
 SET TERM OFF ECHO OFF 
 -- need to fix the file name for the partitions
 SPO &&sqld360_main_report..html APP;
-PRO <li>Plans Details <small><em>(&&num_plans.)</em></small> 
-PRO <a href="&&one_spool_filename..html">page</a>
+PRO <li>Plans Details 
+PRO <a href="&&one_spool_filename..html">page</a> <small><em>(&&num_plans.)</em></small> 
 PRO </li>
 SPO OFF;
 @@sqld360_2f_plans_analysis.sql

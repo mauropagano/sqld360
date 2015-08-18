@@ -40,7 +40,7 @@ SET HEA OFF;
 SET LIN 32767;
 PRINT sql_text_display;
 SET HEA ON;
-PRO &&row_count. rows selected.
+PRO &&row_num. rows selected.
 
 PRO 
 PRO &&sqld360_prefix.&&sqld360_copyright. Version &&sqld360_vrsn.. Report executed on &&sqld360_time_stamp. for database &&db_version. &&database_name_short. from host &&host_name_short..
@@ -54,7 +54,7 @@ SET HEA OFF;
 SPO &&sqld360_log2..txt APP;
 SELECT TO_CHAR(SYSDATE, 'YYYY-MM-DD HH24:MI:SS')||' , '||
        TO_CHAR((:get_time_t1 - :get_time_t0)/100, '999999990.00')||' , '||
-       :row_count||' , &&main_table. , &&title_no_spaces., text , &&one_spool_filename..txt'
+       '&&row_num. , &&main_table. , &&title_no_spaces., text , &&one_spool_filename..txt'
   FROM DUAL
 /
 SPO OFF;

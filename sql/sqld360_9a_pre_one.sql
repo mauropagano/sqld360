@@ -21,42 +21,46 @@ PRO &&hh_mm_ss. &&title.&&title_suffix.
 
 -- count
 PRINT sql_text;
-PRO &&hh_mm_ss. col:&&column_number.of&&max_col_number.. Computing COUNT(*)...
-EXEC :row_count := -1;
-EXEC :sql_text_display := TRIM(CHR(10) FROM :sql_text)||';';
-SET TIMI ON;
-SET SERVEROUT ON;
-BEGIN
-  --:sql_text_display := TRIM(CHR(10) FROM :sql_text)||';';
-  BEGIN
-    --EXECUTE IMMEDIATE 'SELECT COUNT(*) FROM ('||CHR(10)||TRIM(CHR(10) FROM :sql_text)||CHR(10)||')' INTO :row_count;
-    EXECUTE IMMEDIATE 'SELECT COUNT(*) FROM ('||CHR(10)||TRIM(CHR(10) FROM DBMS_LOB.SUBSTR(:sql_text, 32700, 1))||CHR(10)||')' INTO :row_count;
-  EXCEPTION
-    WHEN OTHERS THEN
-      DBMS_OUTPUT.PUT_LINE(DBMS_LOB.SUBSTR(SQLERRM));
-  END;
-  DBMS_OUTPUT.PUT_LINE(TRIM(TO_CHAR(:row_count))||' rows selected.'||CHR(10));
-END;
-/
-SET TIMI OFF;
-SET SERVEROUT OFF;
-PRO
+
 SET TERM OFF;
-COL row_count NEW_V row_count NOPRI;
-SELECT TRIM(TO_CHAR(:row_count)) row_count FROM DUAL;
+--PRO &&hh_mm_ss. col:&&column_number.of&&max_col_number.. Computing COUNT(*)...
+SELECT '0' row_num FROM DUAL;
+PRO &&hh_mm_ss. col:&&column_number.of&&max_col_number..
+--EXEC :row_count := -1;
+EXEC :sql_text_display := TRIM(CHR(10) FROM :sql_text)||';';
+--SET TIMI ON;
+--SET SERVEROUT ON;
+--BEGIN
+--  --:sql_text_display := TRIM(CHR(10) FROM :sql_text)||';';
+--  BEGIN
+--    --EXECUTE IMMEDIATE 'SELECT COUNT(*) FROM ('||CHR(10)||TRIM(CHR(10) FROM :sql_text)||CHR(10)||')' INTO :row_count;
+--    EXECUTE IMMEDIATE 'SELECT COUNT(*) FROM ('||CHR(10)||TRIM(CHR(10) FROM DBMS_LOB.SUBSTR(:sql_text, 32700, 1))||CHR(10)||')' INTO :row_count;
+--  EXCEPTION
+--    WHEN OTHERS THEN
+--      DBMS_OUTPUT.PUT_LINE(DBMS_LOB.SUBSTR(SQLERRM));
+--  END;
+--  DBMS_OUTPUT.PUT_LINE(TRIM(TO_CHAR(:row_count))||' rows selected.'||CHR(10));
+--END;
+--/
+--SET TIMI OFF;
+--SET SERVEROUT OFF;
+PRO
+--SET TERM OFF;
+--COL row_count NEW_V row_count NOPRI;
+--SELECT TRIM(TO_CHAR(:row_count)) row_count FROM DUAL;
 SPO OFF;
 HOS zip -q &&sqld360_main_filename._&&sqld360_file_time. &&sqld360_log..txt
 
 -- spools query
 SPO &&common_sqld360_prefix._query.sql;
-SELECT 'SELECT ROWNUM row_num, v0.* FROM ('||CHR(10)||TRIM(CHR(10) FROM :sql_text)||CHR(10)||') v0 WHERE ROWNUM <= &&max_rows.' FROM DUAL;
+SELECT 'SELECT TO_CHAR(ROWNUM) row_num, v0.* FROM ('||CHR(10)||TRIM(CHR(10) FROM :sql_text)||CHR(10)||') v0 WHERE ROWNUM <= &&max_rows.' FROM DUAL;
 SPO OFF;
 SET HEA ON;
 GET &&common_sqld360_prefix._query.sql
 
 -- update main report
 SPO &&sqld360_main_report..html APP;
-PRO <li title="&&main_table.">&&title. <small><em>(&&row_count.)</em></small>
+PRO <li title="&&main_table.">&&title.
 SPO OFF;
 HOS zip -q &&sqld360_main_filename._&&sqld360_file_time. &&sqld360_main_report..html
 
@@ -85,8 +89,29 @@ DEF skip_tch = 'Y';
 DEF title_suffix = '';
 DEF haxis = '&&db_version. dbname:&&database_name_short. host:&&host_name_short. (avg cpu_count: &&avg_cpu_count.)';
 
+-- needed reset after eventual sqlmon above
+SET TERM OFF; 
+SET HEA ON; 
+SET LIN 32767; 
+SET NEWP NONE; 
+SET PAGES &&def_max_rows.; 
+SET LONG 32000; 
+SET LONGC 2000; 
+SET WRA ON; 
+SET TRIMS ON; 
+SET TRIM ON; 
+SET TI OFF; 
+SET TIMI OFF; 
+SET ARRAY 1000; 
+SET NUM 20; 
+SET SQLBL ON; 
+SET BLO .; 
+SET RECSEP OFF;
+
 -- update main report
 SPO &&sqld360_main_report..html APP;
+PRO <small><em>(&&row_num.)</em></small>
 PRO </li>
 SPO OFF;
 HOS zip -q &&sqld360_main_filename._&&sqld360_file_time. &&sqld360_main_report..html
+

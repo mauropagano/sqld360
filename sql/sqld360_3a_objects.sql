@@ -107,7 +107,7 @@ END;
 
 
 DEF title = 'Columns Usage';
-DEF main_table = 'COL_USAGE$';
+DEF main_table = 'SYS.COL_USAGE$';
 BEGIN
   :sql_text := '
 SELECT o.object_name, cu.*
@@ -137,8 +137,8 @@ DEF main_table = 'DBA_TAB_HISTOGRAMS'
 SET TERM OFF ECHO OFF 
 -- need to fix the file name for the partitions
 SPO &&sqld360_main_report..html APP;
-PRO <li>Histograms <small><em>(&&num_histograms.)</em></small> 
-PRO <a href="&&one_spool_filename..html">page</a>
+PRO <li>Histograms  
+PRO <a href="&&one_spool_filename..html">page</a> <small><em>(&&num_histograms.)</em></small>
 PRO </li>
 SPO OFF;
 @@sqld360_3d_histograms.sql
@@ -211,8 +211,8 @@ DEF main_table = 'DBA_TAB_PARTITIONS'
 SET TERM OFF ECHO OFF 
 -- need to fix the file name for the partitions
 SPO &&sqld360_main_report..html APP;
-PRO <li>Partitions Columns <small><em>(&&part_tables.)</em></small> 
-PRO <a href="&&one_spool_filename..html">page</a>
+PRO <li>Partitions Columns  
+PRO <a href="&&one_spool_filename..html">page</a> <small><em>(&&part_tables.)</em></small>
 PRO </li>
 SPO OFF;
 @@sqld360_3b_partitions_columns.sql

@@ -11,10 +11,10 @@ BEGIN
  SELECT /*+ &&top_level_hints. */
        source, plan_hash_value, SUM(executions) execs, TRUNC(SUM(buffer_gets)/DECODE(SUM(executions),0,1,SUM(executions))) avg_buffer_gets, 
        TRUNC(SUM(elapsed_time)/1e6/DECODE(SUM(executions),0,1,SUM(executions)),3) avg_elapsed_time_secs, TRUNC(SUM(cpu_time)/1e6/DECODE(SUM(executions),0,1,SUM(executions)),3) avg_cpu_time_secs,
-             SUM(rows_processed)/DECODE(SUM(executions),0,1,SUM(executions)) avg_rows_processed,
-             MIN(first_load_time) first_load_time, MAX(last_load_time) last_load_time, MIN(optimizer_env_hash_value) min_cbo_env, max(optimizer_env_hash_value) max_cbo_env,
-             MIN(min_dop) min_req_dop, MAX(max_dop) max_req_dop
-  FROM (SELECT ''MEM'' source, a.plan_hash_value, executions, elapsed_time, cpu_time, rows_processed, buffer_gets, first_load_time, last_load_time, optimizer_env_hash_value, min_dop, max_dop
+       TRUNC(SUM(io_time)/1e6/DECODE(SUM(executions),0,1,SUM(executions)),3) avg_io_time_secs, TRUNC(SUM(rows_processed)/DECODE(SUM(executions),0,1,SUM(executions))) avg_rows_processed,
+       MIN(first_load_time) first_load_time, MAX(last_load_time) last_load_time, MIN(optimizer_env_hash_value) min_cbo_env, max(optimizer_env_hash_value) max_cbo_env,
+       MIN(min_dop) min_req_dop, MAX(max_dop) max_req_dop
+  FROM (SELECT ''MEM'' source, a.plan_hash_value, executions, elapsed_time, cpu_time, rows_processed, buffer_gets, first_load_time, last_load_time, optimizer_env_hash_value, min_dop, max_dop, user_io_wait_time io_time
           FROM gv$sql a,
                (SELECT plan_hash_value, MIN(TO_NUMBER(extractValue(XMLType(other_xml),''/other_xml/info[@type="dop"]''))) min_dop, 
                        MAX(TO_NUMBER(extractValue(XMLType(other_xml),''/other_xml/info[@type="dop"]''))) max_dop
@@ -26,7 +26,7 @@ BEGIN
            AND a.plan_hash_value = dop.plan_hash_value(+)
         UNION ALL
         SELECT ''HIST'' source, a.plan_hash_value, executions_delta executions, elapsed_time_delta elapsed_time, cpu_time_delta cpu_time, rows_processed_delta rows_processed,
-               buffer_gets_delta buffer_gets, null first_load_time, null last_load_time, optimizer_env_hash_value, min_dop, max_dop
+               buffer_gets_delta buffer_gets, null first_load_time, null last_load_time, optimizer_env_hash_value, min_dop, max_dop, iowait_delta
           FROM dba_hist_sqlstat a,
                (SELECT plan_hash_value, MIN(TO_NUMBER(extractValue(XMLType(other_xml),''/other_xml/info[@type="dop"]''))) min_dop, 
                        MAX(TO_NUMBER(extractValue(XMLType(other_xml),''/other_xml/info[@type="dop"]''))) max_dop

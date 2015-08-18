@@ -9,8 +9,8 @@ CL COL;
 COL row_num FOR 9999999 HEA '#' PRI;
 
 -- version
-DEF sqld360_vYYNN = 'v1521';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-08-05)';
+DEF sqld360_vYYNN = 'v1522';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-08-18)';
 DEF sqld360_prefix = 'sqld360';
 
 -- get dbid
@@ -109,6 +109,9 @@ SELECT SUBSTR('&&host_name_short.', 1, INSTR('&&host_name_short..', '.') - 1) ho
 SELECT TRANSLATE('&&host_name_short.',
 'abcdefghijklmnopqrstuvwxyz0123456789-_ ''`~!@#$%&*()=+[]{}\|;:",.<>/?'||CHR(0)||CHR(9)||CHR(10)||CHR(13)||CHR(38),
 'abcdefghijklmnopqrstuvwxyz0123456789-_') host_name_short FROM DUAL;
+
+-- number fo rows per report
+COL row_num NEW_V row_num HEA '#' PRI;
 
 -- get rdbms version
 COL db_version NEW_V db_version;

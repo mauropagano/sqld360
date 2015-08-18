@@ -92,7 +92,7 @@ SET HEA OFF;
 SET LIN 32767;
 PRINT sql_text_display;
 SET HEA ON;
-PRO &&row_count. rows selected.
+PRO &&row_num. rows selected.
 PRO </pre>
 
 @@sqld360_0e_html_footer.sql
@@ -106,7 +106,7 @@ SET HEA OFF;
 SPO &&sqld360_log2..txt APP;
 SELECT TO_CHAR(SYSDATE, 'YYYY-MM-DD HH24:MI:SS')||' , '||
        TO_CHAR((:get_time_t1 - :get_time_t0)/100, '999999990.00')||' , '||
-       :row_count||' , &&main_table. , &&title_no_spaces., bar_chart , &&one_spool_filename._bar_chart.html'
+       '&&row_num. , &&main_table. , &&title_no_spaces., bar_chart , &&one_spool_filename._bar_chart.html'
   FROM DUAL
 /
 SPO OFF;

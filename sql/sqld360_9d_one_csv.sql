@@ -42,7 +42,7 @@ SET HEA OFF;
 SPO &&sqld360_log2..txt APP;
 SELECT TO_CHAR(SYSDATE, 'YYYY-MM-DD HH24:MI:SS')||' , '||
        TO_CHAR((:get_time_t1 - :get_time_t0)/100, '999999990.00')||' , '||
-       :row_count||' , &&main_table. , &&title_no_spaces., csv , &&one_spool_filename..csv'
+       '&&row_num. , &&main_table. , &&title_no_spaces., csv , &&one_spool_filename..csv'
   FROM DUAL
 /
 SPO OFF;
