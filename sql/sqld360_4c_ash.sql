@@ -1581,6 +1581,7 @@ SELECT inst_id, session_id, session_serial#, MIN(sample_time) streak_start, MAX(
                            AND position =  @instance_number@
                            AND partition_id IS NULL)))
  GROUP BY inst_id, session_id, session_serial#, start_of_streak 
+ HAVING COUNT(*) > 1
  ORDER BY start_of_streak, inst_id, session_id, session_serial#      
 ';
 END;
@@ -1665,6 +1666,7 @@ SELECT inst_id, session_id, session_serial#, MIN(sample_time) streak_start, MAX(
                            AND position =  @instance_number@
                            AND partition_id IS NULL)))
  GROUP BY inst_id, session_id, session_serial#, start_of_streak 
+ HAVING COUNT(*) > 1
  ORDER BY start_of_streak, inst_id, session_id, session_serial#      
 ';
 END;

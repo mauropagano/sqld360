@@ -99,6 +99,36 @@ PRO
 
 PRINT :sqld360_fullsql
 PRO /
+
+PRO
+PRO -- List of binds from history
+PRO /*
+BEGIN
+  FOR i IN (SELECT DISTINCT snap_id FROM dba_hist_sqlstat WHERE sql_id = '&&sqld360_sqlid.' AND bind_data IS NOT NULL ORDER BY 1) LOOP
+    DBMS_OUTPUT.PUT_LINE('--SNAP_ID: '||i.snap_id);
+    FOR j IN (SELECT 'EXEC '||
+                      CASE WHEN REGEXP_INSTR(SUBSTR(b.name,1,2),'[[:digit:]]') > 0 THEN ':b'||SUBSTR(b.name,2) ELSE b.name END||
+                      ' := ' ||
+                      CASE WHEN b.datatype = 2 THEN NULL ELSE '''' END||
+                      a.value_string||
+                      CASE WHEN b.datatype = 2 THEN NULL ELSE '''' END||
+                      ';' bind_string
+                 FROM TABLE(SELECT DBMS_SQLTUNE.EXTRACT_BINDS(bind_data) 
+                              FROM dba_hist_sqlstat
+                             WHERE sql_id = '&&sqld360_sqlid.'  
+                               AND snap_id = i.snap_id
+                               AND bind_data IS NOT NULL) a,
+                      dba_hist_sql_bind_metadata b
+                WHERE a.position = b.position
+                  AND b.sql_id = '&&sqld360_sqlid.'
+                ORDER BY b.position) LOOP
+      DBMS_OUTPUT.PUT_LINE(j.bind_string);
+    END LOOP;
+  END LOOP;
+END;
+/  
+PRO */
+
 SPO OFF;
 
 SET TERM ON

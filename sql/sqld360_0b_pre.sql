@@ -9,8 +9,8 @@ CL COL;
 COL row_num FOR 9999999 HEA '#' PRI;
 
 -- version
-DEF sqld360_vYYNN = 'v1522';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-08-18)';
+DEF sqld360_vYYNN = 'v1523';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-08-22)';
 DEF sqld360_prefix = 'sqld360';
 
 -- get dbid
@@ -314,8 +314,8 @@ DEF sqld360_copyright = ' (c) 2015';
 DEF top_level_hints = 'NO_MERGE';
 DEF sq_fact_hints = 'MATERIALIZE NO_MERGE';
 DEF ds_hint = 'DYNAMIC_SAMPLING(4)';
-DEF def_max_rows = '10000';
-DEF max_rows = '1e4';
+DEF def_max_rows = '100000';
+DEF max_rows = '1e5';
 DEF num_parts = '100';
 --DEF translate_lowhigh = 'Y';
 DEF default_dir = 'SQLD360_DIR'

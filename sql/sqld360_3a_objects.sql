@@ -17,6 +17,7 @@ END;
 /
 @@sqld360_9a_pre_one.sql
 
+
 DEF title = 'Indexes';
 DEF main_table = 'DBA_INDEXES';
 BEGIN
@@ -159,6 +160,21 @@ END;
 @@sqld360_9a_pre_one.sql
 
 
+DEF title = 'Views';
+DEF main_table = 'DBA_VIEWS';
+BEGIN
+  :sql_text := '
+SELECT /*+ &&top_level_hints. */
+       *
+  FROM dba_views
+ WHERE (owner, view_name) in &&tables_list.
+ ORDER BY owner, view_name
+';
+END;
+/
+@@sqld360_9a_pre_one.sql
+
+
 -- in 12c need to access DBA_TAB_COL_STATISTICS too for columns NOTES and SCOPE
 -- that are not included in DBA_TAB_COLS
 
@@ -216,6 +232,39 @@ PRO <a href="&&one_spool_filename..html">page</a> <small><em>(&&part_tables.)</e
 PRO </li>
 SPO OFF;
 @@sqld360_3b_partitions_columns.sql
+
+
+DEF title = 'Table Subpartitions';
+DEF main_table = 'DBA_TAB_SUBPARTITIONS';
+BEGIN
+  :sql_text := '
+SELECT /*+ &&top_level_hints. */
+       *
+  FROM dba_tab_subpartitions
+ WHERE (table_owner, table_name) in &&tables_list.
+ ORDER BY table_owner, table_name, subpartition_position
+';
+END;
+/
+@@sqld360_9a_pre_one.sql
+
+
+DEF title = 'Index Subpartitions';
+DEF main_table = 'DBA_IND_SUBPARTITIONS';
+BEGIN
+  :sql_text := '
+SELECT /*+ &&top_level_hints. */
+       a.*
+  FROM dba_ind_subpartitions a,
+       dba_indexes b
+ WHERE (b.table_owner, b.table_name) in &&tables_list.
+   AND a.index_owner = b.owner
+   AND a.index_name = b.index_name
+ ORDER BY a.index_owner, a.index_name, a.subpartition_position
+';
+END;
+/
+@@sqld360_9a_pre_one.sql
 
 
 DEF title = 'Table Modifications';
