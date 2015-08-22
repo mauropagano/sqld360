@@ -283,7 +283,7 @@ END;
 
 
 DEF title = 'Table Stats Preferences';
-DEF main_table = 'OPTSTAT_USER_PREFS$';
+DEF main_table = 'SYS.OPTSTAT_USER_PREFS$';
 BEGIN
   :sql_text := '
 SELECT /*+ &&top_level_hints. */
