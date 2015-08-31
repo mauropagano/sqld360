@@ -11,6 +11,7 @@ DEF sqld360_conf_days = '31';
 DEF sqld360_conf_incl_html = 'Y';
 DEF sqld360_conf_incl_text = 'N';
 DEF sqld360_conf_incl_csv  = 'N';
+DEF sqld360_conf_incl_xml  = 'N';
 DEF sqld360_conf_incl_line = 'Y';
 DEF sqld360_conf_incl_pie  = 'Y';
 DEF sqld360_conf_incl_bar  = 'Y';

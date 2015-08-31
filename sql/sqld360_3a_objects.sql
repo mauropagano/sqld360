@@ -87,6 +87,12 @@ BEGIN
 END;
 /
 
+-- in 12c we are missing column NOTES from DBA_TAB_COL_STATISTICS here
+-- current values from dba_tab_cols_v$ are (h is hist_head$)
+--   decode(bitand(h.spare2, 8), 8, 'INCREMENTAL '
+--    decode(bitand(h.spare2, 128), 128, 'HIST_FOR_INCREM_STATS '
+--    decode(bitand(h.spare2, 256), 256, 'HISTOGRAM_ONLY '
+--    decode(bitand(h.spare2, 512), 512, 'STATS_ON_LOAD ' 
 DEF title = 'Columns';
 DEF main_table = 'DBA_TAB_COLS';
 BEGIN
@@ -174,9 +180,6 @@ END;
 /
 @@sqld360_9a_pre_one.sql
 
-
--- in 12c need to access DBA_TAB_COL_STATISTICS too for columns NOTES and SCOPE
--- that are not included in DBA_TAB_COLS
 
 DEF title = 'Table Partitions';
 DEF main_table = 'DBA_TAB_PARTITIONS';
@@ -343,7 +346,6 @@ SELECT /*+ &&top_level_hints. */
 END;
 /
 @@sqld360_9a_pre_one.sql
-
 
 
 DEF title = 'Segments';

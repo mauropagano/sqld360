@@ -9,8 +9,8 @@ CL COL;
 COL row_num FOR 9999999 HEA '#' PRI;
 
 -- version
-DEF sqld360_vYYNN = 'v1523';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-08-22)';
+DEF sqld360_vYYNN = 'v1524';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-08-31)';
 DEF sqld360_prefix = 'sqld360';
 
 -- get dbid
@@ -255,6 +255,7 @@ SELECT CASE WHEN '&&exact_matching_signature.' = '&&force_matching_signature.' T
 
 -- inclusion config determine skip flags
 COL sqld360_skip_html NEW_V sqld360_skip_html;
+COL sqld360_skip_xml  NEW_V sqld360_skip_xml;
 COL sqld360_skip_text NEW_V sqld360_skip_text;
 COL sqld360_skip_csv  NEW_V sqld360_skip_csv;
 COL sqld360_skip_line NEW_V sqld360_skip_line;
@@ -263,6 +264,7 @@ COL sqld360_skip_bar  NEW_V sqld360_skip_bar;
 COL sqld360_skip_tree NEW_V sqld360_skip_tree;
 
 SELECT CASE '&&sqld360_conf_incl_html.' WHEN 'N' THEN '--' END sqld360_skip_html FROM DUAL;
+SELECT CASE '&&sqld360_conf_incl_xml.'  WHEN 'N' THEN '--' END sqld360_skip_xml  FROM DUAL;
 SELECT CASE '&&sqld360_conf_incl_text.' WHEN 'N' THEN '--' END sqld360_skip_text FROM DUAL;
 SELECT CASE '&&sqld360_conf_incl_csv.'  WHEN 'N' THEN '--' END sqld360_skip_csv  FROM DUAL;
 SELECT CASE '&&sqld360_conf_incl_line.' WHEN 'N' THEN '--' END sqld360_skip_line FROM DUAL;
@@ -333,6 +335,7 @@ DEF ash_max_reports = '12';
 --DEF skip_tcb = '';
 --DEF skip_ash_rpt = '--';
 DEF skip_html = '';
+DEF skip_xml = '';
 DEF skip_text = '';
 DEF skip_csv = '';
 DEF skip_lch = 'Y';

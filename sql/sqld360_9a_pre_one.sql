@@ -66,6 +66,7 @@ HOS zip -q &&sqld360_main_filename._&&sqld360_file_time. &&sqld360_main_report..
 
 -- execute one sql
 @@&&skip_html.&&sqld360_skip_html.sqld360_9b_one_html.sql
+@@&&skip_xml.&&sqld360_skip_xml.sqld360_9i_one_xml.sql
 @@&&skip_text.&&sqld360_skip_text.sqld360_9c_one_text.sql
 @@&&skip_csv.&&sqld360_skip_csv.sqld360_9d_one_csv.sql
 @@&&skip_lch.&&sqld360_skip_line.sqld360_9e_one_line_chart.sql
@@ -80,6 +81,7 @@ DEF abstract2 = '';
 DEF foot = '';
 DEF max_rows = '&&def_max_rows.';
 DEF skip_html = '';
+DEF skip_xml  = '';
 DEF skip_text = '';
 DEF skip_csv = '';
 DEF skip_lch = 'Y';

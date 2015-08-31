@@ -182,7 +182,7 @@ COL child_address PRI
 
 
 DEF title = 'System Stats';
-DEF main_table = 'AUX_STATS$';
+DEF main_table = 'SYS.AUX_STATS$';
 BEGIN
   :sql_text := '
 SELECT /*+ &&top_level_hints. */ 
