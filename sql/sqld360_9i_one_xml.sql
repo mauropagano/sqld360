@@ -20,7 +20,14 @@ EXEC :get_time_t0 := DBMS_UTILITY.get_time;
 
 -- produce report
 VAR r CLOB;
-EXEC :r := DBMS_XMLGEN.GETXML('SELECT TO_CHAR(ROWNUM) row_num, v0.* FROM ('||CHR(10)||TRIM(CHR(10) FROM DBMS_LOB.SUBSTR(:sql_text, 32700, 1))||CHR(10)||') v0 WHERE ROWNUM <= &&max_rows.');
+DECLARE
+  l_ctx DBMS_XMLGEN.ctxhandle;
+BEGIN
+  l_ctx := DBMS_XMLGEN.NEWCONTEXT('SELECT TO_CHAR(ROWNUM) row_num, v0.* FROM ('||CHR(10)||TRIM(CHR(10) FROM DBMS_LOB.SUBSTR(:sql_text, 32700, 1))||CHR(10)||') v0 WHERE ROWNUM <= &&max_rows.');
+  DBMS_XMLGEN.SETNULLHANDLING(l_ctx, DBMS_XMLGEN.NULL_ATTR);
+  :r := DBMS_XMLGEN.GETXML(l_ctx);
+END;
+/
 
 -- spool report
 SET HEA OFF;

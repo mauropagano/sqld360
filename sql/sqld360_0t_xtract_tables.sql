@@ -68,11 +68,11 @@ BEGIN
 &&skip_10g.&&skip_11r1.                                               WHERE sql_id = '&&sqld360_sqlid.'))
         )
         SELECT 'TABLE', o.owner, o.name table_name
-          FROM --dba_tables t,
+          FROM dba_tables t,
                --dba_tab_statistics t, -- include fixed objects
                object o
-        -- WHERE t.owner = o.owner
-        --   AND t.table_name = o.name
+         WHERE t.owner = o.owner
+           AND t.table_name = o.name
          UNION
         SELECT 'TABLE', i.table_owner, i.table_name
           FROM dba_indexes i,
