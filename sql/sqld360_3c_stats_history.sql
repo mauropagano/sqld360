@@ -57,6 +57,7 @@ SELECT /*+ &&top_level_hints. */
        c.owner,
        c.table_name,
        c.column_name, 
+       CASE WHEN h.flags > 64 THEN ''YES'' ELSE ''NO'' END had_histogram,
        h.*
   FROM sys.wri$_optstat_histhead_history h,
        dba_objects o,

@@ -9,8 +9,8 @@ CL COL;
 COL row_num FOR 9999999 HEA '#' PRI;
 
 -- version
-DEF sqld360_vYYNN = 'v1525';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-10-02)';
+DEF sqld360_vYYNN = 'v1526';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2015-11-11)';
 DEF sqld360_prefix = 'sqld360';
 
 -- get dbid
@@ -219,7 +219,7 @@ BEGIN
      INTO :sqld360_fullsql
      FROM dba_hist_sqltext
     WHERE sql_id = '&&sqld360_sqlid.';
- EXCEPTION WHEN NO_DATA_FOUND THEN NULL;
+ EXCEPTION WHEN NO_DATA_FOUND THEN NULL; -- this is intentional, will try next block
  END;
 
   IF :sqld360_fullsql IS NULL THEN
@@ -233,6 +233,34 @@ BEGIN
 
 END;
 /
+
+VAR xplan_user VARCHAR2(30)
+BEGIN
+
+  SELECT parsing_schema_name
+    INTO :xplan_user
+    FROM gv$sql
+   WHERE sql_id = '&&sqld360_sqlid.'
+     AND rownum = 1;
+
+EXCEPTION WHEN NO_DATA_FOUND THEN
+
+  -- pick up one user that executed the SQL
+  -- might give strange results for SQLs that run in
+  -- different schemas where underlying objects are different
+  SELECT parsing_schema_name
+    INTO :xplan_user
+    FROM dba_hist_sqlstat
+   WHERE sql_id =  '&&sqld360_sqlid.'
+     AND ROWNUM = 1;
+
+END;
+/
+COL xplan_user NEW_V xplan_user
+COL current_user NEW_V current_user
+SELECT :xplan_user xplan_user FROM DUAL;
+SELECT SYS_CONTEXT('USERENV', 'CURRENT_SCHEMA') current_user FROM DUAL;
+
 
 -- get exact_matching_signature, force_matching_signature
 COL exact_matching_signature NEW_V exact_matching_signature FOR 99999999999999999999999
@@ -471,6 +499,7 @@ PRO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 SPO &&sqld360_log..txt;
 PRO begin log
 PRO
+host env
 DEF;
 SPO OFF;
 

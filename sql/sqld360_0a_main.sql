@@ -56,6 +56,7 @@ PRO
 SPO OFF;
 
 @@sqld360_3a_objects.sql
+@@sqld360_3g_checks.sql
 @@&&sqld360_skip_stats_h.sqld360_3c_stats_history.sql
 @@&&skip_10g.&&skip_11g.&&skip_12r101.sqld360_3e_inmemory.sql
 @@&&skip_10g.&&skip_11g.sqld360_3f_bt_cache.sql

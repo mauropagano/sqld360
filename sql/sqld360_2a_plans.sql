@@ -118,6 +118,56 @@ HOS zip -q &&sqld360_main_filename._&&sqld360_file_time. &&sqld360_main_report..
 -----------------------------------
 -----------------------------------
 
+DEF title = 'Plan from Plan Table';
+DEF main_table = 'PLAN_TABLE';
+
+@@sqld360_0s_pre_nondef
+
+
+SPO &&one_spool_filename..txt;
+PRO &&title.&&title_suffix. (&&main_table.) 
+PRO &&abstract.
+PRO &&abstract2.
+
+SET TERM OFF 
+COL xplan_sql NEW_V xplan_sql
+SELECT :sqld360_fullsql xplan_sql FROM DUAL;
+ALTER SESSION SET CURRENT_SCHEMA = &&xplan_user.;
+EXPLAIN PLAN FOR &&xplan_sql.
+/
+SET TERM ON 
+SELECT plan_table_output FROM TABLE(DBMS_XPLAN.DISPLAY);
+ALTER SESSION SET CURRENT_SCHEMA = &&current_user.;
+
+
+SET TERM ON
+-- get current time
+SPO &&sqld360_log..txt APP;
+COL current_time NEW_V current_time FOR A15;
+SELECT 'Completed: ' x, TO_CHAR(SYSDATE, 'HH24:MI:SS') current_time FROM DUAL;
+SET TERM OFF
+
+HOS zip -q &&sqld360_main_filename._&&sqld360_file_time. &&sqld360_log..txt
+SET PAGES 50000
+
+-- update main report
+SPO &&sqld360_main_report..html APP;
+PRO <li title="&&main_table.">&&title.
+PRO <a href="&&one_spool_filename..txt">text</a>
+SPO OFF;
+HOS zip -mq &&sqld360_main_filename._&&sqld360_file_time. &&one_spool_filename..txt
+HOS zip -q &&sqld360_main_filename._&&sqld360_file_time. &&sqld360_main_report..html
+
+--HOS zip -q &&sqld360_main_filename._&&sqld360_file_time. &&sqld360_log2..txt
+
+-- update main report
+SPO &&sqld360_main_report..html APP;
+PRO </li>
+SPO OFF;
+HOS zip -q &&sqld360_main_filename._&&sqld360_file_time. &&sqld360_main_report..html
+-----------------------------------
+-----------------------------------
+
 DEF title = 'Plans from Baseline';
 DEF main_table = 'DBA_SQL_PLAN_BASELINES';
 

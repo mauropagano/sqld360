@@ -1,4 +1,4 @@
-SQLd360 v1523 (2015-08-22) by Mauro Pagano
+SQLd360 v1526 (2015-11-11) by Mauro Pagano
 
 SQLd360 is a "free to use" tool to perform an in-depth investigation of a SQL statement. 
 It collects detailed information around the SQL. It also helps to document any findings.
@@ -14,7 +14,7 @@ Steps
 
    $ unzip sqld360.zip
    $ cd sqld360
-   $ sqlplus / as sysdba
+   $ sqlplus dba_user/dba_pwd
 
 2. Execute sqld360.sql indicating three input parameters. The first one is to specify 
    the SQL ID for the SQL you want to analyze. The second one is to specify if your 

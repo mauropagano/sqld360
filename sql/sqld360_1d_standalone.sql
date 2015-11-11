@@ -117,7 +117,8 @@ BEGIN
                               FROM dba_hist_sqlstat
                              WHERE sql_id = '&&sqld360_sqlid.'  
                                AND snap_id = i.snap_id
-                               AND bind_data IS NOT NULL) a,
+                               AND bind_data IS NOT NULL
+                               AND ROWNUM = 1) a,
                       dba_hist_sql_bind_metadata b
                 WHERE a.position = b.position
                   AND b.sql_id = '&&sqld360_sqlid.'
