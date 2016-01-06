@@ -181,6 +181,24 @@ END;
 @@sqld360_9a_pre_one.sql
 
 
+DEF title = 'Clusters';
+DEF main_table = 'DBA_CLUSTERS';
+BEGIN
+  :sql_text := '
+SELECT /*+ &&top_level_hints. */
+       *
+  FROM dba_clusters
+ WHERE cluster_name IN (select cluster_name 
+                          from dba_tables 
+                         where (owner, table_name) in &&tables_list.
+                           and cluster_name is not null)
+ ORDER BY owner, cluster_name
+';
+END;
+/
+@@sqld360_9a_pre_one.sql
+
+
 DEF title = 'Table Partitions';
 DEF main_table = 'DBA_TAB_PARTITIONS';
 BEGIN

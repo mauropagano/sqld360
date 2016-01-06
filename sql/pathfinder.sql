@@ -41,8 +41,8 @@ CL COL;
 SET LIN 32767 PAGES 0 LONG 32767000 LONGC 32767 TRIMS ON AUTOT OFF;
 
 -- version
-DEF pathfinder_vYYNN = 'v1501';
-DEF pathfinder_vrsn = '&&pathfinder_vYYNN. (2015-10-02)';
+DEF pathfinder_vYYNN = 'v1601';
+DEF pathfinder_vrsn = '&&pathfinder_vYYNN. (2016-01-03)';
 DEF pathfinder_prefix = 'pathfinder';
 DEF pathfinder_script = 'script.sql'
 
@@ -69,6 +69,10 @@ SELECT SUBSTR('&&database_name_short.', 1, INSTR('&&database_name_short..', '.')
 SELECT TRANSLATE('&&database_name_short.',
 'abcdefghijklmnopqrstuvwxyz0123456789-_ ''`~!@#$%&*()=+[]{}\|;:",.<>/?'||CHR(0)||CHR(9)||CHR(10)||CHR(13)||CHR(38),
 'abcdefghijklmnopqrstuvwxyz0123456789-_') database_name_short FROM DUAL;
+
+-- get database version
+COL db_version NEW_V db_version;
+SELECT version db_version FROM v$instance;
 
 COL plnfdn_start_time NEW_V plnfdn_start_time
 SELECT TO_CHAR(SYSDATE, 'YYYY/MM/DD HH24:MI:SS') plnfdn_start_time FROM DUAL;
@@ -111,7 +115,7 @@ PRO <script src="sorttable.js"></script>
 PRO </head>
 PRO <body>
 PRO <h1><em>Pathfinder</em> &&pathfinder_vrsn.: Plan Finder</h1>
-PRO <pre>dbname:&&database_name_short. connect string:&&pathfinder_conn. startime:&&plnfdn_start_time.</pre>
+PRO <pre>dbname:&&database_name_short. version:&&db_version. connect string:&&pathfinder_conn. startime:&&plnfdn_start_time.</pre>
 PRO
 PRO <table class=sortable><tr class="main">
 PRO <th class="c">Test#</td>
@@ -1093,6 +1097,7 @@ SPO OFF
 HOS zip -mq &&common_pathfinder_prefix..zip pathfinder_&&pathfinder_file_time._vsql.sql
 HOS zip -mq &&common_pathfinder_prefix..zip pathfinder_&&pathfinder_file_time._xplan.sql
 HOS zip -mq &&common_pathfinder_prefix..zip pathfinder_&&pathfinder_file_time._driver.sql 
+HOS zip -q &&common_pathfinder_prefix..zip &&pathfinder_script.
 HOS zip -mq &&common_pathfinder_prefix..zip sorttable.js
 HOS zip -mq &&common_pathfinder_prefix..zip *&&common_pathfinder_prefix.*
 

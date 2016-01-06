@@ -65,8 +65,11 @@ PRO          titleTextStyle: {fontSize: 16, bold: false},
 PRO          legend: {position: 'none'},
 PRO          allowHtml:true,
 PRO          allowCollapse:true,
-PRO          tooltip: {textStyle: {fontSize: 14}}
+PRO          tooltip: {textStyle: {fontSize: 14}},
+PRO          nodeClass: 'myNodeClass'
 PRO        };
+PRO
+PRO        &&treeColor.;
 PRO
 PRO        var chart = new google.visualization.OrgChart(document.getElementById('orgchart'));
 PRO        chart.draw(data, options);

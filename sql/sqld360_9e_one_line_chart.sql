@@ -113,7 +113,7 @@ BEGIN
     l_col_06, l_col_07, l_col_08, l_col_09, l_col_10,
     l_col_11, l_col_12, l_col_13, l_col_14, l_col_15;
     EXIT WHEN cur%NOTFOUND;
-    l_line := ', [new Date('||SUBSTR(l_end_time,1,4)||','||(TO_NUMBER(SUBSTR(l_end_time,6,2)) - 1)||','||SUBSTR(l_end_time,9,2)||','||SUBSTR(l_end_time,12,2)||','||SUBSTR(l_end_time,15,2)||',0)';
+    l_line := ', [new Date('||SUBSTR(l_end_time,1,4)||','||(TO_NUMBER(SUBSTR(l_end_time,6,2)) - 1)||','||SUBSTR(l_end_time,9,2)||','||SUBSTR(l_end_time,12,2)||','||SUBSTR(l_end_time,15,2)||','||NVL(SUBSTR(l_end_time,18,2),0)||',0)';
     IF '&&tit_01.' IS NOT NULL THEN
       l_line := l_line||', '||l_col_01; 
     END IF;

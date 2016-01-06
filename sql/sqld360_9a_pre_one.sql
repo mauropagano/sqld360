@@ -79,6 +79,7 @@ COL row_num FOR 9999999 HEA '#' PRI;
 DEF abstract = '';
 DEF abstract2 = '';
 DEF foot = '';
+DEF treeColor = '';
 DEF max_rows = '&&def_max_rows.';
 DEF skip_html = '';
 DEF skip_xml  = '';

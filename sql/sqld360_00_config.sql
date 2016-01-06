@@ -51,6 +51,9 @@ DEF sqld360_conf_translate_lowhigh = 'Y';
 DEF sqld360_conf_first_part = '100';
 DEF sqld360_conf_last_part = '100';
 
+-- number of top executions to individually analyze, from memory and history
+DEF sqld360_conf_num_top_execs = '3';
+
 /**************************** not recommended to modify *********************************/
 
 DEF sqld360_conf_tool_page = '<a href="http://www.enkitec.com/products/sqld360" target="_blank">';

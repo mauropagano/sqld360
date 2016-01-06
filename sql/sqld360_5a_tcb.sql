@@ -38,6 +38,7 @@ END;
 
 SET TIMI ON;
 SET SERVEROUT ON;
+PRINT :tcb_dir
 BEGIN
   DBMS_SQLDIAG.EXPORT_SQL_TESTCASE(
       directory       => :tcb_dir,
