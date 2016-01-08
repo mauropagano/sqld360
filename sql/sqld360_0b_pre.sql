@@ -9,8 +9,8 @@ CL COL;
 COL row_num FOR 9999999 HEA '#' PRI;
 
 -- version
-DEF sqld360_vYYNN = 'v1601';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2016-01-03)';
+DEF sqld360_vYYNN = 'v1602';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2016-01-09)';
 DEF sqld360_prefix = 'sqld360';
 
 -- get dbid
@@ -290,15 +290,17 @@ COL sqld360_skip_line NEW_V sqld360_skip_line;
 COL sqld360_skip_pie  NEW_V sqld360_skip_pie;
 COL sqld360_skip_bar  NEW_V sqld360_skip_bar;
 COL sqld360_skip_tree NEW_V sqld360_skip_tree;
+COL sqld360_skip_bubble NEW_V sqld360_skip_bubble;
 
-SELECT CASE '&&sqld360_conf_incl_html.' WHEN 'N' THEN '--' END sqld360_skip_html FROM DUAL;
-SELECT CASE '&&sqld360_conf_incl_xml.'  WHEN 'N' THEN '--' END sqld360_skip_xml  FROM DUAL;
-SELECT CASE '&&sqld360_conf_incl_text.' WHEN 'N' THEN '--' END sqld360_skip_text FROM DUAL;
-SELECT CASE '&&sqld360_conf_incl_csv.'  WHEN 'N' THEN '--' END sqld360_skip_csv  FROM DUAL;
-SELECT CASE '&&sqld360_conf_incl_line.' WHEN 'N' THEN '--' END sqld360_skip_line FROM DUAL;
-SELECT CASE '&&sqld360_conf_incl_pie.'  WHEN 'N' THEN '--' END sqld360_skip_pie  FROM DUAL;
-SELECT CASE '&&sqld360_conf_incl_bar.'  WHEN 'N' THEN '--' END sqld360_skip_bar  FROM DUAL;
-SELECT CASE '&&sqld360_conf_incl_tree.' WHEN 'N' THEN '--' END sqld360_skip_tree FROM DUAL;
+SELECT CASE '&&sqld360_conf_incl_html.'   WHEN 'N' THEN '--' END sqld360_skip_html   FROM DUAL;
+SELECT CASE '&&sqld360_conf_incl_xml.'    WHEN 'N' THEN '--' END sqld360_skip_xml    FROM DUAL;
+SELECT CASE '&&sqld360_conf_incl_text.'   WHEN 'N' THEN '--' END sqld360_skip_text   FROM DUAL;
+SELECT CASE '&&sqld360_conf_incl_csv.'    WHEN 'N' THEN '--' END sqld360_skip_csv    FROM DUAL;
+SELECT CASE '&&sqld360_conf_incl_line.'   WHEN 'N' THEN '--' END sqld360_skip_line   FROM DUAL;
+SELECT CASE '&&sqld360_conf_incl_pie.'    WHEN 'N' THEN '--' END sqld360_skip_pie    FROM DUAL;
+SELECT CASE '&&sqld360_conf_incl_bar.'    WHEN 'N' THEN '--' END sqld360_skip_bar    FROM DUAL;
+SELECT CASE '&&sqld360_conf_incl_tree.'   WHEN 'N' THEN '--' END sqld360_skip_tree   FROM DUAL;
+SELECT CASE '&&sqld360_conf_incl_bubble.' WHEN 'N' THEN '--' END sqld360_skip_bubble FROM DUAL;
 
 COL sqld360_skip_ashrpt NEW_V sqld360_skip_ashrpt;
 SELECT CASE '&&sqld360_conf_incl_ashrpt.' WHEN 'N' THEN '--' END sqld360_skip_ashrpt FROM DUAL;
@@ -370,11 +372,15 @@ DEF skip_lch = 'Y';
 DEF skip_pch = 'Y';
 DEF skip_bch = 'Y';
 DEF skip_tch = 'Y';
+DEF skip_uch = 'Y';
 DEF skip_all = '';
 DEF abstract = '';
 DEF abstract2 = '';
 DEF foot = '';
 DEF treeColor = '';
+DEF bubbleMaxValue = '';
+DEF bubbleSeries = '';
+DEF bubblesDetails = '';
 DEF sql_text = '';
 DEF chartype = '';
 DEF stacked = '';

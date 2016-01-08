@@ -82,6 +82,25 @@ BEGIN
     put('PRO <h2>Execution Plan</h2> ');
     put('SPO OFF');
 
+    put('DEF bubbleMaxValue = ''''');
+    put('COL bubbleMaxValue NEW_V bubbleMaxValue');
+    -- this is to make the chart a little larger
+    put('SELECT NVL2(MAX(id), ''maxValue:''||TO_CHAR(MAX(id)+2)||'','' , '''') bubbleMaxValue ');
+    put('  FROM (SELECT MAX(id) id');
+    put('          FROM gv$sql_plan');
+    put('         WHERE sql_id = ''&&sqld360_sqlid.''');
+    put('           AND plan_hash_value ='||i.plan_hash_value);
+    put('        UNION ALL');
+    put('        SELECT MAX(id) id');
+    put('          FROM dba_hist_sql_plan');
+    put('         WHERE sql_id = ''&&sqld360_sqlid.''');
+    put('           AND plan_hash_value ='||i.plan_hash_value);
+    put('           AND ''&&diagnostics_pack.'' = ''Y'');');
+
+    put('DEF bubbleSeries = ''series: {''''CPU'''': {color: ''''#00E600''''}, ''''I/O'''': {color: ''''#0000FF''''}, ''''Concurrency'''': {color: ''''#CC0000''''}, ''''Other'''': {color: ''''#FFFF00''''}, ''''N/A'''': {color: ''''#CCFFFF''''}},''');
+
+    put('----------------------------');
+
     put('DEF title=''Plan Tree for PHV '||i.plan_hash_value||'''');
     put('DEF main_table = ''DBA_HIST_SQL_PLAN''');
     put('DEF skip_html=''Y''');
@@ -1357,6 +1376,62 @@ BEGIN
 
        put('----------------------------');
 
+       put('DEF title=''Plan Step IDs for SQL_EXEC_ID '||j.sql_exec_id||' of PHV '||i.plan_hash_value||'''');
+       put('DEF main_table = ''GV$ACTIVE_SESSION_HISTORY''');
+       put('DEF skip_uch=''''');
+       put('DEF abstract = ''Top SQL Plan Steps''');
+       put('DEF vaxis = ''SQL Plan Step ID''');
+       put('DEF foot = ''Data is not aggregated, extracted directly from V$ASH, Y-axis report plan steps, size of the bubble is number of samples, color is major contributor (>50%) for bubble''');
+
+       put('COL bubblesDetails NEW_V bubblesDetails');
+       put('SELECT ''<br>Step Details<br>''||LISTAGG(step_details,''<br>'') WITHIN GROUP (ORDER BY id) bubblesDetails');
+       put('          FROM (SELECT DISTINCT NVL(id,0) id, NVL(id,0)||'' - ''||operation||'' ''||options||'' ''||NVL(b.object_name, ''(obj#:''||object_instance||'')'') step_details');
+       put('                  FROM plan_table a,');
+       put('                       dba_objects b');
+       put('                 WHERE statement_id = ''SQLD360_ASH_DATA_MEM''');
+       put('                   AND a.object_instance = b.object_id(+)');
+       put('                   AND cost = '||i.plan_hash_value);
+       put('                   AND NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INSTR(partition_stop,'','',1,4)-INSTR(partition_stop,'','',1,3)-1)),position) = '||j.inst_id||'');
+       put('                   AND NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,4)+1,INSTR(partition_stop,'','',1,5)-INSTR(partition_stop,'','',1,4)-1)),cpu_cost) = '||j.session_id||'');
+       put('                   AND NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,5)+1,INSTR(partition_stop,'','',1,6)-INSTR(partition_stop,'','',1,5)-1)),io_cost) = '||j.session_serial#||'');
+       put('                   AND a.timestamp BETWEEN TO_DATE('''||j.min_sample_time||''', ''YYYYMMDDHH24MISS'') AND TO_DATE('''||j.max_sample_time||''', ''YYYYMMDDHH24MISS'') ');
+       put('                   AND remarks = ''&&sqld360_sqlid.''');
+       put('               );');
+
+       put('BEGIN');
+       put(' :sql_text := ''');
+       put('SELECT TO_CHAR(end_time, ''''YYYY-MM-DD HH24:MI:SS'''') end_time,');
+       put('       null,');
+       put('       plan_line_id,');
+       put('       CASE WHEN rtr_category > .5 THEN category ELSE ''''N/A'''' END,');
+       put('       num_samples');
+       put('  FROM (SELECT end_time, plan_line_id, category, num_samples, rtr_category, ROW_NUMBER() OVER (PARTITION BY end_time, plan_line_id ORDER BY rtr_category DESC) rn_category');
+       put('          FROM (SELECT end_time, plan_line_id, category, SUM(num_samples) OVER (PARTITION BY end_time, plan_line_id) num_samples, RATIO_TO_REPORT(num_samples) OVER (PARTITION BY end_time, plan_line_id) rtr_category');
+       put('                  FROM (SELECT timestamp end_time, NVL(id,0) plan_line_id, ');
+       put('                               CASE WHEN other_tag IS NULL THEN ''''CPU'''' WHEN other_tag LIKE ''''%I/O'''' THEN ''''I/O'''' WHEN other_tag = ''''Concurrency'''' THEN ''''Concurrency'''' ELSE ''''Other'''' END category,'); 
+       put('                               COUNT(*) num_samples'); 
+       put('                          FROM plan_table');
+       put('                         WHERE statement_id = ''''SQLD360_ASH_DATA_MEM''''');
+       put('                           AND cost =  '||i.plan_hash_value||'');
+       put('                           AND NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,3)+1,INSTR(partition_stop,'''','''',1,4)-INSTR(partition_stop,'''','''',1,3)-1)),position) = '||j.inst_id||'');
+       put('                           AND NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,4)+1,INSTR(partition_stop,'''','''',1,5)-INSTR(partition_stop,'''','''',1,4)-1)),cpu_cost) = '||j.session_id||'');
+       put('                           AND NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,5)+1,INSTR(partition_stop,'''','''',1,6)-INSTR(partition_stop,'''','''',1,5)-1)),io_cost) = '||j.session_serial#||'');
+       put('                           AND timestamp BETWEEN TO_DATE('''''||j.min_sample_time||''''', ''''YYYYMMDDHH24MISS'''') AND TO_DATE('''''||j.max_sample_time||''''', ''''YYYYMMDDHH24MISS'''') ');
+       put('                           AND remarks = ''''&&sqld360_sqlid.'''''); 
+       put('                           AND partition_id IS NOT NULL');
+       put('                           AND ''''&&diagnostics_pack.'''' = ''''Y''''');
+       put('                         GROUP BY timestamp, NVL(id,0), CASE WHEN other_tag IS NULL THEN ''''CPU'''' WHEN other_tag LIKE ''''%I/O'''' THEN ''''I/O'''' WHEN other_tag = ''''Concurrency'''' THEN ''''Concurrency'''' ELSE ''''Other'''' END)');
+       put('                 )');
+       put('        )');
+       put(' WHERE rn_category = 1');
+       put(' ORDER BY end_time'); 
+       put(''';');
+       put('END;');
+       put('/ ');
+       put('@sql/sqld360_9a_pre_one.sql');
+
+       put('----------------------------');
+
        put('DEF title=''Top 15 Wait events for SQL_EXEC_ID '||j.sql_exec_id||' of PHV '||i.plan_hash_value||'''');
        put('DEF main_table = ''GV$ACTIVE_SESSION_HISTORY''');
        put('DEF skip_lch=''''');
@@ -1844,6 +1919,62 @@ BEGIN
        put('       ashdata');
        put(' WHERE ashdata.id(+) = plandata.id');
        put(' ORDER BY plandata.id');
+       put(''';');
+       put('END;');
+       put('/ ');
+       put('@sql/sqld360_9a_pre_one.sql');
+
+       put('----------------------------');
+
+       put('DEF title=''Plan Step IDs for SQL_EXEC_ID '||j.sql_exec_id||' of PHV '||i.plan_hash_value||'''');
+       put('DEF main_table = ''DBA_HIST_ACTIVE_SESS_HISTORY''');
+       put('DEF skip_uch=''''');
+       put('DEF abstract = ''Top SQL Plan Steps''');
+       put('DEF vaxis = ''SQL Plan Step ID''');
+       put('DEF foot = ''Data is not aggregated, extracted directly from V$ASH, Y-axis report plan steps, size of the bubble is number of samples, color is major contributor (>50%) for bubble''');
+
+       put('COL bubblesDetails NEW_V bubblesDetails');
+       put('SELECT ''<br>Step Details<br>''||LISTAGG(step_details,''<br>'') WITHIN GROUP (ORDER BY id) bubblesDetails');
+       put('          FROM (SELECT DISTINCT NVL(id,0) id, NVL(id,0)||'' - ''||operation||'' ''||options||'' ''||NVL(b.object_name, ''(obj#:''||object_instance||'')'') step_details');
+       put('                  FROM plan_table a,');
+       put('                       dba_objects b');
+       put('                 WHERE statement_id = ''SQLD360_ASH_DATA_HIST''');
+       put('                   AND a.object_instance = b.object_id(+)');
+       put('                   AND cost = '||i.plan_hash_value);
+       put('                   AND NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INSTR(partition_stop,'','',1,4)-INSTR(partition_stop,'','',1,3)-1)),position) = '||j.inst_id||'');
+       put('                   AND NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,4)+1,INSTR(partition_stop,'','',1,5)-INSTR(partition_stop,'','',1,4)-1)),cpu_cost) = '||j.session_id||'');
+       put('                   AND NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,5)+1,INSTR(partition_stop,'','',1,6)-INSTR(partition_stop,'','',1,5)-1)),io_cost) = '||j.session_serial#||'');
+       put('                   AND a.timestamp BETWEEN TO_DATE('''||j.min_sample_time||''', ''YYYYMMDDHH24MISS'') AND TO_DATE('''||j.max_sample_time||''', ''YYYYMMDDHH24MISS'') ');
+       put('                   AND remarks = ''&&sqld360_sqlid.''');
+       put('               );');
+
+       put('BEGIN');
+       put(' :sql_text := ''');
+       put('SELECT TO_CHAR(end_time, ''''YYYY-MM-DD HH24:MI:SS'''') end_time,');
+       put('       null,');
+       put('       plan_line_id,');
+       put('       CASE WHEN rtr_category > .5 THEN category ELSE ''''N/A'''' END,');
+       put('       num_samples');
+       put('  FROM (SELECT end_time, plan_line_id, category, num_samples, rtr_category, ROW_NUMBER() OVER (PARTITION BY end_time, plan_line_id ORDER BY rtr_category DESC) rn_category');
+       put('          FROM (SELECT end_time, plan_line_id, category, SUM(num_samples) OVER (PARTITION BY end_time, plan_line_id) num_samples, RATIO_TO_REPORT(num_samples) OVER (PARTITION BY end_time, plan_line_id) rtr_category');
+       put('                  FROM (SELECT timestamp end_time, NVL(id,0) plan_line_id, ');
+       put('                               CASE WHEN other_tag IS NULL THEN ''''CPU'''' WHEN other_tag LIKE ''''%I/O'''' THEN ''''I/O'''' WHEN other_tag = ''''Concurrency'''' THEN ''''Concurrency'''' ELSE ''''Other'''' END category,'); 
+       put('                               COUNT(*) num_samples'); 
+       put('                          FROM plan_table');
+       put('                         WHERE statement_id = ''''SQLD360_ASH_DATA_HIST''''');
+       put('                           AND cost =  '||i.plan_hash_value||'');
+       put('                           AND NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,3)+1,INSTR(partition_stop,'''','''',1,4)-INSTR(partition_stop,'''','''',1,3)-1)),position) = '||j.inst_id||'');
+       put('                           AND NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,4)+1,INSTR(partition_stop,'''','''',1,5)-INSTR(partition_stop,'''','''',1,4)-1)),cpu_cost) = '||j.session_id||'');
+       put('                           AND NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,5)+1,INSTR(partition_stop,'''','''',1,6)-INSTR(partition_stop,'''','''',1,5)-1)),io_cost) = '||j.session_serial#||'');
+       put('                           AND timestamp BETWEEN TO_DATE('''''||j.min_sample_time||''''', ''''YYYYMMDDHH24MISS'''') AND TO_DATE('''''||j.max_sample_time||''''', ''''YYYYMMDDHH24MISS'''') ');
+       put('                           AND remarks = ''''&&sqld360_sqlid.'''''); 
+       put('                           AND partition_id IS NOT NULL');
+       put('                           AND ''''&&diagnostics_pack.'''' = ''''Y''''');
+       put('                         GROUP BY timestamp, NVL(id,0), CASE WHEN other_tag IS NULL THEN ''''CPU'''' WHEN other_tag LIKE ''''%I/O'''' THEN ''''I/O'''' WHEN other_tag = ''''Concurrency'''' THEN ''''Concurrency'''' ELSE ''''Other'''' END)');
+       put('                 )');
+       put('        )');
+       put(' WHERE rn_category = 1');
+       put(' ORDER BY end_time'); 
        put(''';');
        put('END;');
        put('/ ');
