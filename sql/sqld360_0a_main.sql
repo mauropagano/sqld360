@@ -87,6 +87,7 @@ SPO OFF;
 
 @@&&skip_10g.&&skip_11r1.sqld360_5f_10053.sql
 @@&&skip_tuning.&&skip_10g.&&sqld360_skip_sqlmon.sqld360_5b_sqlmon.sql
+@@&&skip_diagnostics.&&sqld360_skip_awrrpt.sqld360_5d_awr.sql
 @@&&skip_diagnostics.&&sqld360_skip_ashrpt.sqld360_5c_ash.sql
 @@&&skip_tcb.&&skip_10g.&&sqld360_skip_tcb.sqld360_5a_tcb.sql
 @@&&from_edb360.&&skip_diagnostics.&&sqld360_skip_rawash.sqld360_5r_rawash.sql

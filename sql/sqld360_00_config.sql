@@ -24,6 +24,9 @@ DEF sqld360_conf_incl_sqlmon = 'Y';
 -- include/exclude DBA_HIST_ASH (always on by default, turned off only by eDB180) 
 DEF sqld360_conf_incl_ash_hist = 'Y';
 
+-- include/exclude AWR Reports (always on by default) 
+DEF sqld360_conf_incl_awrrpt = 'Y';
+
 -- include/exclude ASH SQL Reports (always off by default, very expensive and little benefit) 
 DEF sqld360_conf_incl_ashrpt = 'N';
 
@@ -54,6 +57,12 @@ DEF sqld360_conf_last_part = '100';
 
 -- number of top executions to individually analyze, from memory and history
 DEF sqld360_conf_num_top_execs = '3';
+
+-- number of AWR reports to collect, total and NOT per instance
+DEF sqld360_conf_num_awrrpt = '3';
+
+-- number of SQL Monitoring reports to collect, from memory and history
+DEF sqld360_conf_num_sqlmon_rep = '12';
 
 /**************************** not recommended to modify *********************************/
 

@@ -35,7 +35,7 @@ BEGIN
                AND process_name = 'ora'
              ORDER BY
                    sql_exec_start DESC)
-             WHERE ROWNUM <= &&sqlmon_max_reports.)
+             WHERE ROWNUM <= &&sqld360_conf_num_sqlmon_rep.)
   LOOP
     put('BEGIN');
     put(':myreport :=');
@@ -91,7 +91,7 @@ BEGIN
                AND process_name = 'ora'
              ORDER BY
                    sql_exec_start DESC)
-             WHERE ROWNUM <= &&sqlmon_max_reports.)
+             WHERE ROWNUM <= &&sqld360_conf_num_sqlmon_rep.)
   LOOP
     put('BEGIN');
     put(':myreport :=');
@@ -129,7 +129,7 @@ SELECT DBMS_SQLTUNE.report_sql_detail(sql_id => '&&sqld360_sqlid.', report_level
 SPO OFF;
 
 
--- historical, based on elapsed, worst &&sqlmon_max_reports.
+-- historical, based on elapsed, worst &&sqld360_conf_num_sqlmon_rep.
 -- it errors out in < 12c but the error is not reported to screen/main files
 SET SERVEROUT ON;
 SPO sqld360_sqlmon_&&sqld360_sqlid._driver_hist.sql
@@ -151,7 +151,7 @@ BEGIN
                        AND '&&tuning_pack.' = 'Y' 
                        AND '&&sqlmon_hist.' = 'Y'
                      ORDER BY 2 DESC)
-             WHERE ROWNUM <= &&sqlmon_max_reports.)
+             WHERE ROWNUM <= &&sqld360_conf_num_sqlmon_rep.)
   LOOP
     put('BEGIN');
     put(':myreport :=');

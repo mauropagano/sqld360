@@ -97,7 +97,7 @@ BEGIN
     put('           AND plan_hash_value ='||i.plan_hash_value);
     put('           AND ''&&diagnostics_pack.'' = ''Y'');');
 
-    put('DEF bubbleSeries = ''series: {''''CPU'''': {color: ''''#00E600''''}, ''''I/O'''': {color: ''''#0000FF''''}, ''''Concurrency'''': {color: ''''#CC0000''''}, ''''Other'''': {color: ''''#FFFF00''''}, ''''N/A'''': {color: ''''#CCFFFF''''}},''');
+    put('DEF bubbleSeries = ''series: {''''CPU'''': {color: ''''#00E600''''}, ''''I/O'''': {color: ''''#0000FF''''}, ''''Concurrency'''': {color: ''''#820000''''}, ''''Cluster'''': {color: ''''#C07F3F''''}, ''''Other'''': {color: ''''#FFFF00''''}, ''''Multiple'''': {color: ''''#CCFFFF''''}},''');
 
     put('----------------------------');
 
@@ -1408,7 +1408,7 @@ BEGIN
        put('  FROM (SELECT end_time, plan_line_id, category, num_samples, rtr_category, ROW_NUMBER() OVER (PARTITION BY end_time, plan_line_id ORDER BY rtr_category DESC) rn_category');
        put('          FROM (SELECT end_time, plan_line_id, category, SUM(num_samples) OVER (PARTITION BY end_time, plan_line_id) num_samples, RATIO_TO_REPORT(num_samples) OVER (PARTITION BY end_time, plan_line_id) rtr_category');
        put('                  FROM (SELECT timestamp end_time, NVL(id,0) plan_line_id, ');
-       put('                               CASE WHEN other_tag IS NULL THEN ''''CPU'''' WHEN other_tag LIKE ''''%I/O'''' THEN ''''I/O'''' WHEN other_tag = ''''Concurrency'''' THEN ''''Concurrency'''' ELSE ''''Other'''' END category,'); 
+       put('                               CASE WHEN other_tag IS NULL THEN ''''CPU'''' WHEN other_tag LIKE ''''%I/O'''' THEN ''''I/O'''' WHEN other_tag = ''''Concurrency'''' THEN ''''Concurrency'''' WHEN other_tag = ''''Cluster'''' THEN ''''Cluster'''' ELSE ''''Other'''' END category,'); 
        put('                               COUNT(*) num_samples'); 
        put('                          FROM plan_table');
        put('                         WHERE statement_id = ''''SQLD360_ASH_DATA_MEM''''');
@@ -1420,7 +1420,7 @@ BEGIN
        put('                           AND remarks = ''''&&sqld360_sqlid.'''''); 
        put('                           AND partition_id IS NOT NULL');
        put('                           AND ''''&&diagnostics_pack.'''' = ''''Y''''');
-       put('                         GROUP BY timestamp, NVL(id,0), CASE WHEN other_tag IS NULL THEN ''''CPU'''' WHEN other_tag LIKE ''''%I/O'''' THEN ''''I/O'''' WHEN other_tag = ''''Concurrency'''' THEN ''''Concurrency'''' ELSE ''''Other'''' END)');
+       put('                         GROUP BY timestamp, NVL(id,0), CASE WHEN other_tag IS NULL THEN ''''CPU'''' WHEN other_tag LIKE ''''%I/O'''' THEN ''''I/O'''' WHEN other_tag = ''''Concurrency'''' THEN ''''Concurrency'''' WHEN other_tag = ''''Cluster'''' THEN ''''Cluster'''' ELSE ''''Other'''' END)');
        put('                 )');
        put('        )');
        put(' WHERE rn_category = 1');
@@ -1989,7 +1989,7 @@ BEGIN
        put('  FROM (SELECT end_time, plan_line_id, category, num_samples, rtr_category, ROW_NUMBER() OVER (PARTITION BY end_time, plan_line_id ORDER BY rtr_category DESC) rn_category');
        put('          FROM (SELECT end_time, plan_line_id, category, SUM(num_samples) OVER (PARTITION BY end_time, plan_line_id) num_samples, RATIO_TO_REPORT(num_samples) OVER (PARTITION BY end_time, plan_line_id) rtr_category');
        put('                  FROM (SELECT timestamp end_time, NVL(id,0) plan_line_id, ');
-       put('                               CASE WHEN other_tag IS NULL THEN ''''CPU'''' WHEN other_tag LIKE ''''%I/O'''' THEN ''''I/O'''' WHEN other_tag = ''''Concurrency'''' THEN ''''Concurrency'''' ELSE ''''Other'''' END category,'); 
+       put('                               CASE WHEN other_tag IS NULL THEN ''''CPU'''' WHEN other_tag LIKE ''''%I/O'''' THEN ''''I/O'''' WHEN other_tag = ''''Concurrency'''' THEN ''''Concurrency'''' WHEN other_tag = ''''Cluster'''' THEN ''''Cluster'''' ELSE ''''Other'''' END category,'); 
        put('                               COUNT(*) num_samples'); 
        put('                          FROM plan_table');
        put('                         WHERE statement_id = ''''SQLD360_ASH_DATA_HIST''''');
@@ -2001,7 +2001,7 @@ BEGIN
        put('                           AND remarks = ''''&&sqld360_sqlid.'''''); 
        put('                           AND partition_id IS NOT NULL');
        put('                           AND ''''&&diagnostics_pack.'''' = ''''Y''''');
-       put('                         GROUP BY timestamp, NVL(id,0), CASE WHEN other_tag IS NULL THEN ''''CPU'''' WHEN other_tag LIKE ''''%I/O'''' THEN ''''I/O'''' WHEN other_tag = ''''Concurrency'''' THEN ''''Concurrency'''' ELSE ''''Other'''' END)');
+       put('                         GROUP BY timestamp, NVL(id,0), CASE WHEN other_tag IS NULL THEN ''''CPU'''' WHEN other_tag LIKE ''''%I/O'''' THEN ''''I/O'''' WHEN other_tag = ''''Concurrency'''' THEN ''''Concurrency'''' WHEN other_tag = ''''Cluster'''' THEN ''''Cluster'''' ELSE ''''Other'''' END)');
        put('                 )');
        put('        )');
        put(' WHERE rn_category = 1');

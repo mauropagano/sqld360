@@ -104,7 +104,7 @@ PRO    <div id="chart_div" style="width: 900px; height: 500px;"></div>
 PRO
 
 -- footer
-PRO<font class="n">Notes:<br>1) drag to zoom, and right click to reset<br>2) N/A means no major contributor was identified</font>
+PRO<font class="n">Notes:<br>1) drag to zoom, and right click to reset<br>2) Multiple means no major contributor was identified</font>
 PRO<font class="n"><br>3) &&foot.</font>
 PRO <br>
 PRO <pre>&&bubblesDetails.</pre>

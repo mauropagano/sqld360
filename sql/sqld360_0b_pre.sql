@@ -9,8 +9,8 @@ CL COL;
 COL row_num FOR 9999999 HEA '#' PRI;
 
 -- version
-DEF sqld360_vYYNN = 'v1603';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2016-01-12)';
+DEF sqld360_vYYNN = 'v1604';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2016-01-19)';
 DEF sqld360_prefix = 'sqld360';
 
 -- get dbid
@@ -302,6 +302,9 @@ SELECT CASE '&&sqld360_conf_incl_bar.'    WHEN 'N' THEN '--' END sqld360_skip_ba
 SELECT CASE '&&sqld360_conf_incl_tree.'   WHEN 'N' THEN '--' END sqld360_skip_tree   FROM DUAL;
 SELECT CASE '&&sqld360_conf_incl_bubble.' WHEN 'N' THEN '--' END sqld360_skip_bubble FROM DUAL;
 
+COL sqld360_skip_awrrpt NEW_V sqld360_skip_awrrpt;
+SELECT CASE '&&sqld360_conf_incl_awrrpt.' WHEN 'N' THEN '--' END sqld360_skip_awrrpt FROM DUAL;
+
 COL sqld360_skip_ashrpt NEW_V sqld360_skip_ashrpt;
 SELECT CASE '&&sqld360_conf_incl_ashrpt.' WHEN 'N' THEN '--' END sqld360_skip_ashrpt FROM DUAL;
 
@@ -355,7 +358,7 @@ DEF sqlmon_date_mask = 'YYYYMMDDHH24MISS';
 DEF sqlmon_text = 'Y';
 DEF sqlmon_active = 'Y';
 DEF sqlmon_hist = 'Y';
-DEF sqlmon_max_reports = '12';
+--DEF sqlmon_max_reports = '12';
 DEF ash_date_mask = 'YYYYMMDDHH24MISS';
 DEF ash_text = 'Y';
 DEF ash_html = 'Y';

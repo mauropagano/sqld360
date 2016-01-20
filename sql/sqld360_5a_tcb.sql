@@ -47,6 +47,7 @@ BEGIN
       testcase_name   => 'sqld360_&&sqld360_sqlid.',
       exportData      => &&sqld360_tcb_exp_data.,
       samplingPercent => &&sqld360_tcb_exp_sample.,
+      ctrlOptions     => '<parameters><parameter name="capture">with_runtime_info</parameter></parameters>',
       testcase        => :tc
   );
 END;
