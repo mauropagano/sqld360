@@ -42,6 +42,9 @@ DEF sqld360_conf_incl_stats_h = 'Y';
 -- include/exclude search for FORCE MATCHING SQLs (only for standalone execs, always skipped for eDB360 execs) 
 DEF sqld360_conf_incl_fmatch = 'Y';
 
+-- include/exclude Metadata section (useful to work around DBMS_METADATA bugs) 
+DEF sqld360_conf_incl_metadata = 'Y';
+
 -- include/exclude Testcase Builder (only for standalone execs, always skipped for eDB360 execs) 
 DEF sqld360_conf_incl_tcb = 'Y';
 
@@ -68,8 +71,8 @@ DEF sqld360_conf_num_sqlmon_rep = '12';
 
 DEF sqld360_conf_tool_page = '<a href="http://www.enkitec.com/products/sqld360" target="_blank">';
 DEF sqld360_conf_tool_page = '<a href="http://mauro-pagano.com/2015/02/16/sqld360-sql-diagnostics-collection-made-faster/" target="_blank">';
-DEF sqld360_conf_all_pages_icon = '<a href="http://www.enkitec.com/products/sqld360" target="_blank"><img src="SQLd360_img.jpg" alt="SQLd360" height="29" width="46"></a>';
-DEF sqld360_conf_all_pages_icon = '<a href="http://mauro-pagano.com/2015/02/16/sqld360-sql-diagnostics-collection-made-faster/" target="_blank"><img src="SQLd360_img.jpg" alt="SQLd360" height="29" width="46"></a>';
+DEF sqld360_conf_all_pages_icon = '<a href="http://www.enkitec.com/products/sqld360" target="_blank"><img src="SQLd360_img.jpg" alt="SQLd360" height="49" width="58"></a>';
+DEF sqld360_conf_all_pages_icon = '<a href="http://mauro-pagano.com/2015/02/16/sqld360-sql-diagnostics-collection-made-faster/" target="_blank"><img src="SQLd360_img.jpg" alt="SQLd360" height="49" width="58"></a>';
 DEF sqld360_conf_all_pages_logo = '<img src="SQLd360_all_pages_logo.jpg" alt="Enkitec now part of Accenture" width="117" height="29">';
 DEF sqld360_conf_all_pages_logo = '';
 DEF sqld360_conf_google_charts = '<script type="text/javascript" src="https://www.google.com/jsapi"></script>';

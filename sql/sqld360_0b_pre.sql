@@ -9,8 +9,8 @@ CL COL;
 COL row_num FOR 9999999 HEA '#' PRI;
 
 -- version
-DEF sqld360_vYYNN = 'v1604';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2016-01-19)';
+DEF sqld360_vYYNN = 'v1605';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2016-02-07)';
 DEF sqld360_prefix = 'sqld360';
 
 -- get dbid
@@ -127,6 +127,10 @@ SELECT '--' skip_11r1 FROM v$instance WHERE version LIKE '11.1%';
 DEF skip_11r201 = '';
 COL skip_11r201 NEW_V skip_11r201;
 SELECT '--' skip_11r201 FROM v$instance WHERE version LIKE '11.2.0.1%';
+-- this is to bypass some bugs in 11.2.0.3 that can cause slowdown
+DEF skip_11r203 = '';
+COL skip_11r203 NEW_V skip_11r203;
+SELECT '--' skip_11r203 FROM v$instance WHERE version LIKE '11.2.0.3%';
 DEF skip_12r101 = '';
 COL skip_12r101 NEW_V skip_12r101;
 SELECT '--' skip_12r101 FROM v$instance WHERE version LIKE '12.1.0.1%';
@@ -322,6 +326,9 @@ SELECT CASE '&&sqld360_conf_incl_stats_h.' WHEN 'N' THEN '--' END sqld360_skip_s
 
 COL sqld360_skip_fmatch NEW_V sqld360_skip_fmatch;
 SELECT CASE '&&sqld360_conf_incl_fmatch.' WHEN 'N' THEN '--' END sqld360_skip_fmatch FROM DUAL;
+
+COL sqld360_skip_metadata NEW_V sqld360_skip_metadata;
+SELECT CASE '&&sqld360_conf_incl_metadata.' WHEN 'N' THEN '--' END sqld360_skip_metadata FROM DUAL;
 
 COL sqld360_skip_tcb NEW_V sqld360_skip_tcb;
 SELECT CASE '&&sqld360_conf_incl_tcb.' WHEN 'N' THEN '--' END sqld360_skip_tcb FROM DUAL;

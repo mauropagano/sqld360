@@ -13,7 +13,7 @@ PRO
 PRO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 PRO
 PRO &&hh_mm_ss.
-PRO Exctrating ASH data
+PRO Extracting ASH data
 
 DECLARE
   data_already_loaded VARCHAR2(1);

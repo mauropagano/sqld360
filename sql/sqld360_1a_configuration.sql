@@ -223,7 +223,7 @@ END;
 
 
 DEF title = 'All Fix Controls';
-DEF main_table = 'DBA_RSRC_IO_CALIBRATE';
+DEF main_table = 'V$SYSTEM_FIX_CONTROL';
 BEGIN
   :sql_text := '
 SELECT /*+ &&top_level_hints. */ 

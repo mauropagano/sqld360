@@ -12,7 +12,7 @@ PRO <td class="c">3/&&max_col_number.</td>
 PRO <td class="c">4/&&max_col_number.</td>
 PRO <td class="c">5/&&max_col_number.</td>
 PRO </tr><tr class="main"><td>
-PRO &&sqld360_conf_tool_page.<img src="SQLd360_img.jpg" alt="SQLd360" height="102" width="165"></a>
+PRO &&sqld360_conf_tool_page.<img src="SQLd360_img.jpg" alt="SQLd360" height="196" width="231"></a>
 PRO <br>
 PRO
 SPO OFF;
@@ -60,7 +60,7 @@ SPO OFF;
 @@&&sqld360_skip_stats_h.sqld360_3c_stats_history.sql
 @@&&skip_10g.&&skip_11g.&&skip_12r101.sqld360_3e_inmemory.sql
 @@&&skip_10g.&&skip_11g.sqld360_3f_bt_cache.sql
-@@sqld360_3d_metadata.sql
+@@&&sqld360_skip_metadata.sqld360_3d_metadata.sql
 
 
 PRO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

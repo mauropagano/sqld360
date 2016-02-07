@@ -9,7 +9,7 @@ DEF main_table = 'GV$SQL_BIND_CAPTURE';
 BEGIN
   :sql_text := '
 SELECT /*+ &&top_level_hints. */
-       inst_id, child_number, position, datatype_string, min(value_string) min_value, max(value_string) max_value
+       inst_id, child_number, position, datatype_string, min(value_string) min_value, max(value_string) max_value, count(distinct value_string) distinct_combinations
   FROM gv$sql_bind_capture 
  WHERE sql_id = ''&&sqld360_sqlid.''
  GROUP BY inst_id, child_number, position, datatype_string
@@ -40,7 +40,7 @@ DEF main_table = 'DBA_HIST_SQLBIND';
 BEGIN
   :sql_text := '
 SELECT /*+ &&top_level_hints. */
-       instance_number, position, datatype_string, min(value_string) min_value, max(value_string) max_value
+       instance_number, position, datatype_string, min(value_string) min_value, max(value_string) max_value, count(distinct value_string) distinct_combinations
   FROM dba_hist_sqlbind
  WHERE sql_id = ''&&sqld360_sqlid.''
    AND snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id. 
