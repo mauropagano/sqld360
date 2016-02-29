@@ -69,7 +69,17 @@ PRO          tooltip: {textStyle: {fontSize: 14}},
 PRO          nodeClass: 'myNodeClass'
 PRO        };
 PRO
-PRO        &&treeColor.;
+--PRO        &&treeColor.;
+
+SET HEA OFF PAGES 0
+
+SELECT options
+  FROM plan_table
+ WHERE statement_id = 'SQLD360_TREECOLOR'
+   AND operation = '&&sqld360_sqlid.';
+
+SET HEA ON
+
 PRO
 PRO        var chart = new google.visualization.OrgChart(document.getElementById('orgchart'));
 PRO        chart.draw(data, options);

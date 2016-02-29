@@ -588,13 +588,13 @@ SELECT 0 snap_id,
        TO_CHAR(start_time, ''YYYY-MM-DD HH24:MI'') end_time,
        avg_et,
        med_et,
+       percth_et,
        avg_cpu_time,
        med_cpu_time,
+       percth_cpu_time,
        avg_db_time,
        med_db_time,
-       0 dummy_07,
-       0 dummy_08,
-       0 dummy_09,
+       percth_db_time,
        0 dummy_10,
        0 dummy_11,
        0 dummy_12,
@@ -602,12 +602,15 @@ SELECT 0 snap_id,
        0 dummy_14,
        0 dummy_15
   FROM (SELECT start_time,
-               AVG(et) avg_et,
-               MEDIAN(et) med_et,
-               AVG(cpu_time) avg_cpu_time,
-               MEDIAN(cpu_time) med_cpu_time,
-               AVG(db_time) avg_db_time,
-               MEDIAN(db_time) med_db_time
+               TRUNC(AVG(et),3) avg_et,
+               TRUNC(MEDIAN(et),3) med_et,
+               TRUNC(PERCENTILE_DISC(0.&&sqld360_conf_avg_et_percth.) WITHIN GROUP (ORDER BY et),3) percth_et,
+               TRUNC(AVG(cpu_time),3) avg_cpu_time,
+               TRUNC(MEDIAN(cpu_time),3) med_cpu_time,
+               TRUNC(PERCENTILE_DISC(0.&&sqld360_conf_avg_et_percth.) WITHIN GROUP (ORDER BY cpu_time),3) percth_cpu_time,
+               TRUNC(AVG(db_time),3) avg_db_time,
+               TRUNC(MEDIAN(db_time) med_db_time,
+               TRUNC(PERCENTILE_DISC(0.&&sqld360_conf_avg_et_percth.) WITHIN GROUP (ORDER BY db_time),3) percth_db_time
           FROM (SELECT TO_DATE(SUBSTR(distribution,1,12),''YYYYMMDDHH24MI'') start_time,
                        NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INSTR(partition_stop,'','',1,4)-INSTR(partition_stop,'','',1,3)-1)),position)||''-''|| 
                         NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,4)+1,INSTR(partition_stop,'','',1,5)-INSTR(partition_stop,'','',1,4)-1)),cpu_cost)||''-''|| 
@@ -638,13 +641,13 @@ DEF stacked = '';
 
 DEF tit_01 = 'Average Elapsed Time';
 DEF tit_02 = 'Median Elapsed Time';
-DEF tit_03 = 'Average Time on CPU';
-DEF tit_04 = 'Median Time on CPU';
-DEF tit_05 = 'Average DB Time';
-DEF tit_06 = 'Median DB Time';
-DEF tit_07 = '';
-DEF tit_08 = '';
-DEF tit_09 = '';
+DEF tit_03 = '&&sqld360_conf_avg_et_percth.th Elapsed Time';
+DEF tit_04 = 'Average Time on CPU';
+DEF tit_05 = 'Median Time on CPU';
+DEF tit_06 = '&&sqld360_conf_avg_et_percth.th CPU Time';
+DEF tit_07 = 'Average DB Time';
+DEF tit_08 = 'Median DB Time';
+DEF tit_09 = '&&sqld360_conf_avg_et_percth.th DB Time';
 DEF tit_10 = '';
 DEF tit_11 = '';
 DEF tit_12 = '';
@@ -730,13 +733,13 @@ SELECT b.snap_id snap_id,
        TO_CHAR(b.end_interval_time, ''YYYY-MM-DD HH24:MI'')  end_time,
        NVL(avg_et,0) avg_et,
        NVL(med_et,0) med_et,
+       NVL(percth_et,0) percth_et,
        NVL(avg_cpu_time,0) avg_cpu_time,
        NVL(med_cpu_time,0) med_cpu_time,
+       NVL(percth_cpu_time,0) percth_cpu_time,
        NVL(avg_db_time,0) avg_db_time,
        NVL(med_db_time,0) med_db_time,
-       0 dummy_07,
-       0 dummy_08,
-       0 dummy_09,
+       NVL(percth_db_time,0) percth_db_time,
        0 dummy_10,
        0 dummy_11,
        0 dummy_12,
@@ -746,18 +749,24 @@ SELECT b.snap_id snap_id,
   FROM (SELECT snap_id,
                MAX(avg_et) avg_et,
                MAX(med_et) med_et,
+               MAX(percth_et) percth_et,
                MAX(avg_cpu_time) avg_cpu_time,
                MAX(med_cpu_time) med_cpu_time,
+               MAX(percth_cpu_time) percth_cpu_time,
                MAX(avg_db_time) avg_db_time,
-               MAX(med_db_time) med_db_time
+               MAX(med_db_time) med_db_time,
+               MAX(percth_db_time) percth_db_time
           FROM (SELECT start_time,
                        MIN(start_snap_id) snap_id,
-                       AVG(et) avg_et,
-                       MEDIAN(et) med_et,
-                       AVG(cpu_time) avg_cpu_time,
-                       MEDIAN(cpu_time) med_cpu_time,
-                       AVG(db_time) avg_db_time,
-                       MEDIAN(db_time) med_db_time
+                       TRUNC(AVG(et),3) avg_et,
+                       TRUNC(MEDIAN(et),3) med_et,
+                       TRUNC(PERCENTILE_DISC(0.&&sqld360_conf_avg_et_percth.) WITHIN GROUP (ORDER BY et),3) percth_et,
+                       TRUNC(AVG(cpu_time),3) avg_cpu_time,
+                       TRUNC(MEDIAN(cpu_time),3) med_cpu_time,
+                       TRUNC(PERCENTILE_DISC(0.&&sqld360_conf_avg_et_percth.) WITHIN GROUP (ORDER BY cpu_time),3) percth_cpu_time,
+                       TRUNC(AVG(db_time),3) avg_db_time,
+                       TRUNC(MEDIAN(db_time),3) med_db_time,
+                       TRUNC(PERCENTILE_DISC(0.&&sqld360_conf_avg_et_percth.) WITHIN GROUP (ORDER BY db_time),3) percth_db_time
                   FROM (SELECT TO_DATE(SUBSTR(distribution,1,12),''YYYYMMDDHH24MI'') start_time,
                                NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INSTR(partition_stop,'','',1,4)-INSTR(partition_stop,'','',1,3)-1)),position)||''-''|| 
                                 NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,4)+1,INSTR(partition_stop,'','',1,5)-INSTR(partition_stop,'','',1,4)-1)),cpu_cost)||''-''|| 
@@ -793,13 +802,13 @@ DEF stacked = '';
 
 DEF tit_01 = 'Average Elapsed Time';
 DEF tit_02 = 'Median Elapsed Time';
-DEF tit_03 = 'Average Time on CPU';
-DEF tit_04 = 'Median Time on CPU';
-DEF tit_05 = 'Average DB Time';
-DEF tit_06 = 'Median DB Time';
-DEF tit_07 = '';
-DEF tit_08 = '';
-DEF tit_09 = '';
+DEF tit_03 = '&&sqld360_conf_avg_et_percth.th Elapsed Time';
+DEF tit_04 = 'Average Time on CPU';
+DEF tit_05 = 'Median Time on CPU';
+DEF tit_06 = '&&sqld360_conf_avg_et_percth.th CPU Time';
+DEF tit_07 = 'Average DB Time';
+DEF tit_08 = 'Median DB Time';
+DEF tit_09 = '&&sqld360_conf_avg_et_percth.th DB Time';
 DEF tit_10 = '';
 DEF tit_11 = '';
 DEF tit_12 = '';

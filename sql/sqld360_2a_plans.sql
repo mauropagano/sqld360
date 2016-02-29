@@ -32,6 +32,21 @@ SELECT /*+ ORDERED USE_NL(t) */
        'inst_id = '||v.inst_id||' AND sql_id = '''||v.sql_id||''' AND child_number = '||v.child_number)) t
 /
 
+WITH v AS (
+SELECT /*+ MATERIALIZE */
+       DISTINCT sql_id, inst_id, child_number
+  FROM gv$sql
+ WHERE sql_id = '&&sqld360_sqlid.'
+   AND loaded_versions > 0
+   AND '&&skip_10g' IS NULL AND '&&skip_10g' IS NULL
+ ORDER BY 1, 2, 3 )
+SELECT /*+ ORDERED USE_NL(t) */
+       RPAD('Inst: '||v.inst_id, 9)||' '||RPAD('Child: '||v.child_number, 11) inst_child, 
+       t.plan_table_output
+  FROM v, TABLE(DBMS_XPLAN.DISPLAY('gv$sql_plan_statistics_all', NULL, 'ADVANCED ALLSTATS LAST ADAPTIVE', 
+       'inst_id = '||v.inst_id||' AND sql_id = '''||v.sql_id||''' AND child_number = '||v.child_number)) t
+/
+
 SET TERM ON
 -- get current time
 SPO &&sqld360_log..txt APP;
@@ -87,6 +102,17 @@ SELECT /*+ MATERIALIZE */
 SELECT /*+ ORDERED USE_NL(t) */ t.plan_table_output
   FROM v, TABLE(DBMS_XPLAN.DISPLAY_AWR(v.sql_id, v.plan_hash_value, v.dbid, 'ADVANCED')) t;
 
+WITH v AS (
+SELECT /*+ MATERIALIZE */ 
+       DISTINCT sql_id, plan_hash_value, dbid
+  FROM dba_hist_sql_plan 
+ WHERE '&&diagnostics_pack.' = 'Y'
+   AND dbid = '&&sqld360_dbid.' 
+   AND sql_id = '&&sqld360_sqlid.'
+   AND '&&skip_10g' IS NULL AND '&&skip_10g' IS NULL
+ ORDER BY 1, 2, 3 )
+SELECT /*+ ORDERED USE_NL(t) */ t.plan_table_output
+  FROM v, TABLE(DBMS_XPLAN.DISPLAY_AWR(v.sql_id, v.plan_hash_value, v.dbid, 'ADVANCED +ADAPTIVE')) t;
 
 SET TERM ON
 -- get current time

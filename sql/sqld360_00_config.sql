@@ -67,6 +67,9 @@ DEF sqld360_conf_num_awrrpt = '3';
 -- number of SQL Monitoring reports to collect, from memory and history
 DEF sqld360_conf_num_sqlmon_rep = '12';
 
+-- percentile to use in Avg ET based on ASH
+DEF sqld360_conf_avg_et_percth = '90';
+
 /**************************** not recommended to modify *********************************/
 
 DEF sqld360_conf_tool_page = '<a href="http://www.enkitec.com/products/sqld360" target="_blank">';

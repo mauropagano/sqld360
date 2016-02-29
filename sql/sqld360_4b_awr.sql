@@ -388,7 +388,7 @@ DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 1;
 DEF title = 'Avg Buffer Gets/Execution for Instance 1';
-DEF abstract = 'Avg Buffer Gets/Execution for Cluster over time from AWR'
+DEF abstract = 'Avg Buffer Gets/Execution for Instance 1 over time from AWR'
 DEF foot = 'Low number of executions or long executing SQL make values less accurate'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '1');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
@@ -397,7 +397,7 @@ DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 2;
 DEF title = 'Avg Buffer Gets/Execution for Instance 2';
-DEF abstract = 'Avg Buffer Gets/Execution for Cluster over time from AWR'
+DEF abstract = 'Avg Buffer Gets/Execution for Instance 2 over time from AWR'
 DEF foot = 'Low number of executions or long executing SQL make values less accurate'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '2');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
@@ -406,7 +406,7 @@ DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 3;
 DEF title = 'Avg Buffer Gets/Execution for Instance 3';
-DEF abstract = 'Avg Buffer Gets/Execution for Cluster over time from AWR'
+DEF abstract = 'Avg Buffer Gets/Execution for Instance 3 over time from AWR'
 DEF foot = 'Low number of executions or long executing SQL make values less accurate'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '3');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
@@ -415,7 +415,7 @@ DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 4;
 DEF title = 'Avg Buffer Gets/Execution for Instance 4';
-DEF abstract = 'Avg Buffer Gets/Execution for Cluster over time from AWR'
+DEF abstract = 'Avg Buffer Gets/Execution for Instance 4 over time from AWR'
 DEF foot = 'Low number of executions or long executing SQL make values less accurate'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '4');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
@@ -424,7 +424,7 @@ DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 5;
 DEF title = 'Avg Buffer Gets/Execution for Instance 5';
-DEF abstract = 'Avg Buffer Gets/Execution for Cluster over time from AWR'
+DEF abstract = 'Avg Buffer Gets/Execution for Instance 5 over time from AWR'
 DEF foot = 'Low number of executions or long executing SQL make values less accurate'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '5');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
@@ -433,7 +433,7 @@ DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 6;
 DEF title = 'Avg Buffer Gets/Execution for Instance 6';
-DEF abstract = 'Avg Buffer Gets/Execution for Cluster over time from AWR'
+DEF abstract = 'Avg Buffer Gets/Execution for Instance 6 over time from AWR'
 DEF foot = 'Low number of executions or long executing SQL make values less accurate'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '6');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
@@ -442,7 +442,7 @@ DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 7;
 DEF title = 'Avg Buffer Gets/Execution for Instance 7';
-DEF abstract = 'Avg Buffer Gets/Execution for Cluster over time from AWR'
+DEF abstract = 'Avg Buffer Gets/Execution for Instance 7 over time from AWR'
 DEF foot = 'Low number of executions or long executing SQL make values less accurate'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '7');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
@@ -451,7 +451,7 @@ DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 8;
 DEF title = 'Avg Buffer Gets/Execution for Instance 8';
-DEF abstract = 'Avg Buffer Gets/Execution for Cluster over time from AWR'
+DEF abstract = 'Avg Buffer Gets/Execution for Instance 8 over time from AWR'
 DEF foot = 'Low number of executions or long executing SQL make values less accurate'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '8');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
@@ -535,7 +535,7 @@ DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 1;
 DEF title = 'Avg Rows Processed/Execution for Instance 1';
-DEF abstract = 'Avg Rows Processed/Execution for Cluster over time from AWR'
+DEF abstract = 'Avg Rows Processed/Execution for Instance 1 over time from AWR'
 DEF foot = 'Low number of executions or long executing SQL make values less accurate'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '1');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
@@ -544,7 +544,7 @@ DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 2;
 DEF title = 'Avg Rows Processed/Execution for Instance 2';
-DEF abstract = 'Avg Rows Processed/Execution for Cluster over time from AWR'
+DEF abstract = 'Avg Rows Processed/Execution for Instance 2 over time from AWR'
 DEF foot = 'Low number of executions or long executing SQL make values less accurate'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '2');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
@@ -553,7 +553,7 @@ DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 3;
 DEF title = 'Avg Rows Processed/Execution for Instance 3';
-DEF abstract = 'Avg Rows Processed/Execution for Cluster over time from AWR'
+DEF abstract = 'Avg Rows Processed/Execution for Instance 3 over time from AWR'
 DEF foot = 'Low number of executions or long executing SQL make values less accurate'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '3');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
@@ -562,7 +562,7 @@ DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 4;
 DEF title = 'Avg Rows Processed/Execution for Instance 4';
-DEF abstract = 'Avg Rows Processed/Execution for Cluster over time from AWR'
+DEF abstract = 'Avg Rows Processed/Execution for Instance 4 over time from AWR'
 DEF foot = 'Low number of executions or long executing SQL make values less accurate'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '4');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
@@ -571,7 +571,7 @@ DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 5;
 DEF title = 'Avg Rows Processed/Execution for Instance 5';
-DEF abstract = 'Avg Rows Processed/Execution for Cluster over time from AWR'
+DEF abstract = 'Avg Rows Processed/Execution for Instance 5 over time from AWR'
 DEF foot = 'Low number of executions or long executing SQL make values less accurate'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '5');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
@@ -580,7 +580,7 @@ DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 6;
 DEF title = 'Avg Rows Processed/Execution for Instance 6';
-DEF abstract = 'Avg Rows Processed/Execution for Cluster over time from AWR'
+DEF abstract = 'Avg Rows Processed/Execution for Instance 6 over time from AWR'
 DEF foot = 'Low number of executions or long executing SQL make values less accurate'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '6');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
@@ -589,7 +589,7 @@ DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 7;
 DEF title = 'Avg Rows Processed/Execution for Instance 7';
-DEF abstract = 'Avg Rows Processed/Execution for Cluster over time from AWR'
+DEF abstract = 'Avg Rows Processed/Execution for Instance 7 over time from AWR'
 DEF foot = 'Low number of executions or long executing SQL make values less accurate'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '7');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
@@ -598,7 +598,7 @@ DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 8;
 DEF title = 'Avg Rows Processed/Execution for Instance 8';
-DEF abstract = 'Avg Rows Processed/Execution for Cluster over time from AWR'
+DEF abstract = 'Avg Rows Processed/Execution for Instance 8 over time from AWR'
 DEF foot = 'Low number of executions or long executing SQL make values less accurate'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '8');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
@@ -683,7 +683,7 @@ DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 1;
 DEF title = 'Avg Elapsed Time/Execution for Instance 1';
-DEF abstract = 'Avg Elapsed Time/Execution for Cluster over time from AWR'
+DEF abstract = 'Avg Elapsed Time/Execution for Instance 1 over time from AWR'
 DEF foot = 'Low number of executions or long executing SQL make values less accurate'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '1');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
@@ -692,7 +692,7 @@ DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 2;
 DEF title = 'Avg Elapsed Time/Execution for Instance 2';
-DEF abstract = 'Avg Elapsed Time/Execution for Cluster over time from AWR'
+DEF abstract = 'Avg Elapsed Time/Execution for Instance 2 over time from AWR'
 DEF foot = 'Low number of executions or long executing SQL make values less accurate'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '2');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
@@ -701,7 +701,7 @@ DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 3;
 DEF title = 'Avg Elapsed Time/Execution for Instance 3';
-DEF abstract = 'Avg Elapsed Time/Execution for Cluster over time from AWR'
+DEF abstract = 'Avg Elapsed Time/Execution for Instance 3 over time from AWR'
 DEF foot = 'Low number of executions or long executing SQL make values less accurate'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '3');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
@@ -710,7 +710,7 @@ DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 4;
 DEF title = 'Avg Elapsed Time/Execution for Instance 4';
-DEF abstract = 'Avg Elapsed Time/Execution for Cluster over time from AWR'
+DEF abstract = 'Avg Elapsed Time/Execution for Instance 4 over time from AWR'
 DEF foot = 'Low number of executions or long executing SQL make values less accurate'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '4');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
@@ -719,7 +719,7 @@ DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 5;
 DEF title = 'Avg Elapsed Time/Execution for Instance 5';
-DEF abstract = 'Avg Elapsed Time/Execution for Cluster over time from AWR'
+DEF abstract = 'Avg Elapsed Time/Execution for Instance 5 over time from AWR'
 DEF foot = 'Low number of executions or long executing SQL make values less accurate'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '5');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
@@ -728,7 +728,7 @@ DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 6;
 DEF title = 'Avg Elapsed Time/Execution for Instance 6';
-DEF abstract = 'Avg Elapsed Time/Execution for Cluster over time from AWR'
+DEF abstract = 'Avg Elapsed Time/Execution for Instance 6 over time from AWR'
 DEF foot = 'Low number of executions or long executing SQL make values less accurate'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '6');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
@@ -737,7 +737,7 @@ DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 7;
 DEF title = 'Avg Elapsed Time/Execution for Instance 7';
-DEF abstract = 'Avg Elapsed Time/Execution for Cluster over time from AWR'
+DEF abstract = 'Avg Elapsed Time/Execution for Instance 7 over time from AWR'
 DEF foot = 'Low number of executions or long executing SQL make values less accurate'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '7');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
@@ -746,7 +746,7 @@ DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 8;
 DEF title = 'Avg Elapsed Time/Execution for Instance 8';
-DEF abstract = 'Avg Elapsed Time/Execution for Cluster over time from AWR'
+DEF abstract = 'Avg Elapsed Time/Execution for Instance 8 over time from AWR'
 DEF foot = 'Low number of executions or long executing SQL make values less accurate'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '8');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql

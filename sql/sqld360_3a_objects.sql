@@ -198,6 +198,19 @@ END;
 /
 @@sqld360_9a_pre_one.sql
 
+DEF title = 'Partition Key Columns';
+DEF main_table = 'DBA_PART_KEY_COLUMNS';
+BEGIN
+  :sql_text := '
+SELECT /*+ &&top_level_hints. */
+       *
+  FROM dba_part_key_columns
+ WHERE (owner, name) in &&tables_list.
+ ORDER BY owner, name, column_position
+';
+END;
+/
+@@sqld360_9a_pre_one.sql
 
 DEF title = 'Table Partitions';
 DEF main_table = 'DBA_TAB_PARTITIONS';
