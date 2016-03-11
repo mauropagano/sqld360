@@ -1,6 +1,9 @@
+DEF section_id = '2c';
 DEF section_name = 'Performance';
+EXEC DBMS_APPLICATION_INFO.SET_MODULE('&&sqld360_prefix.','&&section_id.');
 SPO &&sqld360_main_report..html APP;
-PRO <h2>&&section_name.</h2>
+PRO <h2>&&section_id.. &&section_name.</h2>
+PRO <ol start="&&report_sequence.">
 SPO OFF;
 
 
@@ -12,9 +15,10 @@ BEGIN
        source, plan_hash_value, force_matching_signature, SUM(executions) execs, ROUND(SUM(buffer_gets)/DECODE(SUM(executions),0,1,SUM(executions))) avg_buffer_gets, 
        ROUND(SUM(elapsed_time)/1e6/DECODE(SUM(executions),0,1,SUM(executions)),3) avg_elapsed_time_secs, ROUND(SUM(cpu_time)/1e6/DECODE(SUM(executions),0,1,SUM(executions)),3) avg_cpu_time_secs,
        ROUND(SUM(io_time)/1e6/DECODE(SUM(executions),0,1,SUM(executions)),3) avg_io_time_secs, ROUND(SUM(rows_processed)/DECODE(SUM(executions),0,1,SUM(executions)),3) avg_rows_processed,
+       ROUND(SUM(rows_processed)/DECODE(SUM(fetches),0,1,SUM(fetches)),3) avg_rows_per_fetch,
        AVG(cost) avg_cost, MIN(first_load_time) first_load_time, MAX(last_load_time) last_load_time, MIN(optimizer_env_hash_value) min_cbo_env, max(optimizer_env_hash_value) max_cbo_env,
        MIN(min_dop) min_req_dop, MAX(max_dop) max_req_dop
-  FROM (SELECT ''MEM'' source, a.plan_hash_value, a.force_matching_signature, executions, elapsed_time, cpu_time, rows_processed, buffer_gets, first_load_time, last_load_time, optimizer_cost cost, optimizer_env_hash_value, min_dop, max_dop, user_io_wait_time io_time
+  FROM (SELECT ''MEM'' source, a.plan_hash_value, a.force_matching_signature, executions, fetches, elapsed_time, cpu_time, rows_processed, buffer_gets, first_load_time, last_load_time, optimizer_cost cost, optimizer_env_hash_value, min_dop, max_dop, user_io_wait_time io_time
           FROM gv$sql a,
                (SELECT plan_hash_value, MIN(TO_NUMBER(extractValue(XMLType(other_xml),''/other_xml/info[@type="dop"]''))) min_dop, 
                        MAX(TO_NUMBER(extractValue(XMLType(other_xml),''/other_xml/info[@type="dop"]''))) max_dop
@@ -25,7 +29,7 @@ BEGIN
          WHERE sql_id = ''&&sqld360_sqlid.''
            AND a.plan_hash_value = dop.plan_hash_value(+)
         UNION ALL
-        SELECT ''HIST'' source, a.plan_hash_value, a.force_matching_signature, executions_delta executions, elapsed_time_delta elapsed_time, cpu_time_delta cpu_time, rows_processed_delta rows_processed,
+        SELECT ''HIST'' source, a.plan_hash_value, a.force_matching_signature, executions_delta executions, fetches_delta fetches, elapsed_time_delta elapsed_time, cpu_time_delta cpu_time, rows_processed_delta rows_processed,
                buffer_gets_delta buffer_gets, null first_load_time, null last_load_time, optimizer_cost, optimizer_env_hash_value, min_dop, max_dop, iowait_delta
           FROM dba_hist_sqlstat a,
                (SELECT plan_hash_value, MIN(TO_NUMBER(extractValue(XMLType(other_xml),''/other_xml/info[@type="dop"]''))) min_dop, 
@@ -171,3 +175,7 @@ SELECT /*+ &&top_level_hints. */
 END;
 /
 @@sqld360_9a_pre_one.sql
+
+SPO &&sqld360_main_report..html APP;
+PRO </ol>
+SPO OFF;

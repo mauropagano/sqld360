@@ -1396,6 +1396,7 @@ SELECT NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INS
        NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,4)+1,INSTR(partition_stop,'','',1,5)-INSTR(partition_stop,'','',1,4)-1)),cpu_cost) session_id,
        NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,5)+1,INSTR(partition_stop,'','',1,6)-INSTR(partition_stop,'','',1,5)-1)),io_cost) session_serial#,
        partition_id sql_exec_id,
+       TO_CHAR(TO_DATE(distribution, ''YYYYMMDDHH24MISS''), ''YYYY-MM-DD HH24:MI:SS'') sql_exec_start,
        TO_CHAR(MIN(timestamp), ''YYYY-MM-DD HH24:MI:SS'')  start_time,
        TO_CHAR(MAX(timestamp), ''YYYY-MM-DD HH24:MI:SS'')  end_time,
        MIN(cost) plan_hash_value,
@@ -1410,6 +1411,7 @@ SELECT NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INS
    AND remarks = ''&&sqld360_sqlid.''
    AND ''&&diagnostics_pack.'' = ''Y''
  GROUP BY partition_id, 
+       TO_CHAR(TO_DATE(distribution, ''YYYYMMDDHH24MISS''), ''YYYY-MM-DD HH24:MI:SS''),
        NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INSTR(partition_stop,'','',1,4)-INSTR(partition_stop,'','',1,3)-1)),position),
        NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,4)+1,INSTR(partition_stop,'','',1,5)-INSTR(partition_stop,'','',1,4)-1)),cpu_cost),
        NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,5)+1,INSTR(partition_stop,'','',1,6)-INSTR(partition_stop,'','',1,5)-1)),io_cost)
@@ -1487,6 +1489,7 @@ SELECT NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INS
        NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,4)+1,INSTR(partition_stop,'','',1,5)-INSTR(partition_stop,'','',1,4)-1)),cpu_cost) session_id,
        NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,5)+1,INSTR(partition_stop,'','',1,6)-INSTR(partition_stop,'','',1,5)-1)),io_cost) session_serial#,
        partition_id sql_exec_id,
+       TO_CHAR(TO_DATE(distribution, ''YYYYMMDDHH24MISS''), ''YYYY-MM-DD HH24:MI:SS'') sql_exec_start,
        TO_CHAR(MIN(timestamp), ''YYYY-MM-DD HH24:MI:SS'')  start_time,
        TO_CHAR(MAX(timestamp), ''YYYY-MM-DD HH24:MI:SS'')  end_time,
        MIN(cost) plan_hash_value,
@@ -1501,6 +1504,7 @@ SELECT NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INS
    AND remarks = ''&&sqld360_sqlid.''
    AND ''&&diagnostics_pack.'' = ''Y''
  GROUP BY partition_id, 
+       TO_CHAR(TO_DATE(distribution, ''YYYYMMDDHH24MISS''), ''YYYY-MM-DD HH24:MI:SS''),
        NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INSTR(partition_stop,'','',1,4)-INSTR(partition_stop,'','',1,3)-1)),position),
        NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,4)+1,INSTR(partition_stop,'','',1,5)-INSTR(partition_stop,'','',1,4)-1)),cpu_cost),
        NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,5)+1,INSTR(partition_stop,'','',1,6)-INSTR(partition_stop,'','',1,5)-1)),io_cost)

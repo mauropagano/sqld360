@@ -1,6 +1,9 @@
+DEF section_id = '2e';
 DEF section_name = 'SQL Monitor';
+EXEC DBMS_APPLICATION_INFO.SET_MODULE('&&sqld360_prefix.','&&section_id.');
 SPO &&sqld360_main_report..html APP;
-PRO <h2>&&section_name.</h2>
+PRO <h2>&&section_id.. &&section_name.</h2>
+PRO <ol start="&&report_sequence.">
 SPO OFF;
 
 COL SQL_ID NOPRI
@@ -37,3 +40,7 @@ SELECT /*+ &&top_level_hints. */
 END;
 /
 @@sqld360_9a_pre_one.sql
+
+SPO &&sqld360_main_report..html APP;
+PRO </ol>
+SPO OFF;

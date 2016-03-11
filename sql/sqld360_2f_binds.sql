@@ -1,6 +1,9 @@
+DEF section_id = '2f';
 DEF section_name = 'Binds';
+EXEC DBMS_APPLICATION_INFO.SET_MODULE('&&sqld360_prefix.','&&section_id.');
 SPO &&sqld360_main_report..html APP;
-PRO <h2>&&section_name.</h2>
+PRO <h2>&&section_id.. &&section_name.</h2>
+PRO <ol start="&&report_sequence.">
 SPO OFF;
 
 
@@ -74,7 +77,7 @@ DEF title = 'Binds with unstable datatype';
 DEF main_table = 'GV$SQL_BIND_CAPTURE';
 BEGIN
   :sql_text := '
-SELECT name, position, MIN(datatype_string) MIN_DATATYPE, MAX(datatype_string) MAX_DATATYPE
+SELECT name, position, COUNT(DISTINCT datatype_string) DISTINCT_DATATYPE, MIN(datatype_string) MIN_DATATYPE, MAX(datatype_string) MAX_DATATYPE
   FROM (SELECT name, position, datatype_string
           FROM gv$sql_bind_capture
          WHERE sql_id = ''&&sqld360_sqlid.''
@@ -90,3 +93,8 @@ SELECT name, position, MIN(datatype_string) MIN_DATATYPE, MAX(datatype_string) M
 END;
 /
 @@sqld360_9a_pre_one.sql
+
+
+SPO &&sqld360_main_report..html APP;
+PRO </ol>
+SPO OFF;

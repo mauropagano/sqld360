@@ -1,7 +1,10 @@
+DEF section_id = '5b';
 DEF section_name = 'SQL Monitor Reports';
+EXEC DBMS_APPLICATION_INFO.SET_MODULE('&&sqld360_prefix.','&&section_id.');
 SPO &&sqld360_main_report..html APP;
-PRO <h2>&&section_name.</h2>
-SPO OFF
+PRO <h2>&&section_id.. &&section_name.</h2>
+PRO <ol start="&&report_sequence.">
+SPO OFF;
 
 DEF title = 'SQL Monitor Reports';
 DEF main_table = 'GV$SQL_MONITOR';
@@ -170,7 +173,9 @@ SPO OFF;
 SET SERVEROUT OFF;
 @sqld360_sqlmon_&&sqld360_sqlid._driver_hist.sql
 
-
+-- report sequence
+EXEC :repo_seq := :repo_seq + 1;
+SELECT TO_CHAR(:repo_seq) report_sequence FROM DUAL;
 
 SET TERM ON
 -- get current time
@@ -186,6 +191,7 @@ SPO &&sqld360_main_report..html APP;
 PRO <li title="&&main_table.">&&title.
 PRO <a href="&&one_spool_filename._sqlmon.zip">zip</a>
 PRO </li>
+PRO </ol>
 SPO OFF;
 HOS zip -jmq 99999_sqld360_&&sqld360_sqlid._drivers sqld360_sqlmon_&&sqld360_sqlid._driver*
 HOS zip -jmq &&one_spool_filename._sqlmon sqld360_sqlmon_&&sqld360_sqlid.*

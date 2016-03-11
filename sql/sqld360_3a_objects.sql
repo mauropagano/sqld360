@@ -1,7 +1,11 @@
+DEF section_id = '3a';
 DEF section_name = 'Objects';
+EXEC DBMS_APPLICATION_INFO.SET_MODULE('&&sqld360_prefix.','&&section_id.');
 SPO &&sqld360_main_report..html APP;
-PRO <h2>&&section_name.</h2>
+PRO <h2>&&section_id.. &&section_name.</h2>
+PRO <ol start="&&report_sequence.">
 SPO OFF;
+
 
 DEF title = 'Tables';
 DEF main_table = 'DBA_TABLES';
@@ -117,10 +121,14 @@ DEF title = 'Columns Usage';
 DEF main_table = 'SYS.COL_USAGE$';
 BEGIN
   :sql_text := '
-SELECT o.object_name, cu.*
+SELECT o.object_name, c.column_name, cu.*
   FROM sys.col_usage$ cu,
-       dba_objects o
+       dba_objects o,
+       dba_tab_cols c
  WHERE cu.obj# = o.object_id
+   AND o.owner = c.owner
+   AND o.object_name = c.table_name
+   AND cu.intcol# = c.column_id
    AND o.object_type = ''TABLE''
    AND (o.owner, o.object_name) IN &&tables_list.
  ORDER BY o.object_name, cu.intcol#
@@ -422,3 +430,7 @@ SELECT /*+ &&top_level_hints. */
 END;
 /
 @@sqld360_9a_pre_one.sql
+
+SPO &&sqld360_main_report..html APP;
+PRO </ol>
+SPO OFF;

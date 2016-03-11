@@ -64,6 +64,10 @@ PRO <li title="&&main_table.">&&title.
 SPO OFF;
 HOS zip -q &&sqld360_main_filename._&&sqld360_file_time. &&sqld360_main_report..html
 
+-- report sequence
+EXEC :repo_seq := :repo_seq + 1;
+SELECT TO_CHAR(:repo_seq) report_sequence FROM DUAL;
+
 -- execute one sql
 @@&&skip_html.&&sqld360_skip_html.sqld360_9b_one_html.sql
 @@&&skip_xml.&&sqld360_skip_xml.sqld360_9i_one_xml.sql

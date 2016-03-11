@@ -11,7 +11,10 @@ PRO
 
 PRO <table><tr class="main">
 
+
 SET SERVEROUT ON ECHO OFF FEEDBACK OFF TIMING OFF 
+
+EXEC :repo_seq := 1;
 
 BEGIN
   FOR i IN (SELECT plan_hash_value
@@ -29,6 +32,7 @@ BEGIN
                     WHERE statement_id LIKE 'SQLD360_ASH_DATA%'
                       AND '&&diagnostics_pack.' = 'Y'
                       AND remarks = '&&sqld360_sqlid.') 
+               WHERE ('&&sqld360_is_insert.' IS NULL AND plan_hash_value <> 0) OR ('&&sqld360_is_insert.' = 'Y')
              ORDER BY 1)
   LOOP
     DBMS_OUTPUT.PUT_LINE('<td class="c">PHV '||i.plan_hash_value||'</td>');
@@ -45,6 +49,10 @@ DEF sqld360_main_report = &&one_spool_filename.
 
 SPO sqld360_plans_analysis_&&sqld360_sqlid._driver.sql
 SET SERVEROUT ON
+
+-- reset the sequence since this is a different page
+EXEC :repo_seq := 1;
+SELECT TO_CHAR(:repo_seq) report_sequence FROM DUAL;
 
 DECLARE
   PROCEDURE put (p_line IN VARCHAR2)
@@ -71,6 +79,7 @@ BEGIN
                      WHERE statement_id LIKE 'SQLD360_ASH_DATA%'
                        AND '&&diagnostics_pack.' = 'Y'
                        AND remarks = '&&sqld360_sqlid.') 
+             WHERE ('&&sqld360_is_insert.' IS NULL AND plan_hash_value <> 0) OR ('&&sqld360_is_insert.' = 'Y')
              ORDER BY 1) 
   LOOP
     put('SET PAGES 50000');
@@ -80,6 +89,9 @@ BEGIN
 
     put('SPO &&one_spool_filename..html APP;');
     put('PRO <h2>Execution Plan</h2> ');
+    put('SET DEF @');
+    put('PRO <ol start="@report_sequence."> ');
+    put('SET DEF &');
     put('SPO OFF');
 
     put('DEF bubbleMaxValue = ''''');
@@ -235,7 +247,11 @@ BEGIN
     put('----------------------------');
 
     put('SPO &&one_spool_filename..html APP;');
+    put('PRO </ol>');
     put('PRO <h2>Elapsed Time</h2> ');
+    put('SET DEF @');
+    put('PRO <ol start="@report_sequence."> ');
+    put('SET DEF &');
     put('SPO OFF');
 
     put('DEF title=''Avg et/exec for recent execs for PHV '||i.plan_hash_value||'''');
@@ -395,7 +411,11 @@ BEGIN
     put('----------------------------');
 
     put('SPO &&one_spool_filename..html APP;');
+    put('PRO </ol>');
     put('PRO <h2>Resource Consumption</h2> ');
+    put('SET DEF @');
+    put('PRO <ol start="@report_sequence."> ');
+    put('SET DEF &');
     put('SPO OFF');
 
     put('DEF title=''Peak PGA and TEMP usage for recent execs for PHV '||i.plan_hash_value||'''');
@@ -805,7 +825,11 @@ BEGIN
     put('----------------------------');
 
     put('SPO &&one_spool_filename..html APP;');
+    put('PRO </ol>');
     put('PRO <h2>Top N</h2> ');
+    put('SET DEF @');
+    put('PRO <ol start="@report_sequence."> ');
+    put('SET DEF &');
     put('SPO OFF');
 
     put('DEF title=''Top 15 Wait events for PHV '||i.plan_hash_value||'''');
@@ -941,18 +965,23 @@ BEGIN
     put('DEF slices = ''15''');
     put('BEGIN');
     put(' :sql_text := ''');
-    put('SELECT step_event,');
-    put('       num_samples,');
-    put('       TRUNC(100*RATIO_TO_REPORT(num_samples) OVER (),2) percent,');
+    put('SELECT data.step||'''' ''''||NVL ( ');
+    put('              (SELECT TRIM(''''.'''' FROM '''' ''''||o.owner||''''.''''||o.object_name||''''.''''||o.subobject_name) FROM dba_objects o WHERE o.object_id = data.obj# AND ROWNUM = 1),'); 
+    put('              (SELECT TRIM(''''.'''' FROM '''' ''''||o.owner||''''.''''||o.object_name||''''.''''||o.subobject_name) FROM dba_objects o WHERE o.data_object_id = data.obj# AND ROWNUM = 1)'); 
+    put('           )||'''' / ''''||data.event  step_event,');
+    put('       data.num_samples,');
+    put('       TRUNC(100*RATIO_TO_REPORT(data.num_samples) OVER (),2) percent,');
     put('       NULL dummy_01');
-    put('  FROM (SELECT id||'''' - ''''||operation||'''' ''''||options||'''' / ''''||object_node step_event,');
+    --put('  FROM (SELECT id||'''' - ''''||operation||'''' ''''||options||'''' / ''''||object_node step_event,');
+    put('  FROM (SELECT id||'''' - ''''||operation||'''' ''''||options step, object_instance obj#, object_node event,');    
     put('               count(*) num_samples');
     put('          FROM plan_table');
     put('         WHERE cost =  '||i.plan_hash_value||'');
     put('           AND remarks = ''''&&sqld360_sqlid.'''''); 
     put('           AND ''''&&diagnostics_pack.'''' = ''''Y''''');
-    put('         GROUP BY id||'''' - ''''||operation||'''' ''''||options||'''' / ''''||object_node'); 
-    put('         ORDER BY 2 DESC)');
+    --put('         GROUP BY id||'''' - ''''||operation||'''' ''''||options||'''' / ''''||object_node'); 
+    put('         GROUP BY id||'''' - ''''||operation||'''' ''''||options, object_instance, object_node'); 
+    put('         ORDER BY 2 DESC) data');
     put(' WHERE rownum <= 15');
     put(''';');
     put('END;');
@@ -1370,7 +1399,11 @@ BEGIN
     -- v1601, top SQL_EXEC_ID
 
     put('SPO &&one_spool_filename..html APP;');
+    put('PRO </ol>');
     put('PRO <h2>Top Executions from memory</h2> ');
+    put('SET DEF @');
+    put('PRO <ol start="@report_sequence."> ');
+    put('SET DEF &');
     put('SPO OFF');
 
     FOR j IN (SELECT inst_id, session_id, session_serial#, sql_exec_id, sql_exec_start, TO_CHAR(min_sample_time, 'YYYYMMDDHH24MISS') min_sample_time, TO_CHAR(max_sample_time, 'YYYYMMDDHH24MISS') max_sample_time
@@ -1612,11 +1645,15 @@ BEGIN
        put('DEF slices = ''15''');
        put('BEGIN');
        put(' :sql_text := ''');
-       put('SELECT step_event,');
-       put('       num_samples,');
-       put('       TRUNC(100*RATIO_TO_REPORT(num_samples) OVER (),2) percent,');
+       put('SELECT data.step||'''' ''''||NVL ( ');
+       put('              (SELECT TRIM(''''.'''' FROM '''' ''''||o.owner||''''.''''||o.object_name||''''.''''||o.subobject_name) FROM dba_objects o WHERE o.object_id = data.obj# AND ROWNUM = 1),'); 
+       put('              (SELECT TRIM(''''.'''' FROM '''' ''''||o.owner||''''.''''||o.object_name||''''.''''||o.subobject_name) FROM dba_objects o WHERE o.data_object_id = data.obj# AND ROWNUM = 1)'); 
+       put('           )||'''' / ''''||data.event  step_event,');
+       put('       data.num_samples,');
+       put('       TRUNC(100*RATIO_TO_REPORT(data.num_samples) OVER (),2) percent,');
        put('       NULL dummy_01');
-       put('  FROM (SELECT id||'''' - ''''||operation||'''' ''''||options||'''' / ''''||object_node step_event,');
+       --put('  FROM (SELECT id||'''' - ''''||operation||'''' ''''||options||'''' / ''''||object_node step_event,');
+       put('  FROM (SELECT id||'''' - ''''||operation||'''' ''''||options step, object_instance obj#, object_node event,'); 
        put('               count(*) num_samples');
        put('          FROM plan_table');
        put('         WHERE statement_id = ''''SQLD360_ASH_DATA_MEM''''');
@@ -1627,8 +1664,9 @@ BEGIN
        put('           AND timestamp BETWEEN TO_DATE('''''||j.min_sample_time||''''', ''''YYYYMMDDHH24MISS'''') AND TO_DATE('''''||j.max_sample_time||''''', ''''YYYYMMDDHH24MISS'''') ');
        put('           AND remarks = ''''&&sqld360_sqlid.'''''); 
        put('           AND ''''&&diagnostics_pack.'''' = ''''Y''''');
-       put('         GROUP BY id||'''' - ''''||operation||'''' ''''||options||'''' / ''''||object_node'); 
-       put('         ORDER BY 2 DESC)');
+       --put('         GROUP BY id||'''' - ''''||operation||'''' ''''||options||'''' / ''''||object_node');
+       put('         GROUP BY id||'''' - ''''||operation||'''' ''''||options, object_instance, object_node');  
+       put('         ORDER BY 2 DESC) data');
        put(' WHERE rownum <= 15');
        put(''';');
        put('END;');
@@ -2045,8 +2083,12 @@ BEGIN
     END LOOP;
 
     put('SPO &&one_spool_filename..html APP;');
+    put('PRO </ol>');
     put('PRO <h2>Top Executions from history</h2> ');
-    put('SPO OFF');    
+    put('SET DEF @');
+    put('PRO <ol start="@report_sequence."> ');
+    put('SET DEF &');
+    put('SPO OFF');  
 
     FOR j IN (SELECT inst_id, session_id, session_serial#, sql_exec_id, sql_exec_start, TO_CHAR(min_sample_time, 'YYYYMMDDHH24MISS') min_sample_time, TO_CHAR(max_sample_time, 'YYYYMMDDHH24MISS') max_sample_time
                 FROM (SELECT inst_id, session_id, session_serial#, sql_exec_id, sql_exec_start,  MIN(sample_time) min_sample_time, MAX(sample_time) max_sample_time, COUNT(*) num_samples
@@ -2286,11 +2328,15 @@ BEGIN
        put('DEF slices = ''15''');
        put('BEGIN');
        put(' :sql_text := ''');
-       put('SELECT step_event,');
-       put('       num_samples,');
-       put('       TRUNC(100*RATIO_TO_REPORT(num_samples) OVER (),2) percent,');
+       put('SELECT data.step||'''' ''''||NVL ( ');
+       put('              (SELECT TRIM(''''.'''' FROM '''' ''''||o.owner||''''.''''||o.object_name||''''.''''||o.subobject_name) FROM dba_objects o WHERE o.object_id = data.obj# AND ROWNUM = 1),'); 
+       put('              (SELECT TRIM(''''.'''' FROM '''' ''''||o.owner||''''.''''||o.object_name||''''.''''||o.subobject_name) FROM dba_objects o WHERE o.data_object_id = data.obj# AND ROWNUM = 1)'); 
+       put('           )||'''' / ''''||data.event  step_event,');
+       put('       data.num_samples,');
+       put('       TRUNC(100*RATIO_TO_REPORT(data.num_samples) OVER (),2) percent,');
        put('       NULL dummy_01');
-       put('  FROM (SELECT id||'''' - ''''||operation||'''' ''''||options||'''' / ''''||object_node step_event,');
+       --put('  FROM (SELECT id||'''' - ''''||operation||'''' ''''||options||'''' / ''''||object_node step_event,');
+       put('  FROM (SELECT id||'''' - ''''||operation||'''' ''''||options step, object_instance obj#, object_node event,'); 
        put('               count(*) num_samples');
        put('          FROM plan_table');
        put('         WHERE statement_id = ''''SQLD360_ASH_DATA_HIST''''');
@@ -2301,8 +2347,9 @@ BEGIN
        put('           AND timestamp BETWEEN TO_DATE('''''||j.min_sample_time||''''', ''''YYYYMMDDHH24MISS'''') AND TO_DATE('''''||j.max_sample_time||''''', ''''YYYYMMDDHH24MISS'''') ');
        put('           AND remarks = ''''&&sqld360_sqlid.'''''); 
        put('           AND ''''&&diagnostics_pack.'''' = ''''Y''''');
-       put('         GROUP BY id||'''' - ''''||operation||'''' ''''||options||'''' / ''''||object_node'); 
-       put('         ORDER BY 2 DESC)');
+       --put('         GROUP BY id||'''' - ''''||operation||'''' ''''||options||'''' / ''''||object_node'); 
+       put('         GROUP BY id||'''' - ''''||operation||'''' ''''||options, object_instance, object_node'); 
+       put('         ORDER BY 2 DESC) data');
        put(' WHERE rownum <= 15');
        put(''';');
        put('END;');
@@ -2712,6 +2759,7 @@ BEGIN
        put('----------------------------');       
 
        put('SPO &&one_spool_filename..html APP;');
+       put('PRO </ol>');
        put('PRO <br>');
        put('SPO OFF');
       

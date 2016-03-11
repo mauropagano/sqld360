@@ -9,8 +9,8 @@ CL COL;
 COL row_num FOR 9999999 HEA '#' PRI;
 
 -- version
-DEF sqld360_vYYNN = 'v1607';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2016-02-28)';
+DEF sqld360_vYYNN = 'v1608';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2016-03-12)';
 DEF sqld360_prefix = 'sqld360';
 
 -- get dbid
@@ -24,6 +24,25 @@ PRO SQL_ID of the SQL to be extracted (required)
 PRO
 COL sqld360_sqlid new_V sqld360_sqlid FOR A15;
 SELECT TRIM('&1.') sqld360_sqlid FROM DUAL;
+
+WHENEVER SQLERROR EXIT;
+DECLARE
+  sqlid_length NUMBER;
+BEGIN
+  SELECT LENGTH(TRANSLATE('&&sqld360_sqlid.',
+                   'abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHJKLMNOPQRSTUVWXYZ-_ ''`~!@#$%&*()=+[]{}\|;:",.<>/?',
+                   'abcdefghijklmnopqrstuvwxyz0123456789')) 
+    INTO sqlid_length
+    FROM DUAL;
+
+  -- SQLID should be 13 chars, at least today in 2016 :-)
+  IF sqlid_length <> 13 THEN
+    RAISE_APPLICATION_ERROR(-20100, 'SQL ID provided looks incorrect!!!');
+  END IF;
+END;
+/
+WHENEVER SQLERROR CONTINUE;
+
 --set a bind too
 VAR sqld360_sqlid VARCHAR2(13);
 BEGIN 
@@ -207,10 +226,13 @@ SELECT value||DECODE(INSTR(value, '/'), 0, '\', '/') sqld360_diagtrace_path FROM
 COL sqld360_spid NEW_V sqld360_spid FOR A5;
 SELECT TO_CHAR(spid) sqld360_spid FROM v$session s, v$process p WHERE s.sid = SYS_CONTEXT('USERENV', 'SID') AND p.addr = s.paddr;
 
--- get sqltxt
+-- get sqltxt and command_type
 COL sqld360_sqltxt NEW_V sqld360_sqltxt
+-- COMMAND_TYPE = 2 is INSERT, likely to never change (eventually will use X$KEACMDN / WRH$_SQLCOMMAND_NAME)
+COL sqld360_is_insert NEW_V sqld360_is_insert
 SELECT SUBSTR(sql_text,1,50) sqld360_sqltxt FROM v$sqltext_with_newlines WHERE sql_id = '&&sqld360_sqlid.' AND piece = 0 AND rownum = 1;
-SELECT SUBSTR(sql_text,1,50) sqld360_sqltxt FROM dba_hist_sqltext WHERE sql_id = '&&sqld360_sqlid.' AND rownum = 1;
+SELECT CASE WHEN command_type = 2 THEN 'Y' END sqld360_is_insert FROM v$sql WHERE sql_id = '&&sqld360_sqlid.' AND rownum = 1;
+SELECT SUBSTR(sql_text,1,50) sqld360_sqltxt, CASE WHEN command_type = 2 THEN 'Y' END sqld360_is_insert FROM dba_hist_sqltext WHERE sql_id = '&&sqld360_sqlid.' AND rownum = 1;
 
 -- get sql full text
 VAR sqld360_fullsql CLOB;
@@ -443,6 +465,7 @@ COL hh_mm_ss NEW_V hh_mm_ss FOR A8;
 COL title_no_spaces NEW_V title_no_spaces;
 COL spool_filename NEW_V spool_filename;
 COL one_spool_filename NEW_V one_spool_filename;
+COL report_sequence NEW_V report_sequence;
 VAR row_count NUMBER;
 -- next two are using to hold the reports SQL
 VAR sql_text CLOB;
@@ -450,6 +473,12 @@ VAR sql_text_backup CLOB;
 --VAR sql_text_backup2 CLOB;
 VAR sql_text_display CLOB;
 VAR file_seq NUMBER;
+VAR repo_seq NUMBER;
+-- the next one is used to store the report sequence before moving to a second-layer page
+VAR repo_seq_bck NUMBER;
+EXEC :repo_seq := 1;
+SELECT TO_CHAR(:repo_seq) report_sequence FROM DUAL;
+EXEC :repo_seq_bck := 0;
 EXEC :file_seq := 5;
 VAR get_time_t0 NUMBER;
 VAR get_time_t1 NUMBER;

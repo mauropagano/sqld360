@@ -27,9 +27,13 @@
 SET PAGES 50000
 
 DEF max_rows = '100000';
+
+DEF section_id = '5f';
 DEF section_name = 'ASH Raw Data';
+EXEC DBMS_APPLICATION_INFO.SET_MODULE('&&sqld360_prefix.','&&section_id.');
 SPO &&sqld360_main_report..html APP;
-PRO <h2>&&section_name.</h2>
+PRO <h2>&&section_id.. &&section_name.</h2>
+PRO <ol start="&&report_sequence.">
 SPO OFF;
 
 DEF title = 'Raw Data';
@@ -95,3 +99,7 @@ SELECT /*+ &&top_level_hints. */
 END;
 /
 @@sqld360_9a_pre_one.sql
+
+SPO &&sqld360_main_report..html APP;
+PRO </ol>
+SPO OFF;

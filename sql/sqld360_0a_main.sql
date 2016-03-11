@@ -38,12 +38,12 @@ PRO
 SPO OFF;
 
 @@sqld360_2a_plans.sql
-@@sqld360_2e_plan_control.sql
-@@sqld360_2b_performance.sql
-@@&&from_edb360.&&skip_force_match.&&sqld360_skip_fmatch.sqld360_2g_performance_fm.sql
-@@&&skip_tuning.&&skip_10g.sqld360_2h_sql_monitor.sql
-@@sqld360_2c_binds.sql
-@@sqld360_2d_cursor_sharing.sql
+@@sqld360_2b_plan_control.sql
+@@sqld360_2c_performance.sql
+@@&&from_edb360.&&skip_force_match.&&sqld360_skip_fmatch.sqld360_2d_performance_fm.sql
+@@&&skip_tuning.&&skip_10g.sqld360_2e_sql_monitor.sql
+@@sqld360_2f_binds.sql
+@@sqld360_2g_cursor_sharing.sql
 
 PRO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -56,11 +56,11 @@ PRO
 SPO OFF;
 
 @@sqld360_3a_objects.sql
-@@sqld360_3g_checks.sql
+@@sqld360_3b_checks.sql
 @@&&sqld360_skip_stats_h.sqld360_3c_stats_history.sql
-@@&&skip_10g.&&skip_11g.&&skip_12r101.sqld360_3e_inmemory.sql
-@@&&skip_10g.&&skip_11g.sqld360_3f_bt_cache.sql
-@@&&sqld360_skip_metadata.sqld360_3d_metadata.sql
+@@&&skip_10g.&&skip_11g.&&skip_12r101.sqld360_3d_inmemory.sql
+@@&&skip_10g.&&skip_11g.sqld360_3e_bt_cache.sql
+@@&&sqld360_skip_metadata.sqld360_3f_metadata.sql
 
 
 PRO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -85,13 +85,13 @@ PRO </td><td>
 PRO
 SPO OFF;
 
-@@&&skip_10g.&&skip_11r1.sqld360_5f_10053.sql
+@@&&skip_10g.&&skip_11r1.sqld360_5a_10053.sql
 @@&&skip_tuning.&&skip_10g.&&sqld360_skip_sqlmon.sqld360_5b_sqlmon.sql
-@@&&skip_diagnostics.&&sqld360_skip_awrrpt.sqld360_5d_awr.sql
-@@&&skip_diagnostics.&&sqld360_skip_ashrpt.sqld360_5c_ash.sql
-@@&&skip_tcb.&&skip_10g.&&sqld360_skip_tcb.sqld360_5a_tcb.sql
-@@&&from_edb360.&&skip_diagnostics.&&sqld360_skip_rawash.sqld360_5r_rawash.sql
-@@&&from_edb360.&&skip_diagnostics.&&sqld360_skip_eadam.sqld360_5e_eadam_ash.sql
+@@&&skip_diagnostics.&&sqld360_skip_awrrpt.sqld360_5c_awr.sql
+@@&&skip_diagnostics.&&sqld360_skip_ashrpt.sqld360_5d_ash.sql
+@@&&skip_tcb.&&skip_10g.&&sqld360_skip_tcb.sqld360_5e_tcb.sql
+@@&&from_edb360.&&skip_diagnostics.&&sqld360_skip_rawash.sqld360_5f_rawash.sql
+@@&&from_edb360.&&skip_diagnostics.&&sqld360_skip_eadam.sqld360_5g_eadam_ash.sql
 
 PRO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

@@ -2,12 +2,16 @@
    Extracted from eAdam
 */
 
+DEF section_id = '5f';
 DEF section_name = 'eAdam';
+EXEC DBMS_APPLICATION_INFO.SET_MODULE('&&sqld360_prefix.','&&section_id.');
+SPO &&sqld360_main_report..html APP;
+PRO <h2>&&section_id.. &&section_name.</h2>
+PRO <ol start="&&report_sequence.">
+SPO OFF;
+
 DEF title = 'eAdam ASH';
 DEF main_table = 'DBA_HIST_ACTIVE_SESS_HISTORY';
-SPO &&sqld360_main_report..html APP;
-PRO <h2>&&section_name.</h2>
-SPO OFF
 
 @@sqld360_0s_pre_nondef
 
@@ -96,6 +100,7 @@ SPO &&sqld360_main_report..html APP;
 PRO <li title="&&main_table.">&&title.
 PRO <a href="&&one_spool_filename..tar">tar</a>
 PRO </li>
+PRO </ol>
 SPO OFF;
 
 HOS zip -mq &&sqld360_main_filename._&&sqld360_file_time. &&one_spool_filename..tar

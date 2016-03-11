@@ -1,6 +1,9 @@
+DEF section_id = '2a';
 DEF section_name = 'Plans';
+EXEC DBMS_APPLICATION_INFO.SET_MODULE('&&sqld360_prefix.','&&section_id.');
 SPO &&sqld360_main_report..html APP;
-PRO <h2>&&section_name.</h2>
+PRO <h2>&&section_id.. &&section_name.</h2>
+PRO <ol start="&&report_sequence.">
 SPO OFF;
 
 DEF title = 'Plans from Memory';
@@ -332,5 +335,14 @@ SPO &&sqld360_main_report..html APP;
 PRO <li>Plans Details 
 PRO <a href="&&one_spool_filename..html">page</a> <small><em>(&&num_plans.)</em></small> 
 PRO </li>
+PRO </ol>
 SPO OFF;
+
+-- this is hardcoded because there are 5 reports in 2a
+EXEC :repo_seq_bck := :repo_seq+5;
+
 @@sqld360_2f_plans_analysis.sql
+
+-- the +1 is to make the <LI> start from the next value
+EXEC :repo_seq := :repo_seq_bck+1;
+SELECT TO_CHAR(:repo_seq) report_sequence FROM DUAL;

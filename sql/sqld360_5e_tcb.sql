@@ -1,9 +1,13 @@
+DEF section_id = '5e';
 DEF section_name = 'Testcase';
+EXEC DBMS_APPLICATION_INFO.SET_MODULE('&&sqld360_prefix.','&&section_id.');
+SPO &&sqld360_main_report..html APP;
+PRO <h2>&&section_id.. &&section_name.</h2>
+PRO <ol start="&&report_sequence.">
+SPO OFF;
+
 DEF title = 'TCB Testcase';
 DEF main_table = 'DBMS_SQLDIAG';
-SPO &&sqld360_main_report..html APP;
-PRO <h2>&&section_name.</h2>
-SPO OFF
 
 @@sqld360_5t_finddir.sql
 
@@ -60,11 +64,16 @@ SET PAGES 50000
 
 HOS zip -q &&sqld360_main_filename._&&sqld360_file_time. &&sqld360_log..txt
 
+-- report sequence
+EXEC :repo_seq := :repo_seq + 1;
+SELECT TO_CHAR(:repo_seq) report_sequence FROM DUAL;
+
 -- update main report
 SPO &&sqld360_main_report..html APP;
 PRO <li title="&&main_table.">&&title.
 PRO <a href="&&one_spool_filename._tcb.zip">zip</a>
 PRO </li>
+PRO </ol>
 SPO OFF;
 HOS zip -jmq &&one_spool_filename._tcb &&tcb_path./sqld360_&&sqld360_sqlid.*
 HOS zip -mq &&sqld360_main_filename._&&sqld360_file_time. &&one_spool_filename._tcb.zip

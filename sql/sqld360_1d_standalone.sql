@@ -147,6 +147,7 @@ SPO &&sqld360_main_report..html APP;
 PRO <li title="&&main_table.">&&title.
 PRO <a href="&&one_spool_filename..sql">sql</a>
 PRO </li>
+PRO </ol>
 SPO OFF;
 --HOS zip -jmq 99999_sqld360_&&sqld360_sqlid._drivers sqld360_xpand_&&sqld360_sqlid._driver.sql
 HOS zip -mq &&sqld360_main_filename._&&sqld360_file_time. &&one_spool_filename..sql
