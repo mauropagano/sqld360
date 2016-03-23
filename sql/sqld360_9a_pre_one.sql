@@ -7,11 +7,13 @@ SELECT TO_CHAR(SYSDATE, 'HH24:MI:SS') hh_mm_ss FROM DUAL;
 SELECT REPLACE(TRANSLATE('&&title.',
 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 ''`~!@#$%^*()-_=+[]{}\|;:",.<>/?'||CHR(0)||CHR(9)||CHR(10)||CHR(13)||CHR(38),
 'abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz0123456789_'), '__', '_') title_no_spaces FROM DUAL;
-SELECT '&&common_sqld360_prefix._&&column_number._&&title_no_spaces.' spool_filename FROM DUAL;
+--SELECT '&&common_sqld360_prefix._&&column_number._&&title_no_spaces.' spool_filename FROM DUAL;
+SELECT '&&common_sqld360_prefix._&&section_id._&&report_sequence._&&title_no_spaces.' spool_filename FROM DUAL;
 SET HEA OFF;
 SET TERM ON;
 
 -- log
+SELECT '0' row_num FROM DUAL;
 SPO &&sqld360_log..txt APP;
 PRO
 PRO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -24,7 +26,6 @@ PRINT sql_text;
 
 SET TERM OFF;
 --PRO &&hh_mm_ss. col:&&column_number.of&&max_col_number.. Computing COUNT(*)...
-SELECT '0' row_num FROM DUAL;
 PRO &&hh_mm_ss. col:&&column_number.of&&max_col_number..
 --EXEC :row_count := -1;
 EXEC :sql_text_display := TRIM(CHR(10) FROM :sql_text)||';';
@@ -53,7 +54,7 @@ HOS zip -q &&sqld360_main_filename._&&sqld360_file_time. &&sqld360_log..txt
 
 -- spools query
 SPO &&common_sqld360_prefix._query.sql;
-SELECT 'SELECT TO_CHAR(ROWNUM) row_num, v0.* FROM ('||CHR(10)||TRIM(CHR(10) FROM :sql_text)||CHR(10)||') v0 WHERE ROWNUM <= &&max_rows.' FROM DUAL;
+SELECT 'SELECT TO_CHAR(ROWNUM) row_num, v0.* /* &&section_id..&&report_sequence. */ FROM ('||CHR(10)||TRIM(CHR(10) FROM :sql_text)||CHR(10)||') v0 WHERE ROWNUM <= &&max_rows.' FROM DUAL;
 SPO OFF;
 SET HEA ON;
 GET &&common_sqld360_prefix._query.sql
@@ -63,10 +64,6 @@ SPO &&sqld360_main_report..html APP;
 PRO <li title="&&main_table.">&&title.
 SPO OFF;
 HOS zip -q &&sqld360_main_filename._&&sqld360_file_time. &&sqld360_main_report..html
-
--- report sequence
-EXEC :repo_seq := :repo_seq + 1;
-SELECT TO_CHAR(:repo_seq) report_sequence FROM DUAL;
 
 -- execute one sql
 @@&&skip_html.&&sqld360_skip_html.sqld360_9b_one_html.sql
@@ -97,7 +94,11 @@ DEF skip_bch = 'Y';
 DEF skip_tch = 'Y';
 DEF skip_uch = 'Y';
 DEF title_suffix = '';
-DEF haxis = '&&db_version. dbname:&&database_name_short. host:&&host_name_short. (avg cpu_count: &&avg_cpu_count.)';
+DEF haxis = '&&db_version. dbmod:&&sqld360_dbmod. host:&&host_hash. (avg cpu_count: &&avg_cpu_count.)';
+
+-- report sequence
+EXEC :repo_seq := :repo_seq + 1;
+SELECT TO_CHAR(:repo_seq) report_sequence FROM DUAL;
 
 -- needed reset after eventual sqlmon above
 SET TERM OFF; 

@@ -2,7 +2,7 @@ SPO &&one_spool_filename..html APP;
 PRO </head>
 @sql/sqld360_0d_html_header.sql
 PRO <body>
-PRO <h1><em>&&sqld360_conf_tool_page.SQLd360</a></em> &&sqld360_vYYNN.: SQL 360-degree view - Partitions Page &&sqld360_conf_all_pages_logo.</h1>
+PRO <h1><em>&&sqld360_conf_tool_page.SQLd360</a></em> &&sqld360_vYYNN.: SQL 360-degree view - &&section_id.. Partitions Page &&sqld360_conf_all_pages_logo.</h1>
 PRO
 PRO <pre>
 PRO sqlid:&&sqld360_sqlid. dbname:&&database_name_short. version:&&db_version. host:&&host_name_short. license:&&license_pack. days:&&history_days. today:&&sqld360_time_stamp.

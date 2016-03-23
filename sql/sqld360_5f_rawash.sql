@@ -26,8 +26,6 @@
 
 SET PAGES 50000
 
-DEF max_rows = '100000';
-
 DEF section_id = '5f';
 DEF section_name = 'ASH Raw Data';
 EXEC DBMS_APPLICATION_INFO.SET_MODULE('&&sqld360_prefix.','&&section_id.');

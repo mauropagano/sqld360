@@ -609,7 +609,7 @@ SELECT 0 snap_id,
                TRUNC(MEDIAN(cpu_time),3) med_cpu_time,
                TRUNC(PERCENTILE_DISC(0.&&sqld360_conf_avg_et_percth.) WITHIN GROUP (ORDER BY cpu_time),3) percth_cpu_time,
                TRUNC(AVG(db_time),3) avg_db_time,
-               TRUNC(MEDIAN(db_time) med_db_time,
+               TRUNC(MEDIAN(db_time),3) med_db_time,
                TRUNC(PERCENTILE_DISC(0.&&sqld360_conf_avg_et_percth.) WITHIN GROUP (ORDER BY db_time),3) percth_db_time
           FROM (SELECT TO_DATE(SUBSTR(distribution,1,12),''YYYYMMDDHH24MI'') start_time,
                        NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INSTR(partition_stop,'','',1,4)-INSTR(partition_stop,'','',1,3)-1)),position)||''-''|| 

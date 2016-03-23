@@ -145,12 +145,16 @@ DECLARE
 BEGIN
   FOR i IN (SELECT * 
               FROM (SELECT report_id,
-                           TO_NUMBER(EXTRACTVALUE(XMLType(report_summary),'/report_repository_summary/sql/stats/stat[@name="elapsed_time"]')) elapsed,
-                           EXTRACTVALUE(XMLType(report_summary),'/report_repository_summary/sql/@sql_exec_id') sql_exec_id,
-                           EXTRACTVALUE(XMLType(report_summary),'/report_repository_summary/sql/@sql_exec_start') sql_exec_start
+                           --TO_NUMBER(EXTRACTVALUE(XMLType(report_summary),'/report_repository_summary/sql/stats/stat[@name="elapsed_time"]')) 
+                           substr(key4,instr(key4,'#')+1, instr(key4,'#',1,2)-instr(key4,'#',1)-1) elapsed,  
+                           --EXTRACTVALUE(XMLType(report_summary),'/report_repository_summary/sql/@sql_exec_id') 
+                           key2 sql_exec_id,
+                           --EXTRACTVALUE(XMLType(report_summary),'/report_repository_summary/sql/@sql_exec_start') 
+                           key3 sql_exec_start
                       FROM dba_hist_reports
                      WHERE component_name = 'sqlmonitor'
-                       AND EXTRACTVALUE(XMLType(report_summary),'/report_repository_summary/sql/@sql_id') = '&&sqld360_sqlid.' 
+                       --AND EXTRACTVALUE(XMLType(report_summary),'/report_repository_summary/sql/@sql_id') = '&&sqld360_sqlid.' 
+                       AND key1 = '&&sqld360_sqlid.'
                        AND '&&tuning_pack.' = 'Y' 
                        AND '&&sqlmon_hist.' = 'Y'
                      ORDER BY 2 DESC)

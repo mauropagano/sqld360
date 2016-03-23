@@ -9,13 +9,9 @@ CL COL;
 COL row_num FOR 9999999 HEA '#' PRI;
 
 -- version
-DEF sqld360_vYYNN = 'v1608';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2016-03-12)';
+DEF sqld360_vYYNN = 'v1609';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2016-03-22)';
 DEF sqld360_prefix = 'sqld360';
-
--- get dbid
-COL sqld360_dbid NEW_V sqld360_dbid;
-SELECT TRIM(TO_CHAR(dbid)) sqld360_dbid FROM v$database;
 
 -- parameters
 PRO
@@ -98,12 +94,17 @@ BEGIN
 END;
 /
 
-COL history_days NEW_V history_days;
--- range: takes at least 31 days and at most as many as actual history, with a default of 31. parameter restricts within that range. 
-SELECT TO_CHAR(LEAST(CEIL(SYSDATE - CAST(MIN(begin_interval_time) AS DATE)),  TO_NUMBER(NVL('&&sqld360_fromedb360_days.', '&&sqld360_conf_days.')))) history_days FROM dba_hist_snapshot WHERE '&&diagnostics_pack.' = 'Y' AND dbid = &&sqld360_dbid.;
-SELECT '0' history_days FROM DUAL WHERE NVL(TRIM('&&diagnostics_pack.'), 'N') = 'N';
+-- get dbid
+COL sqld360_dbid NEW_V sqld360_dbid;
+SELECT TRIM(TO_CHAR(dbid)) sqld360_dbid FROM v$database;
 
-DEF skip_script = 'sql/sqld360_0f_skip_script.sql ';
+-- get dbmod
+COL sqld360_dbmod NEW_V sqld360_dbmod;
+SELECT LPAD(MOD(dbid,1e6),6,'6') sqld360_dbmod FROM v$database;
+
+-- get host hash
+COL host_hash NEW_V host_hash;
+SELECT LPAD(ORA_HASH(SYS_CONTEXT('USERENV', 'SERVER_HOST'),999999),6,'6') host_hash FROM DUAL;
 
 -- get instance number
 COL connect_instance_number NEW_V connect_instance_number;
@@ -128,6 +129,13 @@ SELECT SUBSTR('&&host_name_short.', 1, INSTR('&&host_name_short..', '.') - 1) ho
 SELECT TRANSLATE('&&host_name_short.',
 'abcdefghijklmnopqrstuvwxyz0123456789-_ ''`~!@#$%&*()=+[]{}\|;:",.<>/?'||CHR(0)||CHR(9)||CHR(10)||CHR(13)||CHR(38),
 'abcdefghijklmnopqrstuvwxyz0123456789-_') host_name_short FROM DUAL;
+
+COL history_days NEW_V history_days;
+-- range: takes at least 31 days and at most as many as actual history, with a default of 31. parameter restricts within that range. 
+SELECT TO_CHAR(LEAST(CEIL(SYSDATE - CAST(MIN(begin_interval_time) AS DATE)),  TO_NUMBER(NVL('&&sqld360_fromedb360_days.', '&&sqld360_conf_days.')))) history_days FROM dba_hist_snapshot WHERE '&&diagnostics_pack.' = 'Y' AND dbid = &&sqld360_dbid.;
+SELECT '0' history_days FROM DUAL WHERE NVL(TRIM('&&diagnostics_pack.'), 'N') = 'N';
+
+DEF skip_script = 'sql/sqld360_0f_skip_script.sql ';
 
 -- number fo rows per report
 COL row_num NEW_V row_num HEA '#' PRI;
@@ -357,7 +365,7 @@ SELECT CASE '&&sqld360_conf_incl_tcb.' WHEN 'N' THEN '--' END sqld360_skip_tcb F
 
 COL sqld360_tcb_exp_data NEW_V sqld360_tcb_exp_data;
 COL sqld360_tcb_exp_sample NEW_V sqld360_tcb_exp_sample;
-SELECT CASE '&&sqld360_conf_tcb_sample.' WHEN '0' THEN 'FALSE' ELSE 'TRUE' END sqld360_tcb_exp_data, LEAST(TO_NUMBER('&&sqld360_conf_tcb_sample.'),100) sqld360_tcb_exp_sample FROM dual;
+SELECT CASE WHEN '&&sqld360_conf_tcb_sample.' BETWEEN '1' AND '100' THEN 'TRUE' ELSE 'FALSE' END sqld360_tcb_exp_data, LEAST(TO_NUMBER('&&sqld360_conf_tcb_sample.'),100) sqld360_tcb_exp_sample FROM dual;
 
 -- setup
 DEF sql_trace_level = '1';
@@ -365,13 +373,13 @@ DEF main_table = '';
 DEF title = '';
 DEF title_no_spaces = '';
 DEF title_suffix = '';
-DEF common_sqld360_prefix = '&&sqld360_prefix._&&database_name_short._&&sqld360_sqlid.';
+DEF common_sqld360_prefix = '&&sqld360_prefix._&&sqld360_dbmod._&&sqld360_sqlid.';
 DEF sqld360_main_report = '00001_&&common_sqld360_prefix._index';
 DEF sqld360_log = '00002_&&common_sqld360_prefix._log';
 -- this is for eDB360 to pull the log in case the execution fails
 UPDATE plan_table SET remarks = '&&sqld360_log..txt'  WHERE statement_id = 'SQLD360_SQLID' and operation = '&&sqld360_sqlid.';
 DEF sqld360_tkprof = '00003_&&common_sqld360_prefix._tkprof';
-DEF sqld360_main_filename = '&&common_sqld360_prefix._&&host_name_short.';
+DEF sqld360_main_filename = '&&common_sqld360_prefix._&&host_hash.';  -- need to change this
 DEF sqld360_log2 = '00004_&&common_sqld360_prefix._log2';
 DEF sqld360_tracefile_identifier = '&&common_sqld360_prefix.';
 DEF sqld360_copyright = ' (c) 2015';
@@ -416,7 +424,7 @@ DEF bubblesDetails = '';
 DEF sql_text = '';
 DEF chartype = '';
 DEF stacked = '';
-DEF haxis = '&&db_version. dbname:&&database_name_short. host:&&host_name_short. (avg cpu_count: &&avg_cpu_count.)';
+DEF haxis = '&&db_version. dbname:&&sqld360_dbmod. host:&&host_hash. (avg cpu_count: &&avg_cpu_count.)';
 DEF vaxis = '';
 DEF vbaseline = '';
 DEF tit_01 = '';
@@ -497,6 +505,10 @@ ALTER SESSION SET NLS_COMP = 'BINARY';
 ALTER SESSION SET "_optimizer_order_by_elimination_enabled"=false; 
 -- to work around bug 19567916
 ALTER SESSION SET "_optimizer_aggr_groupby_elim"=false; 
+-- workaround bug 21150273
+ALTER SESSION SET "_optimizer_dsdir_usage_control"=0;
+ALTER SESSION SET "_sql_plan_directive_mgmt_control" = 0;
+ALTER SESSION SET optimizer_dynamic_sampling = 0;
 -- workaround nigeria
 ALTER SESSION SET "_gby_hash_aggregation_enabled" = TRUE;
 ALTER SESSION SET "_hash_join_enabled" = TRUE;
@@ -508,7 +520,8 @@ ALTER SESSION SET db_file_multiblock_read_count = 128;
 ALTER SESSION SET optimizer_index_caching = 0;
 -- to work around Siebel
 ALTER SESSION SET optimizer_index_cost_adj = 100;
-ALTER SESSION SET optimizer_dynamic_sampling = 2;
+-- leaving the next one here to remember we used to set it
+--ALTER SESSION SET optimizer_dynamic_sampling = 2;
 ALTER SESSION SET "_always_semi_join" = CHOOSE;
 ALTER SESSION SET "_and_pruning_enabled" = TRUE;
 ALTER SESSION SET "_subquery_pruning_enabled" = TRUE;
@@ -557,7 +570,7 @@ PRO <body>
 PRO <h1><em>&&sqld360_conf_tool_page.SQLd360</a></em> &&sqld360_vYYNN.: SQL 360-degree view &&sqld360_conf_all_pages_logo.</h1>
 PRO
 PRO <pre>
-PRO sqlid:&&sqld360_sqlid. dbname:&&database_name_short. version:&&db_version. host:&&host_name_short. license:&&license_pack. days:&&history_days. today:&&sqld360_time_stamp.
+PRO sqlid:&&sqld360_sqlid. dbname:&&sqld360_dbmod. version:&&db_version. host:&&host_hash. license:&&license_pack. days:&&history_days. today:&&sqld360_time_stamp.
 PRO </pre>
 PRO
 SPO OFF;

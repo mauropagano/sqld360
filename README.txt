@@ -16,7 +16,7 @@ Steps
    $ cd sqld360
    $ sqlplus dba_user/dba_pwd
 
-2. Execute sqld360.sql indicating three input parameters. The first one is to specify 
+2. Execute sqld360.sql indicating two input parameters. The first one is to specify 
    the SQL ID for the SQL you want to analyze. The second one is to specify if your 
    database is licensed for the Oracle Tuning Pack, the Diagnostics Pack or None 
    [ T | D | N ]. Example below specifies SQL ID 0vy6pt4krb3gm, Tuning Pack. 

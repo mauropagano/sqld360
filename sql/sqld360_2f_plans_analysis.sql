@@ -2,7 +2,7 @@ SPO &&one_spool_filename..html APP;
 PRO </head>
 @sql/sqld360_0d_html_header.sql
 PRO <body>
-PRO <h1><em>&&sqld360_conf_tool_page.SQLd360</a></em> &&sqld360_vYYNN.: SQL 360-degree view - Plans Details Page &&sqld360_conf_all_pages_logo.</h1>
+PRO <h1><em>&&sqld360_conf_tool_page.SQLd360</a></em> &&sqld360_vYYNN.: SQL 360-degree view - &&section_id.. Plans Details Page &&sqld360_conf_all_pages_logo.</h1>
 PRO
 PRO <pre>
 PRO sqlid:&&sqld360_sqlid. dbname:&&database_name_short. version:&&db_version. host:&&host_name_short. license:&&license_pack. days:&&history_days. today:&&sqld360_time_stamp.
@@ -182,7 +182,7 @@ BEGIN
     put('                    AND remarks = ''''&&sqld360_sqlid.''''');
     put('                  GROUP BY NVL(id,0))');
     put('SELECT ''''{v: ''''''''''''||plandata.adapt_id||'''''''''''',f: ''''''''''''||plandata.adapt_id||'''' - ''''||operation||'''' ''''||options||NVL2(object_name,''''<br>'''','''' '''')||object_name||''''''''''''}'''' id, ');
-    put('       parent_id, ''''Step ID:''''||plandata.adapt_id||'''' (ASH Step ID:''''||plandata.id||'''') ASH Samples:''''||NVL(ashdata.num_samples,0), plandata.adapt_id id3');
+    put('       parent_id, ''''Step ID:''''||plandata.adapt_id||'''' (ASH Step ID:''''||plandata.id||'''') ASH Samples:''''||NVL(ashdata.num_samples,0)||'''' (''''||TRUNC(100*NVL(RATIO_TO_REPORT(ashdata.num_samples) OVER (),0),2)||''''%)'''' , plandata.adapt_id id3');
      put('  FROM (SELECT id, adapt_id, NVL(adapt_parent_id, parent_id) parent_id, operation, options, object_name '); 
     put('          FROM (WITH skp_steps AS (SELECT sql_id, plan_hash_value, extractvalue(value(b),''''/row/@op'''') stepid, extractvalue(value(b),''''/row/@skp'''') skp,');
     put('                                          extractvalue(value(b),''''/row/@dep'''') dep');
@@ -908,10 +908,9 @@ BEGIN
 --    put(' WHERE rownum <= 15');
 
     put('SELECT data.obj#||');
-    put('       NVL(');
-    put('       (SELECT TRIM(''''.'''' FROM '''' ''''||o.owner||''''.''''||o.object_name||''''.''''||o.subobject_name) FROM dba_objects o WHERE o.object_id = data.obj# AND ROWNUM = 1),'); 
-    put('       (SELECT TRIM(''''.'''' FROM '''' ''''||o.owner||''''.''''||o.object_name||''''.''''||o.subobject_name) FROM dba_objects o WHERE o.data_object_id = data.obj# AND ROWNUM = 1)'); 
-    put('       ) data_object,');
+    put('       CASE WHEN data.obj# = 0 THEN ''''UNDO''''  ');
+    put('            ELSE (SELECT TRIM(''''.'''' FROM '''' ''''||o.owner||''''.''''||o.object_name||''''.''''||o.subobject_name) FROM dba_objects o WHERE o.object_id = data.obj# AND ROWNUM = 1)'); 
+    put('       END data_object,');
     put('       num_samples,');
     put('       TRUNC(100*RATIO_TO_REPORT(num_samples) OVER (),2) percent,');
     put('       NULL dummy_01');
@@ -965,10 +964,9 @@ BEGIN
     put('DEF slices = ''15''');
     put('BEGIN');
     put(' :sql_text := ''');
-    put('SELECT data.step||'''' ''''||NVL ( ');
-    put('              (SELECT TRIM(''''.'''' FROM '''' ''''||o.owner||''''.''''||o.object_name||''''.''''||o.subobject_name) FROM dba_objects o WHERE o.object_id = data.obj# AND ROWNUM = 1),'); 
-    put('              (SELECT TRIM(''''.'''' FROM '''' ''''||o.owner||''''.''''||o.object_name||''''.''''||o.subobject_name) FROM dba_objects o WHERE o.data_object_id = data.obj# AND ROWNUM = 1)'); 
-    put('           )||'''' / ''''||data.event  step_event,');
+    put('SELECT data.step||'''' ''''||CASE WHEN data.obj# = 0 THEN ''''UNDO''''  ');
+    put('            ELSE (SELECT TRIM(''''.'''' FROM '''' ''''||o.owner||''''.''''||o.object_name||''''.''''||o.subobject_name) FROM dba_objects o WHERE o.object_id = data.obj# AND ROWNUM = 1)'); 
+    put('       END||'''' / ''''||data.event  step_event,');
     put('       data.num_samples,');
     put('       TRUNC(100*RATIO_TO_REPORT(data.num_samples) OVER (),2) percent,');
     put('       NULL dummy_01');
@@ -1519,7 +1517,7 @@ BEGIN
        put('                    AND remarks = ''''&&sqld360_sqlid.''''');
        put('                  GROUP BY NVL(id,0))');
        put('SELECT ''''{v: ''''''''''''||plandata.adapt_id||'''''''''''',f: ''''''''''''||plandata.adapt_id||'''' - ''''||operation||'''' ''''||options||NVL2(object_name,''''<br>'''','''' '''')||object_name||''''''''''''}'''' id, ');
-       put('       parent_id, ''''Step ID:''''||plandata.adapt_id||'''' (ASH Step ID:''''||plandata.id||'''') ASH Samples:''''||NVL(ashdata.num_samples,0), plandata.adapt_id id3');
+       put('       parent_id, ''''Step ID:''''||plandata.adapt_id||'''' (ASH Step ID:''''||plandata.id||'''') ASH Samples:''''||NVL(ashdata.num_samples,0)||'''' (''''||TRUNC(100*NVL(RATIO_TO_REPORT(ashdata.num_samples) OVER (),0),2)||''''%)'''', plandata.adapt_id id3');
        put('  FROM (SELECT id, adapt_id, NVL(adapt_parent_id, parent_id) parent_id, operation, options, object_name '); 
        put('          FROM (WITH skp_steps AS (SELECT sql_id, plan_hash_value, extractvalue(value(b),''''/row/@op'''') stepid, extractvalue(value(b),''''/row/@skp'''') skp,');
        put('                                          extractvalue(value(b),''''/row/@dep'''') dep');
@@ -1645,10 +1643,9 @@ BEGIN
        put('DEF slices = ''15''');
        put('BEGIN');
        put(' :sql_text := ''');
-       put('SELECT data.step||'''' ''''||NVL ( ');
-       put('              (SELECT TRIM(''''.'''' FROM '''' ''''||o.owner||''''.''''||o.object_name||''''.''''||o.subobject_name) FROM dba_objects o WHERE o.object_id = data.obj# AND ROWNUM = 1),'); 
-       put('              (SELECT TRIM(''''.'''' FROM '''' ''''||o.owner||''''.''''||o.object_name||''''.''''||o.subobject_name) FROM dba_objects o WHERE o.data_object_id = data.obj# AND ROWNUM = 1)'); 
-       put('           )||'''' / ''''||data.event  step_event,');
+       put('SELECT data.step||'''' ''''||CASE WHEN data.obj# = 0 THEN ''''UNDO''''  ');
+       put('            ELSE (SELECT TRIM(''''.'''' FROM '''' ''''||o.owner||''''.''''||o.object_name||''''.''''||o.subobject_name) FROM dba_objects o WHERE o.object_id = data.obj# AND ROWNUM = 1)'); 
+       put('       END||'''' / ''''||data.event  step_event,');
        put('       data.num_samples,');
        put('       TRUNC(100*RATIO_TO_REPORT(data.num_samples) OVER (),2) percent,');
        put('       NULL dummy_01');
@@ -2202,7 +2199,7 @@ BEGIN
        put('                    AND remarks = ''''&&sqld360_sqlid.''''');
        put('                  GROUP BY NVL(id,0))');
        put('SELECT ''''{v: ''''''''''''||plandata.adapt_id||'''''''''''',f: ''''''''''''||plandata.adapt_id||'''' - ''''||operation||'''' ''''||options||NVL2(object_name,''''<br>'''','''' '''')||object_name||''''''''''''}'''' id, ');
-       put('       parent_id, ''''Step ID:''''||plandata.adapt_id||'''' (ASH Step ID:''''||plandata.id||'''') ASH Samples:''''||NVL(ashdata.num_samples,0), plandata.adapt_id id3');
+       put('       parent_id, ''''Step ID:''''||plandata.adapt_id||'''' (ASH Step ID:''''||plandata.id||'''') ASH Samples:''''||NVL(ashdata.num_samples,0)||'''' (''''||TRUNC(100*NVL(RATIO_TO_REPORT(ashdata.num_samples) OVER (),0),2)||''''%)'''', plandata.adapt_id id3');
        put('  FROM (SELECT id, adapt_id, NVL(adapt_parent_id, parent_id) parent_id, operation, options, object_name '); 
        put('          FROM (WITH skp_steps AS (SELECT sql_id, plan_hash_value, extractvalue(value(b),''''/row/@op'''') stepid, extractvalue(value(b),''''/row/@skp'''') skp,');
        put('                                          extractvalue(value(b),''''/row/@dep'''') dep');
@@ -2328,10 +2325,9 @@ BEGIN
        put('DEF slices = ''15''');
        put('BEGIN');
        put(' :sql_text := ''');
-       put('SELECT data.step||'''' ''''||NVL ( ');
-       put('              (SELECT TRIM(''''.'''' FROM '''' ''''||o.owner||''''.''''||o.object_name||''''.''''||o.subobject_name) FROM dba_objects o WHERE o.object_id = data.obj# AND ROWNUM = 1),'); 
-       put('              (SELECT TRIM(''''.'''' FROM '''' ''''||o.owner||''''.''''||o.object_name||''''.''''||o.subobject_name) FROM dba_objects o WHERE o.data_object_id = data.obj# AND ROWNUM = 1)'); 
-       put('           )||'''' / ''''||data.event  step_event,');
+       put('SELECT data.step||'''' ''''||CASE WHEN data.obj# = 0 THEN ''''UNDO''''  ');
+       put('            ELSE (SELECT TRIM(''''.'''' FROM '''' ''''||o.owner||''''.''''||o.object_name||''''.''''||o.subobject_name) FROM dba_objects o WHERE o.object_id = data.obj# AND ROWNUM = 1)'); 
+       put('       END||'''' / ''''||data.event  step_event,');
        put('       data.num_samples,');
        put('       TRUNC(100*RATIO_TO_REPORT(data.num_samples) OVER (),2) percent,');
        put('       NULL dummy_01');
@@ -2759,14 +2755,13 @@ BEGIN
        put('----------------------------');       
 
        put('SPO &&one_spool_filename..html APP;');
-       put('PRO </ol>');
        put('PRO <br>');
        put('SPO OFF');
       
     END LOOP;
 
     -- end of v1601
-
+    put('PRO </ol>');
     put('SPO &&sqld360_main_report..html APP;');
     put('PRO </td>');
   END LOOP;

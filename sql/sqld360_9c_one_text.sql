@@ -23,7 +23,7 @@ GET &&common_sqld360_prefix._query.sql
 
 -- header
 SPO &&one_spool_filename..txt;
-PRO &&title.&&title_suffix. (&&main_table.) 
+PRO &&section_id..&&report_sequence.. &&title.&&title_suffix. (&&main_table.) 
 PRO
 PRO &&abstract.
 PRO &&abstract2.
@@ -43,7 +43,7 @@ SET HEA ON;
 PRO &&row_num. rows selected.
 
 PRO 
-PRO &&sqld360_prefix.&&sqld360_copyright. Version &&sqld360_vrsn.. Report executed on &&sqld360_time_stamp. for database &&db_version. &&database_name_short. from host &&host_name_short..
+PRO &&sqld360_prefix.&&sqld360_copyright. Version &&sqld360_vrsn.. Report executed on &&sqld360_time_stamp. for database &&db_version. dbmod &&sqld360_dbmod. from host &&host_hash..
 SPO OFF;
 
 -- get time t1
