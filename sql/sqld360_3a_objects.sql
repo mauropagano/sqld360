@@ -38,7 +38,7 @@ END;
 
 
 DEF title = 'Index Columns';
-DEF main_table = 'DBA_INDEXES';
+DEF main_table = 'DBA_IND_COLUMNS';
 BEGIN
   :sql_text := '
 SELECT /*+ &&top_level_hints. */

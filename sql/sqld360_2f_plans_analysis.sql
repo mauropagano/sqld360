@@ -47,12 +47,13 @@ SPO OFF
 DEF sqld360_main_report_bck = &&sqld360_main_report.
 DEF sqld360_main_report = &&one_spool_filename.
 
-SPO sqld360_plans_analysis_&&sqld360_sqlid._driver.sql
-SET SERVEROUT ON
-
 -- reset the sequence since this is a different page
 EXEC :repo_seq := 1;
 SELECT TO_CHAR(:repo_seq) report_sequence FROM DUAL;
+
+SPO sqld360_plans_analysis_&&sqld360_sqlid._driver.sql
+SET SERVEROUT ON
+
 
 DECLARE
   PROCEDURE put (p_line IN VARCHAR2)
@@ -183,7 +184,7 @@ BEGIN
     put('                  GROUP BY NVL(id,0))');
     put('SELECT ''''{v: ''''''''''''||plandata.adapt_id||'''''''''''',f: ''''''''''''||plandata.adapt_id||'''' - ''''||operation||'''' ''''||options||NVL2(object_name,''''<br>'''','''' '''')||object_name||''''''''''''}'''' id, ');
     put('       parent_id, ''''Step ID:''''||plandata.adapt_id||'''' (ASH Step ID:''''||plandata.id||'''') ASH Samples:''''||NVL(ashdata.num_samples,0)||'''' (''''||TRUNC(100*NVL(RATIO_TO_REPORT(ashdata.num_samples) OVER (),0),2)||''''%)'''' , plandata.adapt_id id3');
-     put('  FROM (SELECT id, adapt_id, NVL(adapt_parent_id, parent_id) parent_id, operation, options, object_name '); 
+    put('  FROM (SELECT id, adapt_id, NVL(adapt_parent_id, parent_id) parent_id, operation, options, object_name '); 
     put('          FROM (WITH skp_steps AS (SELECT sql_id, plan_hash_value, extractvalue(value(b),''''/row/@op'''') stepid, extractvalue(value(b),''''/row/@skp'''') skp,');
     put('                                          extractvalue(value(b),''''/row/@dep'''') dep');
     put('                                     FROM gv$sql_plan_statistics_all a, ');
@@ -238,7 +239,7 @@ BEGIN
     put('           AND ''''&&diagnostics_pack.'''' = ''''Y'''')) plandata,');
     put('       ashdata');
     put(' WHERE ashdata.id(+) = plandata.id');
-     put(' ORDER BY plandata.id');
+    put(' ORDER BY plandata.id');
     put(''';');
     put('END;');
     put('/ ');
@@ -851,6 +852,7 @@ BEGIN
     put('         GROUP BY object_node'); 
     put('         ORDER BY 2 DESC)');
     put(' WHERE rownum <= 15');
+    put(' ORDER BY 2 DESC');
     put(''';');
     put('END;');
     put('/ ');
@@ -924,7 +926,7 @@ BEGIN
     put('         GROUP BY a.object_instance'); 
     put('         ORDER BY 2 DESC) data');
     put(' WHERE rownum <= 15');
-
+    put(' ORDER BY 2 DESC');
     put(''';');
     put('END;');
     put('/ ');
@@ -951,6 +953,7 @@ BEGIN
     put('         GROUP BY id||'''' - ''''||operation||'''' ''''||options'); 
     put('         ORDER BY 2 DESC)');
     put(' WHERE rownum <= 15');
+    put(' ORDER BY 2 DESC');
     put(''';');
     put('END;');
     put('/ ');
@@ -981,6 +984,7 @@ BEGIN
     put('         GROUP BY id||'''' - ''''||operation||'''' ''''||options, object_instance, object_node'); 
     put('         ORDER BY 2 DESC) data');
     put(' WHERE rownum <= 15');
+    put(' ORDER BY 2 DESC');
     put(''';');
     put('END;');
     put('/ ');
@@ -1665,6 +1669,7 @@ BEGIN
        put('         GROUP BY id||'''' - ''''||operation||'''' ''''||options, object_instance, object_node');  
        put('         ORDER BY 2 DESC) data');
        put(' WHERE rownum <= 15');
+       put(' ORDER BY 2 DESC');
        put(''';');
        put('END;');
        put('/ ');
@@ -2347,6 +2352,7 @@ BEGIN
        put('         GROUP BY id||'''' - ''''||operation||'''' ''''||options, object_instance, object_node'); 
        put('         ORDER BY 2 DESC) data');
        put(' WHERE rownum <= 15');
+       put(' ORDER BY 2 DESC');
        put(''';');
        put('END;');
        put('/ ');

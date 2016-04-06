@@ -55,8 +55,8 @@ DEF sqld360_conf_tcb_sample = '0';
 DEF sqld360_conf_translate_lowhigh = 'Y';
 
 -- number of partitions to consider for column stats gathering (first 100, last 100)
-DEF sqld360_conf_first_part = '100';
-DEF sqld360_conf_last_part = '100';
+DEF sqld360_conf_first_part = '10';
+DEF sqld360_conf_last_part = '10';
 
 -- number of top executions to individually analyze, from memory and history
 DEF sqld360_conf_num_top_execs = '3';

@@ -67,12 +67,28 @@ COL sql_text PRI
 
 
 DEF title = 'SQL Plan Directives';
-DEF main_table = 'DBA_SQL_PLAN_DIR_OBJECTS';
+DEF main_table = 'DBA_SQL_PLAN_DIRECTIVES';
 BEGIN
   :sql_text := '
 SELECT /*+ &&top_level_hints. */
        * 
-  FROM dba_sql_plan_directives
+  FROM (SELECT d.dir_id directive_id,
+               d.type,
+               d.enabled,
+               (CASE WHEN d.internal_state = ''HAS_STATS'' OR d.redundant = ''YES'' THEN ''SUPERSEDED''
+                     WHEN d.internal_state IN (''NEW'', ''MISSING_STATS'', ''PERMANENT'') THEN ''USABLE''
+                     ELSE ''UNKNOWN'' 
+                 END) state,
+               d.auto_drop,
+               f.reason,
+               d.created,
+               d.last_modified,
+               d.last_used,
+               d.internal_state,
+               d.redundant
+          FROM sys."_BASE_OPT_DIRECTIVE" d,
+               sys."_BASE_OPT_FINDING" f
+          WHERE d.f_id = f.f_id)
  WHERE directive_id IN (SELECT directive_id
                           FROM dba_sql_plan_dir_objects
                          WHERE (owner, object_name) in &&tables_list.) 
@@ -88,7 +104,7 @@ DEF main_table = 'DBA_SQL_PLAN_DIR_OBJECTS';
 BEGIN
   :sql_text := '
 SELECT /*+ &&top_level_hints. */
-       * 
+       directive_id, owner, object_name, subobject_name, object_type
   FROM dba_sql_plan_dir_objects
  WHERE (owner, object_name) in &&tables_list. 
  ORDER BY owner, object_name, directive_id
