@@ -14,7 +14,7 @@ DEF main_table = 'GV$SQL_MONITOR';
 VAR myreport CLOB
 
 -- text
-SET SERVEROUT ON
+SET SERVEROUT ON SIZE 1000000;
 SET TERM OFF
 SPO sqld360_sqlmon_&&sqld360_sqlid._driver_txt.sql
 DECLARE
@@ -71,7 +71,7 @@ SELECT DBMS_SQLTUNE.report_sql_monitor_list(sql_id => '&&sqld360_sqlid.', type =
 SPO OFF;
 
 -- active
-SET SERVEROUT ON;
+SET SERVEROUT ON SIZE 1000000;
 SPO sqld360_sqlmon_&&sqld360_sqlid._driver_active.sql
 DECLARE
   PROCEDURE put (p_line IN VARCHAR2)
@@ -134,7 +134,7 @@ SPO OFF;
 
 -- historical, based on elapsed, worst &&sqld360_conf_num_sqlmon_rep.
 -- it errors out in < 12c but the error is not reported to screen/main files
-SET SERVEROUT ON;
+SET SERVEROUT ON SIZE 1000000;
 SPO sqld360_sqlmon_&&sqld360_sqlid._driver_hist.sql
 DECLARE
   PROCEDURE put (p_line IN VARCHAR2)

@@ -13,6 +13,7 @@ PRO <table><tr class="main">
 
 
 SET SERVEROUT ON ECHO OFF FEEDBACK OFF TIMING OFF 
+SET SERVEROUT ON SIZE 1000000;
 
 EXEC :repo_seq := 1;
 
@@ -52,7 +53,7 @@ EXEC :repo_seq := 1;
 SELECT TO_CHAR(:repo_seq) report_sequence FROM DUAL;
 
 SPO sqld360_plans_analysis_&&sqld360_sqlid._driver.sql
-SET SERVEROUT ON
+SET SERVEROUT ON SIZE 1000000;
 
 
 DECLARE
@@ -1594,11 +1595,9 @@ BEGIN
 
        put('COL bubblesDetails NEW_V bubblesDetails');
        put('SELECT ''<br>Step Details<br>''||LISTAGG(step_details,''<br>'') WITHIN GROUP (ORDER BY id) bubblesDetails');
-       put('          FROM (SELECT DISTINCT NVL(id,0) id, NVL(id,0)||'' - ''||operation||'' ''||options||'' ''||NVL(b.object_name, ''(obj#:''||object_instance||'')'') step_details');
-       put('                  FROM plan_table a,');
-       put('                       dba_objects b');
+       put('          FROM (SELECT DISTINCT NVL(id,0) id, NVL(id,0)||'' - ''||operation||'' ''||options||'' (obj#:''||object_instance||'')'' step_details');
+       put('                  FROM plan_table a ');
        put('                 WHERE statement_id = ''SQLD360_ASH_DATA_MEM''');
-       put('                   AND a.object_instance = b.object_id(+)');
        put('                   AND cost = '||i.plan_hash_value);
        put('                   AND NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INSTR(partition_stop,'','',1,4)-INSTR(partition_stop,'','',1,3)-1)),position) = '||j.inst_id||'');
        put('                   AND NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,4)+1,INSTR(partition_stop,'','',1,5)-INSTR(partition_stop,'','',1,4)-1)),cpu_cost) = '||j.session_id||'');
@@ -2277,11 +2276,9 @@ BEGIN
 
        put('COL bubblesDetails NEW_V bubblesDetails');
        put('SELECT ''<br>Step Details<br>''||LISTAGG(step_details,''<br>'') WITHIN GROUP (ORDER BY id) bubblesDetails');
-       put('          FROM (SELECT DISTINCT NVL(id,0) id, NVL(id,0)||'' - ''||operation||'' ''||options||'' ''||NVL(b.object_name, ''(obj#:''||object_instance||'')'') step_details');
-       put('                  FROM plan_table a,');
-       put('                       dba_objects b');
+       put('          FROM (SELECT DISTINCT NVL(id,0) id, NVL(id,0)||'' - ''||operation||'' ''||options||'' (obj#:''||object_instance||'')'' step_details');
+       put('                  FROM plan_table a');
        put('                 WHERE statement_id = ''SQLD360_ASH_DATA_HIST''');
-       put('                   AND a.object_instance = b.object_id(+)');
        put('                   AND cost = '||i.plan_hash_value);
        put('                   AND NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INSTR(partition_stop,'','',1,4)-INSTR(partition_stop,'','',1,3)-1)),position) = '||j.inst_id||'');
        put('                   AND NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,4)+1,INSTR(partition_stop,'','',1,5)-INSTR(partition_stop,'','',1,4)-1)),cpu_cost) = '||j.session_id||'');

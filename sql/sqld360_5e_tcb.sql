@@ -41,7 +41,7 @@ END;
 /
 
 SET TIMI ON;
-SET SERVEROUT ON;
+SET SERVEROUT ON SIZE 1000000;
 PRINT :tcb_dir
 BEGIN
   DBMS_SQLDIAG.EXPORT_SQL_TESTCASE(
@@ -49,8 +49,8 @@ BEGIN
       sql_text        => :sqld360_fullsql,
       user_name       => :tc_user,
       testcase_name   => 'sqld360_&&sqld360_sqlid.',
-      exportData      => &&sqld360_tcb_exp_data.,
-      samplingPercent => &&sqld360_tcb_exp_sample.,
+      exportData      => FALSE, -- &&sqld360_tcb_exp_data.,  -- this is intentional so if we want data we need to manually modify the API call here
+      samplingPercent => 0, --&&sqld360_tcb_exp_sample., -- this is intentional so if we want data we need to manually modify the API call here
       ctrlOptions     => '<parameters><parameter name="capture">with_runtime_info</parameter></parameters>',
       testcase        => :tc
   );

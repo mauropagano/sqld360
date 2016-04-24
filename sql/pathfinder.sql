@@ -133,7 +133,7 @@ PRO
 SPO OFF;
 
 SET TERM ON
-SET SERVEROUT ON
+SET SERVEROUT ON SIZE 1000000;
 PRO Building Pathfinder driver scripts
 SET TERM OFF
 
@@ -797,7 +797,7 @@ DECLARE
       put(' )  ');
       put('  AND sql_text like ''%'||l_unique_id||'%'' AND sql_text NOT LIKE ''%not me%'';');
       put('SPO s'||l_test_id_rp_i||'_driver.sql');
-      put('SET SERVEROUT ON');
+      put('SET SERVEROUT ON SIZE 1000000;');
       put('PRO SPO &&pathfinder_main_report..html APP;');
       put('PRO PRO ^^html_row.');
       put('PRO SPO OFF;');

@@ -9,8 +9,8 @@ CL COL;
 COL row_num FOR 9999999 HEA '#' PRI;
 
 -- version
-DEF sqld360_vYYNN = 'v1611';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2016-04-06)';
+DEF sqld360_vYYNN = 'v1612';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2016-04-24)';
 DEF sqld360_prefix = 'sqld360';
 
 -- parameters
@@ -133,7 +133,21 @@ SELECT TRANSLATE('&&host_name_short.',
 COL history_days NEW_V history_days;
 -- range: takes at least 31 days and at most as many as actual history, with a default of 31. parameter restricts within that range. 
 SELECT TO_CHAR(LEAST(CEIL(SYSDATE - CAST(MIN(begin_interval_time) AS DATE)),  TO_NUMBER(NVL('&&sqld360_fromedb360_days.', '&&sqld360_conf_days.')))) history_days FROM dba_hist_snapshot WHERE '&&diagnostics_pack.' = 'Y' AND dbid = &&sqld360_dbid.;
+SELECT TO_CHAR(TO_DATE('&&sqld360_conf_date_to.', 'YYYY-MM-DD') - TO_DATE('&&sqld360_conf_date_from.', 'YYYY-MM-DD') + 1) history_days FROM DUAL WHERE '&&sqld360_conf_date_from.' != 'YYYY-MM-DD' AND '&&sqld360_conf_date_to.' != 'YYYY-MM-DD';
 SELECT '0' history_days FROM DUAL WHERE NVL(TRIM('&&diagnostics_pack.'), 'N') = 'N';
+
+SET TERM OFF;
+
+-- Dates format
+DEF sqld360_date_format = 'YYYY-MM-DD"T"HH24:MI:SS';
+DEF sqld360_timestamp_format = 'YYYY-MM-DD"T"HH24:MI:SS.FF';
+DEF sqld360_timestamp_tz_format = 'YYYY-MM-DD"T"HH24:MI:SS.FFTZH:TZM';
+
+COL sqld360_date_from NEW_V sqld360_date_from;
+COL sqld360_date_to NEW_V sqld360_date_to;
+SELECT CASE '&&sqld360_conf_date_from.' WHEN 'YYYY-MM-DD' THEN TO_CHAR(SYSDATE - &&history_days., '&&sqld360_date_format.') ELSE '&&sqld360_conf_date_from.T00:00:00' END sqld360_date_from FROM DUAL;
+SELECT CASE '&&sqld360_conf_date_to.' WHEN 'YYYY-MM-DD' THEN TO_CHAR(SYSDATE, '&&sqld360_date_format.') ELSE '&&sqld360_conf_date_to.T23:59:59' END sqld360_date_to FROM DUAL;
+
 
 DEF skip_script = 'sql/sqld360_0f_skip_script.sql ';
 
@@ -184,11 +198,15 @@ COL tool_sysdate NEW_V tool_sysdate;
 SELECT TO_CHAR(SYSDATE, 'YYYYMMDDHH24MISS') tool_sysdate FROM DUAL;
 COL as_of_date NEW_V as_of_date;
 SELECT ', as of '||TO_CHAR(SYSDATE, 'Dy Mon DD @HH12:MIAM') as_of_date FROM DUAL;
+COL between_times NEW_V between_times;
+COL between_dates NEW_V between_dates;
+SELECT ', between &&sqld360_date_from. and &&sqld360_date_to.' between_dates FROM DUAL;
+
 COL minimum_snap_id NEW_V minimum_snap_id;
-SELECT NVL(TO_CHAR(MAX(snap_id)), '0') minimum_snap_id FROM dba_hist_snapshot WHERE '&&diagnostics_pack.' = 'Y' AND dbid = &&sqld360_dbid. AND begin_interval_time < SYSDATE - &&history_days.;
+SELECT NVL(TO_CHAR(MIN(snap_id)), '0') minimum_snap_id FROM dba_hist_snapshot WHERE '&&diagnostics_pack.' = 'Y' AND dbid = &&sqld360_dbid. AND begin_interval_time > TO_DATE('&&sqld360_date_from.', '&&sqld360_date_format.');
 SELECT '-1' minimum_snap_id FROM DUAL WHERE TRIM('&&minimum_snap_id.') IS NULL;
 COL maximum_snap_id NEW_V maximum_snap_id;
-SELECT NVL(TO_CHAR(MAX(snap_id)), '&&minimum_snap_id.') maximum_snap_id FROM dba_hist_snapshot WHERE '&&diagnostics_pack.' = 'Y' AND dbid = &&sqld360_dbid.;
+SELECT NVL(TO_CHAR(MAX(snap_id)), '&&minimum_snap_id.') maximum_snap_id FROM dba_hist_snapshot WHERE '&&diagnostics_pack.' = 'Y' AND dbid = &&sqld360_dbid. AND end_interval_time < TO_DATE('&&sqld360_date_to.', '&&sqld360_date_format.');
 SELECT '-1' maximum_snap_id FROM DUAL WHERE TRIM('&&maximum_snap_id.') IS NULL;
 
 -- ebs

@@ -5,6 +5,10 @@
 -- history days (default 31)
 DEF sqld360_conf_days = '31';
 
+-- range of dates below superceed history days when values are other than YYYY-MM-DD
+DEF sqld360_conf_date_from = 'YYYY-MM-DD';
+DEF sqld360_conf_date_to = 'YYYY-MM-DD';
+
 /**************************** not recommended to modify *********************************/
 
 -- excluding report types reduce usability while providing marginal performance gain
@@ -49,6 +53,7 @@ DEF sqld360_conf_incl_metadata = 'Y';
 DEF sqld360_conf_incl_tcb = 'Y';
 
 -- TCB data, sampling percentage, 0 means no data, any other value between 1 and 100 is ok (only for standalone execs, always skipped for eDB360 execs) 
+-- THIS OPTION IS INTENTIONALLY INGORED, email me if you'd like to have TCB with data
 DEF sqld360_conf_tcb_sample = '0';
 
 -- include/exclude translate min/max/histograms endpoint values
@@ -85,4 +90,6 @@ DEF sqld360_conf_google_charts = '<script type="text/javascript" src="https://ww
 
 --DEF sqld360_conf_incl_text = 'N';
 --DEF sqld360_conf_incl_csv = 'N';
+--DEF sqld360_conf_date_from = '2016-04-15';
+--DEF sqld360_conf_date_to = '2016-04-18';
 

@@ -13,7 +13,7 @@ DEF main_table = 'DBMS_METADATA';
 
 VAR mymetadata CLOB;
 
-SET SERVEROUT ON
+SET SERVEROUT ON SIZE 1000000;
 SET TERM OFF
 SPO sqld360_metadata_&&sqld360_sqlid._driver.sql
 DECLARE

@@ -12,6 +12,7 @@ PRO
 PRO <table><tr class="main">
 
 SET SERVEROUT ON ECHO OFF FEEDBACK OFF TIMING OFF 
+SET SERVEROUT ON SIZE 1000000;
 
 BEGIN
   FOR i IN (SELECT table_name, owner 
@@ -33,7 +34,7 @@ DEF sqld360_main_report_bck = &&sqld360_main_report.
 DEF sqld360_main_report = &&one_spool_filename.
 
 SPO sqld360_partitions_columns_&&sqld360_sqlid._driver.sql
-SET SERVEROUT ON
+SET SERVEROUT ON SIZE 1000000;
 
 DECLARE
   PROCEDURE put (p_line IN VARCHAR2)

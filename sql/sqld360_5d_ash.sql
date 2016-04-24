@@ -14,7 +14,7 @@ DEF main_table = 'V$ACTIVE_SESSION_HISTORY';
 
 ALTER SESSION SET nls_comp='BINARY';
 ALTER SESSION SET nls_sort='BINARY';
-SET SERVEROUT ON
+SET SERVEROUT ON SIZE 1000000;
 SET TERM OFF
 -- driver
 SPO sqld360_ash_&&sqld360_sqlid._driver.sql

@@ -3,7 +3,7 @@ DEF main_table = 'V$SQL';
 
 @@sqld360_0s_pre_nondef
 
-SET SERVEROUT ON
+SET SERVEROUT ON SIZE 1000000;
 SET TERM OFF HEA OFF
 
 VAR binds_from_mem NUMBER

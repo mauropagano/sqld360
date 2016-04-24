@@ -12,7 +12,7 @@ DEF main_table = 'DBA_HIST_SQLSTAT';
 @@sqld360_0s_pre_nondef
 
 
-SET SERVEROUT ON
+SET SERVEROUT ON SIZE 1000000;
 SET TERM OFF
 -- driver
 SPO sqld360_awr_&&sqld360_sqlid._driver.sql

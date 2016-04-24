@@ -32,7 +32,7 @@ PRO      function drawChart() {
 PRO        var data = google.visualization.arrayToDataTable([
 
 -- body
-SET SERVEROUT ON;
+SET SERVEROUT ON SIZE 1000000;
 DECLARE
   cur SYS_REFCURSOR;
   l_step_id VARCHAR2(1000);
