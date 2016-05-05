@@ -983,7 +983,7 @@ BEGIN
     put('           AND ''''&&diagnostics_pack.'''' = ''''Y''''');
     --put('         GROUP BY id||'''' - ''''||operation||'''' ''''||options||'''' / ''''||object_node'); 
     put('         GROUP BY id||'''' - ''''||operation||'''' ''''||options, object_instance, object_node'); 
-    put('         ORDER BY 2 DESC) data');
+    put('         ORDER BY 4 DESC) data');
     put(' WHERE rownum <= 15');
     put(' ORDER BY 2 DESC');
     put(''';');
@@ -1666,7 +1666,7 @@ BEGIN
        put('           AND ''''&&diagnostics_pack.'''' = ''''Y''''');
        --put('         GROUP BY id||'''' - ''''||operation||'''' ''''||options||'''' / ''''||object_node');
        put('         GROUP BY id||'''' - ''''||operation||'''' ''''||options, object_instance, object_node');  
-       put('         ORDER BY 2 DESC) data');
+       put('         ORDER BY 4 DESC) data');
        put(' WHERE rownum <= 15');
        put(' ORDER BY 2 DESC');
        put(''';');
@@ -2347,7 +2347,7 @@ BEGIN
        put('           AND ''''&&diagnostics_pack.'''' = ''''Y''''');
        --put('         GROUP BY id||'''' - ''''||operation||'''' ''''||options||'''' / ''''||object_node'); 
        put('         GROUP BY id||'''' - ''''||operation||'''' ''''||options, object_instance, object_node'); 
-       put('         ORDER BY 2 DESC) data');
+       put('         ORDER BY 4 DESC) data');
        put(' WHERE rownum <= 15');
        put(' ORDER BY 2 DESC');
        put(''';');
