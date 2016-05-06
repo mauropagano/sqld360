@@ -91,7 +91,7 @@ BEGIN
       WHERE a.sql_id = b.operation -- plan table has the SQL ID to load
         AND b.statement_id = 'SQLD360_SQLID' -- flag to identify the rows that stores SQL ID info
         --AND a.sample_time > systimestamp-&&history_days.  -- extract only data of interest
-        AND a.sample_time BETWEEN TO_TIMESTAMP('&&sqld360_conf_date_from.','&&sqld360_date_format.') AND TO_TIMESTAMP('&&sqld360_conf_date_to.','&&sqld360_date_format.')  -- extract only data of interest        
+        AND a.sample_time BETWEEN TO_TIMESTAMP('&&sqld360_date_from.','&&sqld360_date_format.') AND TO_TIMESTAMP('&&sqld360_date_to.','&&sqld360_date_format.')  -- extract only data of interest        
         AND SUBSTR(b.options,1,1) = '1'  -- load data only for those SQL IDs that have diagnostics enabled
         &&from_edb360.AND b.operation = '&&sqld360_sqlid.'
         AND '&&sqld360_conf_incl_ash_hist.' = 'Y'
@@ -136,7 +136,7 @@ BEGIN
       WHERE a.sql_id = b.operation -- plan table has the SQL ID to load
         AND b.statement_id = 'SQLD360_SQLID' -- flag to identify the rows that stores SQL ID info
         --AND a.sample_time > systimestamp - &&history_days.  -- extract only data of interest
-        AND a.sample_time BETWEEN TO_TIMESTAMP('&&sqld360_conf_date_from.','&&sqld360_date_format.') AND TO_TIMESTAMP('&&sqld360_conf_date_to.','&&sqld360_date_format.')
+        AND a.sample_time BETWEEN TO_TIMESTAMP('&&sqld360_date_from.','&&sqld360_date_format.') AND TO_TIMESTAMP('&&sqld360_date_to.','&&sqld360_date_format.')
         AND SUBSTR(b.options,1,1) = '1'  -- load data only for those SQL IDs that have diagnostics enabled
         &&from_edb360.AND b.operation = '&&sqld360_sqlid.'
      ;   
