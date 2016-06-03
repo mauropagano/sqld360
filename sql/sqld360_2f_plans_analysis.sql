@@ -184,8 +184,9 @@ BEGIN
     put('                    AND remarks = ''''&&sqld360_sqlid.''''');
     put('                  GROUP BY NVL(id,0))');
     put('SELECT ''''{v: ''''''''''''||plandata.adapt_id||'''''''''''',f: ''''''''''''||plandata.adapt_id||'''' - ''''||operation||'''' ''''||options||NVL2(object_name,''''<br>'''','''' '''')||object_name||''''''''''''}'''' id, ');
-    put('       parent_id, ''''Step ID:''''||plandata.adapt_id||'''' (ASH Step ID:''''||plandata.id||'''') ASH Samples:''''||NVL(ashdata.num_samples,0)||'''' (''''||TRUNC(100*NVL(RATIO_TO_REPORT(ashdata.num_samples) OVER (),0),2)||''''%)'''' , plandata.adapt_id id3');
-    put('  FROM (SELECT id, adapt_id, NVL(adapt_parent_id, parent_id) parent_id, operation, options, object_name '); 
+    put('       parent_id, ''''Step ID: ''''||plandata.adapt_id||'''' (ASH Step ID: ''''||plandata.id||'''')\nASH Samples: ''''||NVL(ashdata.num_samples,0)||'''' (''''||TRUNC(100*NVL(RATIO_TO_REPORT(ashdata.num_samples) OVER (),0),2)||''''%)''''|| ');
+    put('                  NVL2(access_predicates,''''\nAccess Predicates: ''''||access_predicates,'''''''')||NVL2(filter_predicates,''''\nFilter Predicates: ''''||filter_predicates,''''''''), plandata.adapt_id id3');
+    put('  FROM (SELECT id, adapt_id, NVL(adapt_parent_id, parent_id) parent_id, operation, options, object_name, access_predicates, filter_predicates '); 
     put('          FROM (WITH skp_steps AS (SELECT sql_id, plan_hash_value, extractvalue(value(b),''''/row/@op'''') stepid, extractvalue(value(b),''''/row/@skp'''') skp,');
     put('                                          extractvalue(value(b),''''/row/@dep'''') dep');
     put('                                     FROM gv$sql_plan_statistics_all a, ');
@@ -193,10 +194,10 @@ BEGIN
     put('                                    WHERE sql_id = ''''&&sqld360_sqlid.''''');
     put('                                      AND other_xml IS NOT NULL ');
     put('                                      AND plan_hash_value = '||i.plan_hash_value||'),'); 
-    put('                 plan_all AS (SELECT sql_id, plan_hash_value, id, parent_id, dep, (ROW_NUMBER() OVER (ORDER BY id))-1 adapt_id, operation, options, object_name, skp ');
+    put('                 plan_all AS (SELECT sql_id, plan_hash_value, id, parent_id, dep, (ROW_NUMBER() OVER (ORDER BY id))-1 adapt_id, operation, options, object_name, access_predicates, filter_predicates, skp ');
     -- the DISTINCT here is to handle multiple child cursors with the same PHV (otherise the ROW_NUMBER makes them all distinct)    
-    put('                                FROM (SELECT DISTINCT a.sql_id, a.plan_hash_value, a.id, a.parent_id, NVL(b.dep,0) dep, a.operation,a.options,a.object_name, b.skp ');
-    put('                                             FROM gv$sql_plan_statistics_all a, skp_steps b ');
+    put('                                FROM (SELECT DISTINCT a.sql_id, a.plan_hash_value, a.id, a.parent_id, NVL(b.dep,0) dep, a.operation, a.options, a.object_name, REPLACE(a.access_predicates, CHR(39) , CHR(92)||CHR(39)) access_predicates, REPLACE(a.filter_predicates, CHR(39) , CHR(92)||CHR(39)) filter_predicates, b.skp ');
+    put('                                        FROM gv$sql_plan_statistics_all a, skp_steps b ');
     put('                                       WHERE a.sql_id = ''''&&sqld360_sqlid.''''');
     put('                                         AND a.plan_hash_value = '||i.plan_hash_value||'');
     put('                                         AND a.id = b.stepid(+) ');
@@ -207,10 +208,10 @@ BEGIN
     put('                          FROM plan_all b ');
     put('                         WHERE a.dep-1 = b.dep'); 
     put('                           AND b.adapt_id < a.adapt_id ) adapt_parent_id, parent_id,'); 
-    put('                       a.operation operation, a.options, a.object_name');
+    put('                       a.operation operation, a.options, a.object_name, a.access_predicates, a.filter_predicates');
     put('                  FROM plan_all a)');
     put('        UNION ');
-    put('        SELECT id, adapt_id, NVL(adapt_parent_id, parent_id) parent_id, operation, options, object_name ');  
+    put('        SELECT id, adapt_id, NVL(adapt_parent_id, parent_id) parent_id, operation, options, object_name, access_predicates, filter_predicates ');  
     put('          FROM (WITH skp_steps AS (SELECT sql_id, plan_hash_value, extractvalue(value(b),''''/row/@op'''') stepid, extractvalue(value(b),''''/row/@skp'''') skp,');
     put('                                          extractvalue(value(b),''''/row/@dep'''') dep');
     put('                                     FROM dba_hist_sql_plan a, ');
@@ -219,7 +220,7 @@ BEGIN
     put('                                      AND other_xml IS NOT NULL ');
     put('                                      AND plan_hash_value = '||i.plan_hash_value||'),'); 
     put('                 plan_all AS (SELECT a.sql_id, a.plan_hash_value, a.id, a.parent_id, NVL(b.dep,0) dep,'); 
-    put('                                     (ROW_NUMBER() OVER (ORDER BY a.id))-1 adapt_id, a.operation,a.options,a.object_name, b.skp');
+    put('                                     (ROW_NUMBER() OVER (ORDER BY a.id))-1 adapt_id, a.operation, a.options, a.object_name, REPLACE(a.access_predicates, CHR(39) , CHR(92)||CHR(39)) access_predicates, REPLACE(a.filter_predicates, CHR(39) , CHR(92)||CHR(39)) filter_predicates, b.skp');
     put('                                FROM dba_hist_sql_plan a, skp_steps b ');
     put('                               WHERE a.sql_id = ''''&&sqld360_sqlid.''''');
     put('                                 AND a.plan_hash_value = '||i.plan_hash_value||'');
@@ -231,7 +232,7 @@ BEGIN
     put('                          FROM plan_all b ');
     put('                         WHERE a.dep-1 = b.dep'); 
     put('                           AND b.adapt_id < a.adapt_id ) adapt_parent_id, parent_id,'); 
-    put('                       a.operation operation, a.options, a.object_name');
+    put('                       a.operation operation, a.options, a.object_name, a.access_predicates, a.filter_predicates');
     put('                  FROM plan_all a');
     put('                 WHERE NOT EXISTS (SELECT 1 ');
     put('                             FROM gv$sql_plan_statistics_all ');
@@ -1522,8 +1523,9 @@ BEGIN
        put('                    AND remarks = ''''&&sqld360_sqlid.''''');
        put('                  GROUP BY NVL(id,0))');
        put('SELECT ''''{v: ''''''''''''||plandata.adapt_id||'''''''''''',f: ''''''''''''||plandata.adapt_id||'''' - ''''||operation||'''' ''''||options||NVL2(object_name,''''<br>'''','''' '''')||object_name||''''''''''''}'''' id, ');
-       put('       parent_id, ''''Step ID:''''||plandata.adapt_id||'''' (ASH Step ID:''''||plandata.id||'''') ASH Samples:''''||NVL(ashdata.num_samples,0)||'''' (''''||TRUNC(100*NVL(RATIO_TO_REPORT(ashdata.num_samples) OVER (),0),2)||''''%)'''', plandata.adapt_id id3');
-       put('  FROM (SELECT id, adapt_id, NVL(adapt_parent_id, parent_id) parent_id, operation, options, object_name '); 
+       put('       parent_id, ''''Step ID: ''''||plandata.adapt_id||'''' (ASH Step ID: ''''||plandata.id||'''')\nASH Samples: ''''||NVL(ashdata.num_samples,0)||'''' (''''||TRUNC(100*NVL(RATIO_TO_REPORT(ashdata.num_samples) OVER (),0),2)||''''%)''''|| ');
+       put('                  NVL2(access_predicates,''''\nAccess Predicates: ''''||access_predicates,'''''''')||NVL2(filter_predicates,''''\nFilter Predicates: ''''||filter_predicates,''''''''), plandata.adapt_id id3');
+       put('  FROM (SELECT id, adapt_id, NVL(adapt_parent_id, parent_id) parent_id, operation, options, object_name, access_predicates, filter_predicates '); 
        put('          FROM (WITH skp_steps AS (SELECT sql_id, plan_hash_value, extractvalue(value(b),''''/row/@op'''') stepid, extractvalue(value(b),''''/row/@skp'''') skp,');
        put('                                          extractvalue(value(b),''''/row/@dep'''') dep');
        put('                                     FROM gv$sql_plan_statistics_all a, ');
@@ -1531,10 +1533,10 @@ BEGIN
        put('                                    WHERE sql_id = ''''&&sqld360_sqlid.''''');
        put('                                      AND other_xml IS NOT NULL ');
        put('                                      AND plan_hash_value = '||i.plan_hash_value||'),'); 
-       put('                 plan_all AS (SELECT sql_id, plan_hash_value, id, parent_id, dep, (ROW_NUMBER() OVER (ORDER BY id))-1 adapt_id, operation, options, object_name, skp ');
+       put('                 plan_all AS (SELECT sql_id, plan_hash_value, id, parent_id, dep, (ROW_NUMBER() OVER (ORDER BY id))-1 adapt_id, operation, options, object_name, access_predicates, filter_predicates, skp ');
        -- the DISTINCT here is to handle multiple child cursors with the same PHV (otherise the ROW_NUMBER makes them all distinct)    
-       put('                                FROM (SELECT DISTINCT a.sql_id, a.plan_hash_value, a.id, a.parent_id, NVL(b.dep,0) dep, a.operation,a.options,a.object_name, b.skp ');
-       put('                                             FROM gv$sql_plan_statistics_all a, skp_steps b ');
+       put('                                FROM (SELECT DISTINCT a.sql_id, a.plan_hash_value, a.id, a.parent_id, NVL(b.dep,0) dep, a.operation, a.options, a.object_name, REPLACE(a.access_predicates, CHR(39) , CHR(92)||CHR(39)) access_predicates, REPLACE(a.filter_predicates, CHR(39) , CHR(92)||CHR(39)) filter_predicates, b.skp ');
+       put('                                        FROM gv$sql_plan_statistics_all a, skp_steps b ');
        put('                                       WHERE a.sql_id = ''''&&sqld360_sqlid.''''');
        put('                                         AND a.plan_hash_value = '||i.plan_hash_value||'');
        put('                                         AND a.id = b.stepid(+) ');
@@ -1545,10 +1547,10 @@ BEGIN
        put('                          FROM plan_all b ');
        put('                         WHERE a.dep-1 = b.dep'); 
        put('                           AND b.adapt_id < a.adapt_id ) adapt_parent_id, parent_id,'); 
-       put('                       a.operation operation, a.options, a.object_name');
+       put('                       a.operation operation, a.options, a.object_name, a.access_predicates, a.filter_predicates');
        put('                  FROM plan_all a)');
        put('        UNION ');
-       put('        SELECT id, adapt_id, NVL(adapt_parent_id, parent_id) parent_id, operation, options, object_name ');  
+       put('        SELECT id, adapt_id, NVL(adapt_parent_id, parent_id) parent_id, operation, options, object_name, access_predicates, filter_predicates ');  
        put('          FROM (WITH skp_steps AS (SELECT sql_id, plan_hash_value, extractvalue(value(b),''''/row/@op'''') stepid, extractvalue(value(b),''''/row/@skp'''') skp,');
        put('                                          extractvalue(value(b),''''/row/@dep'''') dep');
        put('                                     FROM dba_hist_sql_plan a, ');
@@ -1557,7 +1559,7 @@ BEGIN
        put('                                      AND other_xml IS NOT NULL ');
        put('                                      AND plan_hash_value = '||i.plan_hash_value||'),'); 
        put('                 plan_all AS (SELECT a.sql_id, a.plan_hash_value, a.id, a.parent_id, NVL(b.dep,0) dep,'); 
-       put('                                     (ROW_NUMBER() OVER (ORDER BY a.id))-1 adapt_id, a.operation,a.options,a.object_name, b.skp');
+       put('                                     (ROW_NUMBER() OVER (ORDER BY a.id))-1 adapt_id, a.operation, a.options, a.object_name, REPLACE(a.access_predicates, CHR(39) , CHR(92)||CHR(39)) access_predicates, REPLACE(a.filter_predicates, CHR(39) , CHR(92)||CHR(39)) filter_predicates, b.skp');
        put('                                FROM dba_hist_sql_plan a, skp_steps b ');
        put('                               WHERE a.sql_id = ''''&&sqld360_sqlid.''''');
        put('                                 AND a.plan_hash_value = '||i.plan_hash_value||'');
@@ -1569,7 +1571,7 @@ BEGIN
        put('                          FROM plan_all b ');
        put('                         WHERE a.dep-1 = b.dep'); 
        put('                           AND b.adapt_id < a.adapt_id ) adapt_parent_id, parent_id,'); 
-       put('                       a.operation operation, a.options, a.object_name');
+       put('                       a.operation operation, a.options, a.object_name, a.access_predicates, a.filter_predicates');
        put('                  FROM plan_all a');
        put('                 WHERE NOT EXISTS (SELECT 1 ');
        put('                             FROM gv$sql_plan_statistics_all ');
@@ -2203,8 +2205,9 @@ BEGIN
        put('                    AND remarks = ''''&&sqld360_sqlid.''''');
        put('                  GROUP BY NVL(id,0))');
        put('SELECT ''''{v: ''''''''''''||plandata.adapt_id||'''''''''''',f: ''''''''''''||plandata.adapt_id||'''' - ''''||operation||'''' ''''||options||NVL2(object_name,''''<br>'''','''' '''')||object_name||''''''''''''}'''' id, ');
-       put('       parent_id, ''''Step ID:''''||plandata.adapt_id||'''' (ASH Step ID:''''||plandata.id||'''') ASH Samples:''''||NVL(ashdata.num_samples,0)||'''' (''''||TRUNC(100*NVL(RATIO_TO_REPORT(ashdata.num_samples) OVER (),0),2)||''''%)'''', plandata.adapt_id id3');
-       put('  FROM (SELECT id, adapt_id, NVL(adapt_parent_id, parent_id) parent_id, operation, options, object_name '); 
+       put('       parent_id, ''''Step ID: ''''||plandata.adapt_id||'''' (ASH Step ID: ''''||plandata.id||'''')\mASH Samples: ''''||NVL(ashdata.num_samples,0)||'''' (''''||TRUNC(100*NVL(RATIO_TO_REPORT(ashdata.num_samples) OVER (),0),2)||''''%)''''|| ');
+       put('                  NVL2(access_predicates,''''\nAccess Predicates: ''''||access_predicates,'''''''')||NVL2(filter_predicates,''''\nFilter Predicates: ''''||filter_predicates,''''''''), plandata.adapt_id id3');
+       put('  FROM (SELECT id, adapt_id, NVL(adapt_parent_id, parent_id) parent_id, operation, options, object_name, access_predicates, filter_predicates '); 
        put('          FROM (WITH skp_steps AS (SELECT sql_id, plan_hash_value, extractvalue(value(b),''''/row/@op'''') stepid, extractvalue(value(b),''''/row/@skp'''') skp,');
        put('                                          extractvalue(value(b),''''/row/@dep'''') dep');
        put('                                     FROM gv$sql_plan_statistics_all a, ');
@@ -2212,10 +2215,10 @@ BEGIN
        put('                                    WHERE sql_id = ''''&&sqld360_sqlid.''''');
        put('                                      AND other_xml IS NOT NULL ');
        put('                                      AND plan_hash_value = '||i.plan_hash_value||'),'); 
-       put('                 plan_all AS (SELECT sql_id, plan_hash_value, id, parent_id, dep, (ROW_NUMBER() OVER (ORDER BY id))-1 adapt_id, operation, options, object_name, skp ');
+       put('                 plan_all AS (SELECT sql_id, plan_hash_value, id, parent_id, dep, (ROW_NUMBER() OVER (ORDER BY id))-1 adapt_id, operation, options, object_name, access_predicates, filter_predicates, skp ');
        -- the DISTINCT here is to handle multiple child cursors with the same PHV (otherise the ROW_NUMBER makes them all distinct)    
-       put('                                FROM (SELECT DISTINCT a.sql_id, a.plan_hash_value, a.id, a.parent_id, NVL(b.dep,0) dep, a.operation,a.options,a.object_name, b.skp ');
-       put('                                             FROM gv$sql_plan_statistics_all a, skp_steps b ');
+       put('                                FROM (SELECT DISTINCT a.sql_id, a.plan_hash_value, a.id, a.parent_id, NVL(b.dep,0) dep, a.operation, a.options, a.object_name, REPLACE(a.access_predicates, CHR(39) , CHR(92)||CHR(39)) access_predicates, REPLACE(a.filter_predicates, CHR(39) , CHR(92)||CHR(39)) filter_predicates, b.skp ');
+       put('                                        FROM gv$sql_plan_statistics_all a, skp_steps b ');
        put('                                       WHERE a.sql_id = ''''&&sqld360_sqlid.''''');
        put('                                         AND a.plan_hash_value = '||i.plan_hash_value||'');
        put('                                         AND a.id = b.stepid(+) ');
@@ -2226,10 +2229,10 @@ BEGIN
        put('                          FROM plan_all b ');
        put('                         WHERE a.dep-1 = b.dep'); 
        put('                           AND b.adapt_id < a.adapt_id ) adapt_parent_id, parent_id,'); 
-       put('                       a.operation operation, a.options, a.object_name');
+       put('                       a.operation operation, a.options, a.object_name, a.access_predicates, a.filter_predicates');
        put('                  FROM plan_all a)');
        put('        UNION ');
-       put('        SELECT id, adapt_id, NVL(adapt_parent_id, parent_id) parent_id, operation, options, object_name ');  
+       put('        SELECT id, adapt_id, NVL(adapt_parent_id, parent_id) parent_id, operation, options, object_name, access_predicates, filter_predicates ');  
        put('          FROM (WITH skp_steps AS (SELECT sql_id, plan_hash_value, extractvalue(value(b),''''/row/@op'''') stepid, extractvalue(value(b),''''/row/@skp'''') skp,');
        put('                                          extractvalue(value(b),''''/row/@dep'''') dep');
        put('                                     FROM dba_hist_sql_plan a, ');
@@ -2238,7 +2241,7 @@ BEGIN
        put('                                      AND other_xml IS NOT NULL ');
        put('                                      AND plan_hash_value = '||i.plan_hash_value||'),'); 
        put('                 plan_all AS (SELECT a.sql_id, a.plan_hash_value, a.id, a.parent_id, NVL(b.dep,0) dep,'); 
-       put('                                     (ROW_NUMBER() OVER (ORDER BY a.id))-1 adapt_id, a.operation,a.options,a.object_name, b.skp');
+       put('                                     (ROW_NUMBER() OVER (ORDER BY a.id))-1 adapt_id, a.operation, a.options, a.object_name, REPLACE(a.access_predicates, CHR(39) , CHR(92)||CHR(39)) access_predicates, REPLACE(a.filter_predicates, CHR(39) , CHR(92)||CHR(39)) filter_predicates, b.skp');
        put('                                FROM dba_hist_sql_plan a, skp_steps b ');
        put('                               WHERE a.sql_id = ''''&&sqld360_sqlid.''''');
        put('                                 AND a.plan_hash_value = '||i.plan_hash_value||'');
@@ -2250,7 +2253,7 @@ BEGIN
        put('                          FROM plan_all b ');
        put('                         WHERE a.dep-1 = b.dep'); 
        put('                           AND b.adapt_id < a.adapt_id ) adapt_parent_id, parent_id,'); 
-       put('                       a.operation operation, a.options, a.object_name');
+       put('                       a.operation operation, a.options, a.object_name, a.access_predicates, a.filter_predicates');
        put('                  FROM plan_all a');
        put('                 WHERE NOT EXISTS (SELECT 1 ');
        put('                             FROM gv$sql_plan_statistics_all ');

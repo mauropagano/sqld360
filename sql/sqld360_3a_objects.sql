@@ -158,6 +158,26 @@ PRO </li>
 SPO OFF;
 @@sqld360_3d_histograms.sql
 
+DEF title = 'Histograms on long strings';
+DEF main_table = 'DBA_TAB_HISTOGRAMS';
+BEGIN
+  :sql_text := '
+SELECT /*+ &&top_level_hints. */
+       owner, table_name, column_name, data_type, data_length, num_buckets, avg_col_len, char_length
+  FROM dba_tab_cols
+ WHERE (owner, table_name) IN &&tables_list.
+   AND num_buckets <= 253
+   &&skip_12c.AND char_length > 32
+   &&skip_12c.AND data_length > 32
+   &&skip_10g.&&skip_11g.AND char_length > 64
+   &&skip_10g.&&skip_11g.AND data_length > 64
+   AND avg_col_len > 6
+ ORDER BY owner, table_name, column_id
+';
+END;
+/
+@@sqld360_9a_pre_one.sql
+
 
 DEF title = 'Constraints';
 DEF main_table = 'DBA_CONSTRAINTS';

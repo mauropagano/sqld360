@@ -9,8 +9,8 @@ CL COL;
 COL row_num FOR 9999999 HEA '#' PRI;
 
 -- version
-DEF sqld360_vYYNN = 'v1613';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2016-05-05)';
+DEF sqld360_vYYNN = 'v1615';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2016-06-03)';
 DEF sqld360_prefix = 'sqld360';
 
 -- parameters
@@ -69,12 +69,15 @@ PRO
 PRO Oracle Pack License? (Tuning, Diagnostics or None) [ T | D | N ] (required)
 COL license_pack NEW_V license_pack FOR A1;
 SELECT NVL(UPPER(SUBSTR(TRIM('&2.'), 1, 1)), '?') license_pack FROM DUAL;
+WHENEVER SQLERROR EXIT SQL.SQLCODE;
 BEGIN
   IF NOT '&&license_pack.' IN ('T', 'D', 'N') THEN
     RAISE_APPLICATION_ERROR(-20000, 'Invalid Oracle Pack License "&&license_pack.". Valid values are T, D and N.');
   END IF;
 END;
 /
+WHENEVER SQLERROR CONTINUE;
+
 PRO
 SET TERM OFF;
 COL diagnostics_pack NEW_V diagnostics_pack FOR A1;
@@ -172,6 +175,9 @@ SELECT '--' skip_11r201 FROM v$instance WHERE version LIKE '11.2.0.1%';
 DEF skip_11r203 = '';
 COL skip_11r203 NEW_V skip_11r203;
 SELECT '--' skip_11r203 FROM v$instance WHERE version LIKE '11.2.0.3%';
+DEF skip_12c = '';
+COL skip_12c NEW_V skip_12c;
+SELECT '--' skip_12c FROM v$instance WHERE version LIKE '12.%';
 DEF skip_12r101 = '';
 COL skip_12r101 NEW_V skip_12r101;
 SELECT '--' skip_12r101 FROM v$instance WHERE version LIKE '12.1.0.1%';
