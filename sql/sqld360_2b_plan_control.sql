@@ -25,6 +25,22 @@ END;
 
 COL sql_text PRI
 
+DEF title = 'SQL Profile Data';
+DEF main_table = 'DBMSHSXP_SQL_PROFILE_ATTR';
+BEGIN
+  :sql_text := '
+SELECT /*+ &&top_level_hints. */
+       * 
+  FROM dbmshsxp_sql_profile_attr 
+ WHERE profile_name IN (SELECT name 
+                          FROM dba_sql_profiles 
+                         WHERE signature IN ( &&exact_matching_signature. , &&force_matching_signature. )) 
+   AND ''&&tuning_pack.'' = ''Y''
+ ORDER BY profile_name
+';
+END;
+/
+@@sqld360_9a_pre_one.sql
 
 
 COL sql_text NOPRI
@@ -131,6 +147,20 @@ END;
 @@&&skip_10g.&&skip_11g.sqld360_9a_pre_one.sql
 
 COL ADDRESS PRI
+
+DEF title = 'Mapped SQL';
+DEF main_table = 'GV$MAPPED_SQL';
+BEGIN
+  :sql_text := '
+SELECT /*+ &&top_level_hints. */
+       * 
+  FROM gv$mapped_sql
+ WHERE mapped_sql_id = ''&&sqld360_sqlid.'' OR sql_id = ''&&sqld360_sqlid.''
+ ORDER BY inst_id
+';
+END;
+/
+@@&&skip_10g.&&skip_11g.sqld360_9a_pre_one.sql
 
 SPO &&sqld360_main_report..html APP;
 PRO </ol>

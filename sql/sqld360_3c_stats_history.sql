@@ -6,6 +6,21 @@ PRO <h2>&&section_id.. &&section_name.</h2>
 PRO <ol start="&&report_sequence.">
 SPO OFF;
 
+
+DEF title = 'System Statistics Versions';
+DEF main_table = 'WRI$_OPTSTAT_AUX_HISTORY';
+BEGIN
+  :sql_text := '
+SELECT /*+ &&top_level_hints. */
+       h.*
+  FROM sys.wri$_optstat_aux_history h
+ ORDER BY h.savtime desc, sname
+';
+END;
+/
+@@sqld360_9a_pre_one.sql
+
+
 DEF title = 'Tables Statistics Versions';
 DEF main_table = 'WRI$_OPTSTAT_TAB_HISTORY';
 BEGIN

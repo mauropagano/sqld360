@@ -33,7 +33,7 @@ PRO         var data = new google.visualization.DataTable();
 PRO         data.addColumn('string','');
 PRO         data.addColumn('datetime','Sample Time');
 PRO         data.addColumn('number','Plan Step');
-PRO         data.addColumn('string','');
+PRO         data.addColumn('string','Wait Class');
 PRO         data.addColumn('number','Number of samples');   
 PRO         data.addRows([
 

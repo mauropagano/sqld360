@@ -5,15 +5,16 @@ PRO <body>
 PRO <h1><em>&&sqld360_conf_tool_page.SQLd360</a></em> &&sqld360_vYYNN.: SQL 360-degree view - &&section_id.. Plans Details Page &&sqld360_conf_all_pages_logo.</h1>
 PRO
 PRO <pre>
-PRO sqlid:&&sqld360_sqlid. dbname:&&database_name_short. version:&&db_version. host:&&host_name_short. license:&&license_pack. days:&&history_days. today:&&sqld360_time_stamp.
+PRO sqlid:&&sqld360_sqlid. dbname:&&database_name_short. version:&&db_version. host:&&host_hash. license:&&license_pack. days:&&history_days. today:&&sqld360_time_stamp.
 PRO </pre>
 PRO
 
 PRO <table><tr class="main">
 
 
-SET SERVEROUT ON ECHO OFF FEEDBACK OFF TIMING OFF 
+SET ECHO OFF FEEDBACK OFF TIMING OFF 
 SET SERVEROUT ON SIZE 1000000;
+SET SERVEROUT ON SIZE UNL;
 
 EXEC :repo_seq := 1;
 
@@ -54,6 +55,7 @@ SELECT TO_CHAR(:repo_seq) report_sequence FROM DUAL;
 
 SPO sqld360_plans_analysis_&&sqld360_sqlid._driver.sql
 SET SERVEROUT ON SIZE 1000000;
+SET SERVEROUT ON SIZE UNL;
 
 
 DECLARE
@@ -185,7 +187,7 @@ BEGIN
     put('                  GROUP BY NVL(id,0))');
     put('SELECT ''''{v: ''''''''''''||plandata.adapt_id||'''''''''''',f: ''''''''''''||plandata.adapt_id||'''' - ''''||operation||'''' ''''||options||NVL2(object_name,''''<br>'''','''' '''')||object_name||''''''''''''}'''' id, ');
     put('       parent_id, ''''Step ID: ''''||plandata.adapt_id||'''' (ASH Step ID: ''''||plandata.id||'''')\nASH Samples: ''''||NVL(ashdata.num_samples,0)||'''' (''''||TRUNC(100*NVL(RATIO_TO_REPORT(ashdata.num_samples) OVER (),0),2)||''''%)''''|| ');
-    put('                  NVL2(access_predicates,''''\nAccess Predicates: ''''||access_predicates,'''''''')||NVL2(filter_predicates,''''\nFilter Predicates: ''''||filter_predicates,''''''''), plandata.adapt_id id3');
+    put('                  NVL2(access_predicates,''''\n\nAccess Predicates: ''''||access_predicates,'''''''')||NVL2(filter_predicates,''''\n\nFilter Predicates: ''''||filter_predicates,''''''''), plandata.adapt_id id3');
     put('  FROM (SELECT id, adapt_id, NVL(adapt_parent_id, parent_id) parent_id, operation, options, object_name, access_predicates, filter_predicates '); 
     put('          FROM (WITH skp_steps AS (SELECT sql_id, plan_hash_value, extractvalue(value(b),''''/row/@op'''') stepid, extractvalue(value(b),''''/row/@skp'''') skp,');
     put('                                          extractvalue(value(b),''''/row/@dep'''') dep');
@@ -1524,7 +1526,7 @@ BEGIN
        put('                  GROUP BY NVL(id,0))');
        put('SELECT ''''{v: ''''''''''''||plandata.adapt_id||'''''''''''',f: ''''''''''''||plandata.adapt_id||'''' - ''''||operation||'''' ''''||options||NVL2(object_name,''''<br>'''','''' '''')||object_name||''''''''''''}'''' id, ');
        put('       parent_id, ''''Step ID: ''''||plandata.adapt_id||'''' (ASH Step ID: ''''||plandata.id||'''')\nASH Samples: ''''||NVL(ashdata.num_samples,0)||'''' (''''||TRUNC(100*NVL(RATIO_TO_REPORT(ashdata.num_samples) OVER (),0),2)||''''%)''''|| ');
-       put('                  NVL2(access_predicates,''''\nAccess Predicates: ''''||access_predicates,'''''''')||NVL2(filter_predicates,''''\nFilter Predicates: ''''||filter_predicates,''''''''), plandata.adapt_id id3');
+       put('                  NVL2(access_predicates,''''\n\nAccess Predicates: ''''||access_predicates,'''''''')||NVL2(filter_predicates,''''\n\nFilter Predicates: ''''||filter_predicates,''''''''), plandata.adapt_id id3');
        put('  FROM (SELECT id, adapt_id, NVL(adapt_parent_id, parent_id) parent_id, operation, options, object_name, access_predicates, filter_predicates '); 
        put('          FROM (WITH skp_steps AS (SELECT sql_id, plan_hash_value, extractvalue(value(b),''''/row/@op'''') stepid, extractvalue(value(b),''''/row/@skp'''') skp,');
        put('                                          extractvalue(value(b),''''/row/@dep'''') dep');
@@ -2206,7 +2208,7 @@ BEGIN
        put('                  GROUP BY NVL(id,0))');
        put('SELECT ''''{v: ''''''''''''||plandata.adapt_id||'''''''''''',f: ''''''''''''||plandata.adapt_id||'''' - ''''||operation||'''' ''''||options||NVL2(object_name,''''<br>'''','''' '''')||object_name||''''''''''''}'''' id, ');
        put('       parent_id, ''''Step ID: ''''||plandata.adapt_id||'''' (ASH Step ID: ''''||plandata.id||'''')\mASH Samples: ''''||NVL(ashdata.num_samples,0)||'''' (''''||TRUNC(100*NVL(RATIO_TO_REPORT(ashdata.num_samples) OVER (),0),2)||''''%)''''|| ');
-       put('                  NVL2(access_predicates,''''\nAccess Predicates: ''''||access_predicates,'''''''')||NVL2(filter_predicates,''''\nFilter Predicates: ''''||filter_predicates,''''''''), plandata.adapt_id id3');
+       put('                  NVL2(access_predicates,''''\n\nAccess Predicates: ''''||access_predicates,'''''''')||NVL2(filter_predicates,''''\n\nFilter Predicates: ''''||filter_predicates,''''''''), plandata.adapt_id id3');
        put('  FROM (SELECT id, adapt_id, NVL(adapt_parent_id, parent_id) parent_id, operation, options, object_name, access_predicates, filter_predicates '); 
        put('          FROM (WITH skp_steps AS (SELECT sql_id, plan_hash_value, extractvalue(value(b),''''/row/@op'''') stepid, extractvalue(value(b),''''/row/@skp'''') skp,');
        put('                                          extractvalue(value(b),''''/row/@dep'''') dep');

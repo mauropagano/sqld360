@@ -1400,16 +1400,29 @@ SELECT NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INS
        TO_CHAR(MIN(timestamp), ''YYYY-MM-DD HH24:MI:SS'')  start_time,
        TO_CHAR(MAX(timestamp), ''YYYY-MM-DD HH24:MI:SS'')  end_time,
        MIN(cost) plan_hash_value,
-       COUNT(DISTINCT position||''-''||cpu_cost||''-''||io_cost) num_processes,
-       MAX(TRUNC(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,10)+1,INSTR(partition_stop,'','',1,11)-INSTR(partition_stop,'','',1,10)-1)) / 2097152)) max_px_degree,
        LEAST(1+86400*(MAX(timestamp)-MIN(timestamp)),COUNT(*)) elapsed_time,
        SUM(CASE WHEN object_node = ''ON CPU'' THEN 1 ELSE 0 END) cpu_time,
-       COUNT(*) db_time
-  FROM plan_table
+       COUNT(*) db_time,
+       COUNT(DISTINCT position||''-''||cpu_cost||''-''||io_cost) num_processes_ash,
+       MAX(TRUNC(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,10)+1,INSTR(partition_stop,'','',1,11)-INSTR(partition_stop,'','',1,10)-1)) / 2097152)) max_px_degree_ash,
+       MAX(px_servers_requested) px_servers_requested_sqlmon, 
+       MAX(px_servers_allocated) px_servers_allocated_sqlmon
+  FROM plan_table a,
+       (SELECT inst_id, 
+               sql_exec_id, 
+               sql_exec_start, 
+               px_servers_requested, 
+               px_servers_allocated
+          FROM gv$sql_monitor
+         WHERE sql_id = ''&&sqld360_sqlid.''
+           AND ''&&tuning_pack.'' = ''Y'') b
  WHERE statement_id = ''SQLD360_ASH_DATA_MEM''
    AND position =  @instance_number@
    AND remarks = ''&&sqld360_sqlid.''
    AND ''&&diagnostics_pack.'' = ''Y''
+   AND b.sql_exec_id(+) = a.partition_id
+   AND b.inst_id(+) = NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INSTR(partition_stop,'','',1,4)-INSTR(partition_stop,'','',1,3)-1)),position)
+   AND b.sql_exec_start(+) = TO_DATE(distribution, ''YYYYMMDDHH24MISS'')
  GROUP BY partition_id, 
        TO_CHAR(TO_DATE(distribution, ''YYYYMMDDHH24MISS''), ''YYYY-MM-DD HH24:MI:SS''),
        NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INSTR(partition_stop,'','',1,4)-INSTR(partition_stop,'','',1,3)-1)),position),
@@ -1493,16 +1506,29 @@ SELECT NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INS
        TO_CHAR(MIN(timestamp), ''YYYY-MM-DD HH24:MI:SS'')  start_time,
        TO_CHAR(MAX(timestamp), ''YYYY-MM-DD HH24:MI:SS'')  end_time,
        MIN(cost) plan_hash_value,
-       COUNT(DISTINCT position||''-''||cpu_cost||''-''||io_cost) num_processes,
-       MAX(TRUNC(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,10)+1,INSTR(partition_stop,'','',1,11)-INSTR(partition_stop,'','',1,10)-1)) / 2097152)) max_px_degree,
        LEAST(10+86400*(MAX(timestamp)-MIN(timestamp)),SUM(10)) elapsed_time, 
        SUM(CASE WHEN object_node = ''ON CPU'' THEN 10 ELSE 0 END) cpu_time,
-       SUM(10) db_time
-  FROM plan_table
+       SUM(10) db_time,
+       COUNT(DISTINCT position||''-''||cpu_cost||''-''||io_cost) num_processes_ash,
+       MAX(TRUNC(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,10)+1,INSTR(partition_stop,'','',1,11)-INSTR(partition_stop,'','',1,10)-1)) / 2097152)) max_px_degree_ash,
+       MAX(px_servers_requested) px_servers_requested_sqlmon, 
+       MAX(px_servers_allocated) px_servers_allocated_sqlmon
+  FROM plan_table a,
+       (SELECT inst_id, 
+               sql_exec_id, 
+               sql_exec_start, 
+               px_servers_requested, 
+               px_servers_allocated
+          FROM gv$sql_monitor
+         WHERE sql_id = ''&&sqld360_sqlid.''
+           AND ''&&tuning_pack.'' = ''Y'') b
  WHERE statement_id = ''SQLD360_ASH_DATA_HIST''
    AND position =  @instance_number@
    AND remarks = ''&&sqld360_sqlid.''
    AND ''&&diagnostics_pack.'' = ''Y''
+   AND b.sql_exec_id(+) = a.partition_id
+   AND b.inst_id(+) = NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INSTR(partition_stop,'','',1,4)-INSTR(partition_stop,'','',1,3)-1)),position)
+   AND b.sql_exec_start(+) = TO_DATE(distribution, ''YYYYMMDDHH24MISS'')
  GROUP BY partition_id, 
        TO_CHAR(TO_DATE(distribution, ''YYYYMMDDHH24MISS''), ''YYYY-MM-DD HH24:MI:SS''),
        NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INSTR(partition_stop,'','',1,4)-INSTR(partition_stop,'','',1,3)-1)),position),

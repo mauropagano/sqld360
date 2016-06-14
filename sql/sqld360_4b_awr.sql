@@ -169,7 +169,7 @@ DEF tit_03 = 'IO Wait Time';
 DEF tit_04 = 'Cluster Wait Time';
 DEF tit_05 = 'Application Wait Time';
 DEF tit_06 = 'Concurrency Wait Time';
-DEF tit_07 = '';
+DEF tit_07 = 'Unaccounted Time';
 DEF tit_08 = '';
 DEF tit_09 = '';
 DEF tit_10 = '';
@@ -185,6 +185,7 @@ COL io_time FOR 999999990.000;
 COL cluster_time FOR 999999990.000;
 COL application_time FOR 999999990.000;
 COL concurrency_time FOR 999999990.000;
+COL unaccounted_time FOR 999999990.000;
 
 
 DEF main_table = 'DBA_HIST_SQLSTAT';
@@ -201,7 +202,13 @@ SELECT MIN(a.snap_id) snap_id,
        SUM(NVL(b.clwait_delta,0))/1000000 cluster_time,
        SUM(NVL(b.apwait_delta,0))/1000000 application_time,
        SUM(NVL(b.ccwait_delta,0))/1000000 concurrency_time,
-       0 dummy_07,
+       (SUM(NVL(b.elapsed_time_delta,0)) - 
+         (SUM(NVL(b.cpu_time_delta,0)) +
+          SUM(NVL(b.iowait_delta,0))   +
+          SUM(NVL(b.clwait_delta,0))   +
+          SUM(NVL(b.apwait_delta,0))   +
+          SUM(NVL(b.ccwait_delta,0)))
+       ) / 1000000 unaccounted_time,
        0 dummy_08,
        0 dummy_09,
        0 dummy_10,
@@ -234,7 +241,7 @@ DEF skip_lch = '';
 DEF skip_all = '&&is_single_instance.';
 DEF title = 'SQL Execute Time by Wait Class for Cluster';
 DEF abstract = 'SQL Execute Time compared by Wait Class'
-DEF foot = 'SQL Execute Elapsed Time'
+DEF foot = 'Unaccounted Time computed as difference between Elapsed Time and [CPU+IO+App+Clu+Concu] Time'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', 'a.instance_number');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
 
@@ -243,7 +250,7 @@ DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 1;
 DEF title = 'SQL Execute Time by Wait Class for Instance 1';
 DEF abstract = 'SQL Execute Time compared by Wait Class'
-DEF foot = 'SQL Execute Elapsed Time'
+DEF foot = 'Unaccounted Time computed as difference between Elapsed Time and [CPU+IO+App+Clu+Concu] Time'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '1');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
 
@@ -252,7 +259,7 @@ DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 2;
 DEF title = 'SQL Execute Time by Wait Class for Instance 2';
 DEF abstract = 'SQL Execute Time compared by Wait Class'
-DEF foot = 'SQL Execute Elapsed Time'
+DEF foot = 'Unaccounted Time computed as difference between Elapsed Time and [CPU+IO+App+Clu+Concu] Time'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '2');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
 
@@ -261,7 +268,7 @@ DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 3;
 DEF title = 'SQL Execute Time by Wait Class for Instance 3';
 DEF abstract = 'SQL Execute Time compared by Wait Class'
-DEF foot = 'SQL Execute Elapsed Time'
+DEF foot = 'Unaccounted Time computed as difference between Elapsed Time and [CPU+IO+App+Clu+Concu] Time'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '3');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
 
@@ -270,7 +277,7 @@ DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 4;
 DEF title = 'SQL Execute Time by Wait Class for Instance 4';
 DEF abstract = 'SQL Execute Time compared by Wait Class'
-DEF foot = 'SQL Execute Elapsed Time'
+DEF foot = 'Unaccounted Time computed as difference between Elapsed Time and [CPU+IO+App+Clu+Concu] Time'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '4');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
 
@@ -279,7 +286,7 @@ DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 5;
 DEF title = 'SQL Execute Time by Wait Class for Instance 5';
 DEF abstract = 'SQL Execute Time compared by Wait Class'
-DEF foot = 'SQL Execute Elapsed Time'
+DEF foot = 'Unaccounted Time computed as difference between Elapsed Time and [CPU+IO+App+Clu+Concu] Time'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '5');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
 
@@ -288,7 +295,7 @@ DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 6;
 DEF title = 'SQL Execute Time by Wait Class for Instance 6';
 DEF abstract = 'SQL Execute Time compared by Wait Class'
-DEF foot = 'SQL Execute Elapsed Time'
+DEF foot = 'Unaccounted Time computed as difference between Elapsed Time and [CPU+IO+App+Clu+Concu] Time'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '6');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
 
@@ -297,7 +304,7 @@ DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 7;
 DEF title = 'SQL Execute Time by Wait Class for Instance 7';
 DEF abstract = 'SQL Execute Time compared by Wait Class'
-DEF foot = 'SQL Execute Elapsed Time'
+DEF foot = 'Unaccounted Time computed as difference between Elapsed Time and [CPU+IO+App+Clu+Concu] Time'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '7');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
 
@@ -306,7 +313,7 @@ DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 8;
 DEF title = 'SQL Execute Time by Wait Class for Instance 8';
 DEF abstract = 'SQL Execute Time compared by Wait Class'
-DEF foot = 'SQL Execute Elapsed Time'
+DEF foot = 'Unaccounted Time computed as difference between Elapsed Time and [CPU+IO+App+Clu+Concu] Time'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '8');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
 

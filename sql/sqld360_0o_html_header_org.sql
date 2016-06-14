@@ -16,7 +16,6 @@ PRO a                   {color:#663300;}
 PRO table               {font-size:8pt; border_collapse:collapse; empty-cells:show; white-space:nowrap; border:1px solid #cccc99;}
 PRO li                  {font-size:8pt; color:black; padding-left:4px; padding-right:4px; padding-bottom:2px;}
 PRO th                  {font-weight:bold; color:white; background:#0066CC; padding-left:4px; padding-right:4px; padding-bottom:2px;}
-PRO tr                  {color:black; background:#fcfcf0;}
 PRO tr.main             {color:black; background:#fcfcf0;}
 PRO td                  {vertical-align:top; border:1px solid #cccc99;}
 PRO td.c                {text-align:center;}
