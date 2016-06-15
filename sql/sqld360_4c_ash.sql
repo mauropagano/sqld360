@@ -1409,19 +1409,24 @@ SELECT NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INS
        MAX(px_servers_allocated) px_servers_allocated_sqlmon
   FROM plan_table a,
        (SELECT inst_id, 
+               sid,
+               session_serial#,
                sql_exec_id, 
                sql_exec_start, 
                px_servers_requested, 
                px_servers_allocated
           FROM gv$sql_monitor
          WHERE sql_id = ''&&sqld360_sqlid.''
-           AND ''&&tuning_pack.'' = ''Y'') b
+           AND ''&&tuning_pack.'' = ''Y''
+           AND px_qcsid IS NULL) b
  WHERE statement_id = ''SQLD360_ASH_DATA_MEM''
    AND position =  @instance_number@
    AND remarks = ''&&sqld360_sqlid.''
    AND ''&&diagnostics_pack.'' = ''Y''
    AND b.sql_exec_id(+) = a.partition_id
    AND b.inst_id(+) = NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INSTR(partition_stop,'','',1,4)-INSTR(partition_stop,'','',1,3)-1)),position)
+   AND b.sid(+) = NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,4)+1,INSTR(partition_stop,'','',1,5)-INSTR(partition_stop,'','',1,4)-1)),cpu_cost)
+   AND b.session_serial#(+) = NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,5)+1,INSTR(partition_stop,'','',1,6)-INSTR(partition_stop,'','',1,5)-1)),io_cost)
    AND b.sql_exec_start(+) = TO_DATE(distribution, ''YYYYMMDDHH24MISS'')
  GROUP BY partition_id, 
        TO_CHAR(TO_DATE(distribution, ''YYYYMMDDHH24MISS''), ''YYYY-MM-DD HH24:MI:SS''),
@@ -1515,19 +1520,24 @@ SELECT NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INS
        MAX(px_servers_allocated) px_servers_allocated_sqlmon
   FROM plan_table a,
        (SELECT inst_id, 
+               sid,
+               session_serial#,
                sql_exec_id, 
                sql_exec_start, 
                px_servers_requested, 
                px_servers_allocated
           FROM gv$sql_monitor
          WHERE sql_id = ''&&sqld360_sqlid.''
-           AND ''&&tuning_pack.'' = ''Y'') b
+           AND ''&&tuning_pack.'' = ''Y''
+           AND px_qcsid IS NULL) b
  WHERE statement_id = ''SQLD360_ASH_DATA_HIST''
    AND position =  @instance_number@
    AND remarks = ''&&sqld360_sqlid.''
    AND ''&&diagnostics_pack.'' = ''Y''
    AND b.sql_exec_id(+) = a.partition_id
    AND b.inst_id(+) = NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INSTR(partition_stop,'','',1,4)-INSTR(partition_stop,'','',1,3)-1)),position)
+   AND b.sid(+) = NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,4)+1,INSTR(partition_stop,'','',1,5)-INSTR(partition_stop,'','',1,4)-1)),cpu_cost)
+   AND b.session_serial#(+) = NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,5)+1,INSTR(partition_stop,'','',1,6)-INSTR(partition_stop,'','',1,5)-1)),io_cost)
    AND b.sql_exec_start(+) = TO_DATE(distribution, ''YYYYMMDDHH24MISS'')
  GROUP BY partition_id, 
        TO_CHAR(TO_DATE(distribution, ''YYYYMMDDHH24MISS''), ''YYYY-MM-DD HH24:MI:SS''),
