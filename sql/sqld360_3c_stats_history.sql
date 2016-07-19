@@ -1,5 +1,5 @@
 DEF section_id = '3c';
-DEF section_name = 'Statistics Versions';
+DEF section_name = 'Statistics History';
 EXEC DBMS_APPLICATION_INFO.SET_MODULE('&&sqld360_prefix.','&&section_id.');
 SPO &&sqld360_main_report..html APP;
 PRO <h2>&&section_id.. &&section_name.</h2>
@@ -7,7 +7,7 @@ PRO <ol start="&&report_sequence.">
 SPO OFF;
 
 
-DEF title = 'System Statistics Versions';
+DEF title = 'System Statistics History';
 DEF main_table = 'WRI$_OPTSTAT_AUX_HISTORY';
 BEGIN
   :sql_text := '
@@ -21,7 +21,7 @@ END;
 @@sqld360_9a_pre_one.sql
 
 
-DEF title = 'Tables Statistics Versions';
+DEF title = 'Tables Statistics History';
 DEF main_table = 'WRI$_OPTSTAT_TAB_HISTORY';
 BEGIN
   :sql_text := '
@@ -42,7 +42,7 @@ END;
 @@sqld360_9a_pre_one.sql
 
 
-DEF title = 'Indexes Statistics Versions';
+DEF title = 'Indexes Statistics History';
 DEF main_table = 'WRI$_OPTSTAT_IND_HISTORY';
 BEGIN
   :sql_text := '
@@ -67,7 +67,7 @@ END;
 @@sqld360_9a_pre_one.sql
 
 
-DEF title = 'Columns Statistics Versions';
+DEF title = 'Columns Statistics History';
 DEF main_table = 'WRI$_OPTSTAT_IND_HISTORY';
 BEGIN
   :sql_text := '
@@ -94,7 +94,7 @@ END;
 @@sqld360_9a_pre_one.sql
 
 
-DEF title = 'Partitions Statistics Versions';
+DEF title = 'Partitions Statistics History';
 DEF main_table = 'WRI$_OPTSTAT_IND_HISTORY';
 BEGIN
   :sql_text := '

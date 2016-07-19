@@ -12,13 +12,16 @@ DEF main_table = 'GV$SQL';
 BEGIN
   :sql_text := '
  SELECT /*+ &&top_level_hints. */
-       source, plan_hash_value, force_matching_signature, SUM(executions) execs, ROUND(SUM(buffer_gets)/DECODE(SUM(executions),0,1,SUM(executions))) avg_buffer_gets, 
+       source, plan_hash_value, force_matching_signature, SUM(executions) execs, SUM(end_of_fetch_count) eof_count, ROUND(SUM(buffer_gets)/DECODE(SUM(executions),0,1,SUM(executions))) avg_buffer_gets, 
        ROUND(SUM(elapsed_time)/1e6/DECODE(SUM(executions),0,1,SUM(executions)),3) avg_elapsed_time_secs, ROUND(SUM(cpu_time)/1e6/DECODE(SUM(executions),0,1,SUM(executions)),3) avg_cpu_time_secs,
        ROUND(SUM(io_time)/1e6/DECODE(SUM(executions),0,1,SUM(executions)),3) avg_io_time_secs, ROUND(SUM(rows_processed)/DECODE(SUM(executions),0,1,SUM(executions)),3) avg_rows_processed,
        ROUND(SUM(rows_processed)/DECODE(SUM(fetches),0,1,SUM(fetches)),3) avg_rows_per_fetch,
-       ROUND(AVG(cost)) avg_cost, MIN(cost) min_cost, MAX(cost) max_cost, MIN(first_load_time) first_load_time, MAX(last_load_time) last_load_time, MIN(optimizer_env_hash_value) min_cbo_env, max(optimizer_env_hash_value) max_cbo_env,
+       sql_profile, sql_plan_baseline, 
+       ROUND(AVG(cost)) avg_cost, MIN(cost) min_cost, MAX(cost) max_cost, 
+       MIN(first_load_time) first_load_time, MAX(last_load_time) last_load_time, 
+       MIN(optimizer_env_hash_value) min_cbo_env, max(optimizer_env_hash_value) max_cbo_env,
        MIN(min_dop) min_req_dop, MAX(max_dop) max_req_dop
-  FROM (SELECT ''MEM'' source, a.plan_hash_value, a.force_matching_signature, executions, fetches, elapsed_time, cpu_time, rows_processed, buffer_gets, first_load_time, last_load_time, optimizer_cost cost, optimizer_env_hash_value, min_dop, max_dop, user_io_wait_time io_time
+  FROM (SELECT ''MEM'' source, a.plan_hash_value, a.force_matching_signature, a.sql_profile, a.sql_plan_baseline, executions, fetches, end_of_fetch_count, elapsed_time, cpu_time, rows_processed, buffer_gets, first_load_time, last_load_time, optimizer_cost cost, optimizer_env_hash_value, min_dop, max_dop, user_io_wait_time io_time
           FROM gv$sql a,
                (SELECT plan_hash_value, MIN(TO_NUMBER(extractValue(XMLType(other_xml),''/other_xml/info[@type="dop"]''))) min_dop, 
                        MAX(TO_NUMBER(extractValue(XMLType(other_xml),''/other_xml/info[@type="dop"]''))) max_dop
@@ -29,7 +32,7 @@ BEGIN
          WHERE sql_id = ''&&sqld360_sqlid.''
            AND a.plan_hash_value = dop.plan_hash_value(+)
         UNION ALL
-        SELECT ''HIST'' source, a.plan_hash_value, a.force_matching_signature, executions_delta executions, fetches_delta fetches, elapsed_time_delta elapsed_time, cpu_time_delta cpu_time, rows_processed_delta rows_processed,
+        SELECT ''HIST'' source, a.plan_hash_value, a.force_matching_signature, a.sql_profile, ''N/A'' sql_plan_baseline, executions_delta executions, fetches_delta fetches,  end_of_fetch_count_delta end_of_fetch_count, elapsed_time_delta elapsed_time, cpu_time_delta cpu_time, rows_processed_delta rows_processed,
                buffer_gets_delta buffer_gets, null first_load_time, null last_load_time, optimizer_cost, optimizer_env_hash_value, min_dop, max_dop, iowait_delta
           FROM dba_hist_sqlstat a,
                (SELECT plan_hash_value, MIN(TO_NUMBER(extractValue(XMLType(other_xml),''/other_xml/info[@type="dop"]''))) min_dop, 
@@ -43,7 +46,7 @@ BEGIN
            AND ''&&diagnostics_pack.'' = ''Y''
            AND snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.
            AND a.plan_hash_value = dop.plan_hash_value(+))
- GROUP BY source, plan_hash_value, force_matching_signature
+ GROUP BY source, plan_hash_value, force_matching_signature, sql_profile, sql_plan_baseline
 ';
 END;
 /

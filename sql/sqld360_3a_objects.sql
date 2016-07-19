@@ -147,6 +147,9 @@ SELECT TRIM(TO_CHAR(COUNT(DISTINCT owner||'.'||table_name))) num_histograms
 DEF title= 'Histograms'
 DEF main_table = 'DBA_TAB_HISTOGRAMS'
 
+-- storing the report sequence before forking to a new page
+EXEC :repo_seq_bck := :repo_seq;
+
 --this one initiated a new file name, need it in the next anchor
 @@sqld360_0s_pre_nondef
 SET TERM OFF ECHO OFF 
@@ -158,6 +161,10 @@ PRO </li>
 SPO OFF;
 @@sqld360_3d_histograms.sql
 
+-- storing the report sequence before forking to a new page
+EXEC :repo_seq := :repo_seq_bck+1;
+
+
 DEF title = 'Histograms on long strings';
 DEF main_table = 'DBA_TAB_HISTOGRAMS';
 BEGIN
@@ -167,6 +174,7 @@ SELECT /*+ &&top_level_hints. */
   FROM dba_tab_cols
  WHERE (owner, table_name) IN &&tables_list.
    AND num_buckets <= 253
+   AND histogram <> ''NONE''
    &&skip_12c.AND char_length > 32
    &&skip_12c.AND data_length > 32
    &&skip_10g.&&skip_11g.AND char_length > 64
@@ -273,6 +281,9 @@ END;
 @@sqld360_9a_pre_one.sql
 
 
+-- storing the report sequence before forking to a new page
+EXEC :repo_seq_bck := :repo_seq;
+
 -- find if there are partitioned tables involved
 COL cols_from_part_tables NEW_V cols_from_part_tables
 COL part_tables NEW_V part_tables 
@@ -284,7 +295,7 @@ SELECT TRIM(TO_CHAR(COUNT(*))) cols_from_part_tables,
 DEF title= 'Partitions Columns'
 DEF main_table = 'DBA_TAB_PARTITIONS'
 
---this one initiated a new file name, need it in the next anchor
+--this one initiates a new file name, need it in the next <a>
 @@sqld360_0s_pre_nondef
 SET TERM OFF ECHO OFF 
 -- need to fix the file name for the partitions
@@ -294,6 +305,9 @@ PRO <a href="&&one_spool_filename..html">page</a> <small><em>(&&part_tables.)</e
 PRO </li>
 SPO OFF;
 @@sqld360_3b_partitions_columns.sql
+
+-- storing the report sequence before forking to a new page
+EXEC :repo_seq := :repo_seq_bck+1;
 
 
 DEF title = 'Table Subpartitions';

@@ -6,6 +6,10 @@ PRO <h2>&&section_id.. &&section_name.</h2>
 PRO <ol start="&&report_sequence.">
 SPO OFF;
 
+COL address NOPRI
+COL hash_value NOPRI
+COL sql_id NOPRI
+
 DEF title = 'SQL Text';
 DEF main_table = 'V$SQLTEXT_WITH_NEWLINES';
 BEGIN
@@ -19,6 +23,10 @@ SELECT /*+ &&top_level_hints. */
 END;
 /
 @@sqld360_9a_pre_one.sql
+
+COL address PRI
+COL hash_value PRI
+COL sql_id PRI
 
 
 DEF title = 'SQL Text from AWR';

@@ -149,6 +149,11 @@ PRO <a href="&&one_spool_filename..sql">sql</a>
 PRO </li>
 PRO </ol>
 SPO OFF;
+
+-- this SQL is because the previous 2 steps don't use the standard formula to increase the seq#
+EXEC :repo_seq := :repo_seq+2;
+SELECT TO_CHAR(:repo_seq) report_sequence FROM DUAL;
+
 --HOS zip -jmq 99999_sqld360_&&sqld360_sqlid._drivers sqld360_xpand_&&sqld360_sqlid._driver.sql
 HOS zip -mq &&sqld360_main_filename._&&sqld360_file_time. &&one_spool_filename..sql
 HOS zip -q &&sqld360_main_filename._&&sqld360_file_time. &&sqld360_main_report..html

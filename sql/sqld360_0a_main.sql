@@ -26,6 +26,8 @@ DEF column_number = '1';
 @@&&skip_10g.&&skip_11r1.sqld360_1c_xpand.sql
 @@sqld360_1d_standalone.sql
 @@sqld360_1e_nls.sql
+@@sqld360_1f_observations.sql
+
 
 PRO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -56,7 +58,7 @@ PRO
 SPO OFF;
 
 @@sqld360_3a_objects.sql
-@@sqld360_3b_checks.sql
+--@@sqld360_3b_checks.sql
 @@&&sqld360_skip_stats_h.sqld360_3c_stats_history.sql
 @@&&skip_10g.&&skip_11g.&&skip_12r101.sqld360_3d_inmemory.sql
 @@&&skip_10g.&&skip_11g.sqld360_3e_bt_cache.sql
@@ -89,7 +91,7 @@ SPO OFF;
 @@&&skip_tuning.&&skip_10g.&&sqld360_skip_sqlmon.sqld360_5b_sqlmon.sql
 @@&&skip_diagnostics.&&sqld360_skip_awrrpt.sqld360_5c_awr.sql
 @@&&skip_diagnostics.&&sqld360_skip_ashrpt.sqld360_5d_ash.sql
-@@&&skip_tcb.&&skip_10g.&&sqld360_skip_tcb.sqld360_5e_tcb.sql
+@@&&skip_tcb.&&skip_10g.&&sqld360_skip_tcb.&&sqld360_local_exec.sqld360_5e_tcb.sql
 @@&&from_edb360.&&skip_diagnostics.&&sqld360_skip_rawash.sqld360_5f_rawash.sql
 @@&&from_edb360.&&skip_diagnostics.&&sqld360_skip_eadam.sqld360_5g_eadam_ash.sql
 

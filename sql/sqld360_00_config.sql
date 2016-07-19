@@ -28,8 +28,8 @@ DEF sqld360_conf_incl_sqlmon = 'Y';
 -- include/exclude DBA_HIST_ASH (always on by default, turned off only by eDB180) 
 DEF sqld360_conf_incl_ash_hist = 'Y';
 
--- include/exclude AWR Reports (always on by default) 
-DEF sqld360_conf_incl_awrrpt = 'Y';
+-- include/exclude AWR Reports (always off by default) 
+DEF sqld360_conf_incl_awrrpt = 'N';
 
 -- include/exclude ASH SQL Reports (always off by default, very expensive and little benefit) 
 DEF sqld360_conf_incl_ashrpt = 'N';
@@ -50,7 +50,7 @@ DEF sqld360_conf_incl_fmatch = 'Y';
 DEF sqld360_conf_incl_metadata = 'Y';
 
 -- include/exclude Testcase Builder (only for standalone execs, always skipped for eDB360 execs) 
-DEF sqld360_conf_incl_tcb = 'Y';
+DEF sqld360_conf_incl_tcb = 'N';
 
 -- TCB data, sampling percentage, 0 means no data, any other value between 1 and 100 is ok (only for standalone execs, always skipped for eDB360 execs) 
 -- THIS OPTION IS INTENTIONALLY INGORED, email me if you'd like to have TCB with data

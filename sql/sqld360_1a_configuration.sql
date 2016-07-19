@@ -224,7 +224,52 @@ SELECT /*+ &&top_level_hints. */
 ';
 END;
 /
-@@_9a_pre_one.sql
+@@sqld360_9a_pre_one.sql
+
+DEF title = 'System Parameters Change Log';
+DEF main_table = 'GV$SYSTEM_PARAMETER2';
+BEGIN
+  :sql_text := '
+WITH 
+all_parameters AS (
+SELECT snap_id,
+       dbid,
+       instance_number,
+       parameter_name,
+       value,
+       isdefault,
+       ismodified,
+       lag(value) OVER (PARTITION BY dbid, instance_number, parameter_hash ORDER BY snap_id) prior_value
+  FROM dba_hist_parameter
+ WHERE snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.
+   AND ''&&diagnostics_pack.'' = ''Y''
+   AND dbid = &&sqld360_dbid.
+)
+SELECT TO_CHAR(s.begin_interval_time, ''YYYY-MM-DD HH24:MI'') begin_time,
+       TO_CHAR(s.end_interval_time, ''YYYY-MM-DD HH24:MI'') end_time,
+       p.snap_id,
+       --p.dbid,
+       p.instance_number,
+       p.parameter_name,
+       p.value,
+       p.isdefault,
+       p.ismodified,
+       p.prior_value
+  FROM all_parameters p,
+       dba_hist_snapshot s
+ WHERE p.value != p.prior_value
+   AND s.snap_id = p.snap_id
+   AND s.dbid = p.dbid
+   AND s.instance_number = p.instance_number
+ ORDER BY
+       s.begin_interval_time DESC,
+       --p.dbid,
+       p.instance_number,
+       p.parameter_name
+';
+END;
+/
+@@&&from_edb360.sqld360_9a_pre_one.sql
 
 
 COL address NOPRI
@@ -245,6 +290,7 @@ SELECT /*+ &&top_level_hints. */
 END;
 /
 @@sqld360_9a_pre_one.sql
+
 
 DEF title = 'Non-default Optimizer Environment';
 DEF main_table = 'GV$SQL_OPTIMIZER_ENV';

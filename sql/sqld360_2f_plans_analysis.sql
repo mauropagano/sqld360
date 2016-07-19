@@ -1630,7 +1630,7 @@ BEGIN
        put('                           AND NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,5)+1,INSTR(partition_stop,'''','''',1,6)-INSTR(partition_stop,'''','''',1,5)-1)),io_cost) = '||j.session_serial#||'');
        put('                           AND timestamp BETWEEN TO_DATE('''''||j.min_sample_time||''''', ''''YYYYMMDDHH24MISS'''') AND TO_DATE('''''||j.max_sample_time||''''', ''''YYYYMMDDHH24MISS'''') ');
        put('                           AND remarks = ''''&&sqld360_sqlid.'''''); 
-       put('                           AND partition_id IS NOT NULL');
+       put('                           --AND partition_id IS NOT NULL');
        put('                           AND ''''&&diagnostics_pack.'''' = ''''Y''''');
        put('                         GROUP BY timestamp, NVL(id,0), CASE WHEN other_tag IS NULL THEN ''''CPU'''' WHEN other_tag LIKE ''''%I/O'''' THEN ''''I/O'''' WHEN other_tag = ''''Concurrency'''' THEN ''''Concurrency'''' WHEN other_tag = ''''Cluster'''' THEN ''''Cluster'''' ELSE ''''Other'''' END)');
        put('                 )');
@@ -2345,7 +2345,7 @@ BEGIN
        put('                           AND NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,5)+1,INSTR(partition_stop,'''','''',1,6)-INSTR(partition_stop,'''','''',1,5)-1)),io_cost) = '||j.session_serial#||'');
        put('                           AND timestamp BETWEEN TO_DATE('''''||j.min_sample_time||''''', ''''YYYYMMDDHH24MISS'''') AND TO_DATE('''''||j.max_sample_time||''''', ''''YYYYMMDDHH24MISS'''') ');
        put('                           AND remarks = ''''&&sqld360_sqlid.'''''); 
-       put('                           AND partition_id IS NOT NULL');
+       put('                           --AND partition_id IS NOT NULL');
        put('                           AND ''''&&diagnostics_pack.'''' = ''''Y''''');
        put('                         GROUP BY timestamp, NVL(id,0), CASE WHEN other_tag IS NULL THEN ''''CPU'''' WHEN other_tag LIKE ''''%I/O'''' THEN ''''I/O'''' WHEN other_tag = ''''Concurrency'''' THEN ''''Concurrency'''' WHEN other_tag = ''''Cluster'''' THEN ''''Cluster'''' ELSE ''''Other'''' END)');
        put('                 )');
