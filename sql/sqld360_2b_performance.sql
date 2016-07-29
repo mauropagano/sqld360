@@ -1,4 +1,4 @@
-DEF section_id = '2c';
+DEF section_id = '2b';
 DEF section_name = 'Performance';
 EXEC DBMS_APPLICATION_INFO.SET_MODULE('&&sqld360_prefix.','&&section_id.');
 SPO &&sqld360_main_report..html APP;

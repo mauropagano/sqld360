@@ -10,37 +10,41 @@ DEF title = 'System-wide observations';
 DEF main_table = 'V$PARAMETER2';
 BEGIN
   :sql_text := '
-WITH cbo_parameters AS (SELECT /*+ MATERIALIZE */ name, value, isdefault FROM gv$sys_optimizer_env),
-     fix_controls   AS (SELECT /*+ MATERIALIZE */ bugno, value, is_default FROM gv$system_fix_control),
-     instances      AS (SELECT /*+ MATERIALIZE */ version FROM v$instance)
-SELECT scope, message
-  FROM (SELECT ''SYSTEM'' scope, ''There are ''||num_nondef_fixc||'' CBO-related parameters set to non-default value'' message
-           FROM (SELECT COUNT(*) num_nondef_fixc
+WITH cbo_parameters AS (SELECT /*+ MATERIALIZE */ inst_id, name, value, isdefault FROM gv$sys_optimizer_env),
+     fix_controls   AS (SELECT /*+ MATERIALIZE */ inst_id, bugno, value, is_default FROM gv$system_fix_control),
+     instances      AS (SELECT /*+ MATERIALIZE */ inst_id, version FROM gv$instance)
+SELECT inst_id instance, scope, message
+  FROM (SELECT inst_id, ''SYSTEM'' scope, ''There are ''||num_nondef_fixc||'' CBO-related parameters set to non-default value'' message
+           FROM (SELECT COUNT(*) num_nondef_fixc, inst_id
                    FROM cbo_parameters 
-                  WHERE isdefault = ''NO'')
+                  WHERE isdefault = ''NO''
+                  GROUP BY inst_id)
           WHERE num_nondef_fixc > 0
         UNION ALL
-        SELECT ''PARAMETER'', ''Parameter ''||name||'' is set to non-default value of ''||value
+        SELECT inst_id, ''PARAMETER'', ''Parameter ''||name||'' is set to non-default value of ''||value
           FROM cbo_parameters 
          WHERE isdefault = ''NO''
         UNION ALL
-        SELECT ''SYSTEM'', ''There are ''||num_nondef_fixc||'' fix_controls set to non-default value''
-          FROM (SELECT COUNT(*) num_nondef_fixc
+        SELECT inst_id, ''SYSTEM'', ''There are ''||num_nondef_fixc||'' fix_controls set to non-default value''
+          FROM (SELECT COUNT(*) num_nondef_fixc, inst_id
                   FROM fix_controls 
-                 WHERE is_default = 0)
+                 WHERE is_default = 0
+                 GROUP BY inst_id)
          WHERE num_nondef_fixc > 0
         UNION ALL
-        SELECT ''FIX_CONTROL'', ''Fix control ''||bugno||'' is set to non-default value of ''||value
+        SELECT inst_id, ''FIX_CONTROL'', ''Fix control ''||bugno||'' is set to non-default value of ''||value
           FROM fix_controls 
          WHERE is_default = 0
         UNION ALL
-        SELECT ''OFE'', ''OPTIMIZER_FEATURES_ENABLE set to a value (''||cbo_parameters.value||'') different than RDBMS version (''||db_version.version||'')'' 
-         FROM cbo_parameters, 
-              (SELECT DISTINCT version 
-                 FROM instances) db_version
-        WHERE cbo_parameters.name = ''optimizer_features_enable''
-          AND cbo_parameters.value <> db_version.version
+        SELECT cbo_parameters.inst_id, ''OFE'', ''OPTIMIZER_FEATURES_ENABLE set to a value (''||cbo_parameters.value||'') different than RDBMS version (''||db_version.version||'')'' 
+          FROM cbo_parameters, 
+               (SELECT inst_id, version 
+                  FROM instances) db_version
+         WHERE cbo_parameters.name = ''optimizer_features_enable''
+           AND cbo_parameters.value <> SUBSTR(version,1,INSTR(version,''.'',1,4)-1)
+           AND cbo_parameters.inst_id = db_version.inst_id
         )
+ ORDER BY inst_id, scope, message
 ';
 END;
 /
@@ -126,6 +130,7 @@ SELECT scope, message
                  GROUP BY sql_plan_hash_value)
          WHERE TRUNC(num_single_block_reads/num_samples,3) >= 0.02 -- 2%
         )
+ ORDER BY scope, message
 ';
 END;
 /
@@ -168,24 +173,24 @@ SELECT scope, owner, table_name, message
           FROM tables
          WHERE num_rows IS NULL
          UNION ALL
-        SELECT ''PARTITION_STATS'', table_owner, table_name,  ''Table ''||table_name||'' has ''||num_old_parts||''partitions with statistics more than a month old''
+        SELECT ''PARTITION_STATS'', table_owner, table_name,  ''Table ''||table_name||'' has ''||num_old_parts||'' partition(s) with statistics more than a month old''
           FROM (SELECT COUNT(*) num_old_parts, table_owner, table_name
                   FROM partitions
                  WHERE last_analyzed < ADD_MONTHS(TRUNC(SYSDATE),-1)
                  GROUP BY table_owner, table_name)
          WHERE num_old_parts > 0
          UNION ALL
-        SELECT ''PARTITION_STALE_STATS'', owner, table_name,  ''Table partition''||table_name||''.''||partition_name||'' has stale stats''
+        SELECT ''PARTITION_STALE_STATS'', owner, table_name,  ''Table partition ''||table_name||''.''||partition_name||'' has stale stats''
           FROM table_and_part_stats
          WHERE stale_stats = ''YES''
            AND partition_name IS NOT NULL
          UNION ALL
-        SELECT ''PARTITION_LOCKED_STATS'', owner, table_name,  ''Table partition''||table_name||''.''||partition_name||'' has locked stats''
+        SELECT ''PARTITION_LOCKED_STATS'', owner, table_name,  ''Table partition ''||table_name||''.''||partition_name||'' has locked stats''
           FROM table_and_part_stats
          WHERE stattype_locked IN (''ALL'',''DATA'')
            AND partition_name IS NOT NULL
          UNION ALL
-        SELECT ''PARTITION_MISSING_STATS'', table_owner, table_name,  ''Table partition''||table_name||''.''||partition_name||'' has no stats''
+        SELECT ''PARTITION_MISSING_STATS'', table_owner, table_name,  ''Table partition ''||table_name||''.''||partition_name||'' has no stats''
           FROM partitions
          WHERE num_rows IS NULL
          UNION ALL 
@@ -207,7 +212,7 @@ SELECT scope, owner, table_name, message
          UNION ALL
         SELECT ''TABLE_DEGREE'', owner, table_name,  ''Table ''||table_name||'' has a non-default DEGREE (''||TRIM(degree)||'')''
           FROM tables
-         WHERE degree <> ''1''
+         WHERE TRIM(degree) <> ''1''
          UNION ALL
         SELECT ''INDEX_DEGREE'', tables.owner, tables.table_name, ''Table ''||tables.table_name||'' has ''||COUNT(*)||'' indexes with DEGREE different than the table itself''
           FROM tables, 

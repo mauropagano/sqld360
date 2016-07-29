@@ -22,9 +22,6 @@ PRO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 DEF column_number = '1';
 
 @@sqld360_1a_configuration.sql
-@@sqld360_1b_identification.sql
-@@&&skip_10g.&&skip_11r1.sqld360_1c_xpand.sql
-@@sqld360_1d_standalone.sql
 @@sqld360_1e_nls.sql
 @@sqld360_1f_observations.sql
 
@@ -39,13 +36,16 @@ PRO </td><td>
 PRO
 SPO OFF;
 
-@@sqld360_2a_plans.sql
-@@sqld360_2b_plan_control.sql
-@@sqld360_2c_performance.sql
-@@&&from_edb360.&&skip_force_match.&&sqld360_skip_fmatch.sqld360_2d_performance_fm.sql
-@@&&skip_tuning.&&skip_10g.sqld360_2e_sql_monitor.sql
-@@sqld360_2f_binds.sql
-@@sqld360_2g_cursor_sharing.sql
+@@sqld360_2a_identification.sql
+@@&&skip_10g.&&skip_11r1.sqld360_2a_xpand.sql
+@@sqld360_2a_standalone.sql
+@@sqld360_2b_performance.sql
+@@&&from_edb360.&&skip_force_match.&&sqld360_skip_fmatch.sqld360_2c_performance_fm.sql
+@@sqld360_2d_plans.sql
+@@sqld360_2e_plan_control.sql
+@@&&skip_tuning.&&skip_10g.sqld360_2f_sql_monitor.sql
+@@sqld360_2g_binds.sql
+@@sqld360_2h_cursor_sharing.sql
 
 PRO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -75,7 +75,9 @@ PRO </td><td>
 PRO
 SPO OFF;
 
-@@sqld360_4a_impact.sql
+@@sqld360_4a_system_impact.sql
+@@sqld360_4b_execution_metrics.sql
+@@sqld360_4c_execution_metrics_per_phv.sql
 
 PRO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

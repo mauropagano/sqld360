@@ -28,6 +28,8 @@ BEGIN
 SELECT /*+ &&top_level_hints. */
        o.owner owner,
        o.object_name table_name,
+       TRUNC((h.rowcnt - LAG(h.rowcnt,1,NULL) OVER (PARTITION BY h.obj# ORDER BY h.savtime)) / NULLIF(LAG(h.rowcnt,1,NULL) OVER (PARTITION BY h.obj# ORDER BY h.savtime),0),2)*100 rowcnt_change_perc,
+       TRUNC((h.blkcnt - LAG(h.blkcnt,1,NULL) OVER (PARTITION BY h.obj# ORDER BY h.savtime)) / NULLIF(LAG(h.blkcnt,1,NULL) OVER (PARTITION BY h.obj# ORDER BY h.savtime),0),2)*100 blkcnt_change_perc,
        h.*
   FROM sys.wri$_optstat_tab_history h,
        dba_objects o
@@ -50,6 +52,9 @@ SELECT /*+ &&top_level_hints. */
        i.owner,
        i.table_name,
        i.index_name, 
+       TRUNC((h.blevel - LAG(h.blevel,1,NULL) OVER (PARTITION BY h.obj# ORDER BY h.savtime)) / NULLIF(LAG(h.blevel,1,NULL) OVER (PARTITION BY h.obj# ORDER BY h.savtime),0),2)*100 blevel_change_perc,
+       TRUNC((h.leafcnt - LAG(h.leafcnt,1,NULL) OVER (PARTITION BY h.obj# ORDER BY h.savtime)) / NULLIF(LAG(h.leafcnt,1,NULL) OVER (PARTITION BY h.obj# ORDER BY h.savtime),0),2)*100 leafcnt_change_perc,
+       TRUNC((h.clufac - LAG(h.clufac,1,NULL) OVER (PARTITION BY h.obj# ORDER BY h.savtime)) / NULLIF(LAG(h.clufac,1,NULL) OVER (PARTITION BY h.obj# ORDER BY h.savtime),0),2)*100 clufac_change_perc,    
        h.*
   FROM sys.wri$_optstat_ind_history h,
        dba_objects o,
@@ -75,6 +80,8 @@ SELECT /*+ &&top_level_hints. */
        c.owner,
        c.table_name,
        c.column_name, 
+       TRUNC((h.null_cnt - LAG(h.null_cnt,1,NULL) OVER (PARTITION BY h.obj#, c.column_name ORDER BY h.savtime)) / NULLIF(LAG(h.null_cnt,1,NULL) OVER (PARTITION BY h.obj#, c.column_name  ORDER BY h.savtime),0),2)*100 nullcnt_change_perc,
+       TRUNC((h.distcnt - LAG(h.distcnt,1,NULL) OVER (PARTITION BY h.obj#, c.column_name ORDER BY h.savtime)) / NULLIF(LAG(h.distcnt,1,NULL) OVER (PARTITION BY h.obj#, c.column_name  ORDER BY h.savtime),0),2)*100 distcnt_change_perc,
        CASE WHEN h.flags > 64 THEN ''YES'' ELSE ''NO'' END had_histogram,
        h.*
   FROM sys.wri$_optstat_histhead_history h,
@@ -103,6 +110,8 @@ SELECT /*+ &&top_level_hints. */
         p.table_name,
         p.partition_name,
         p.partition_position, 
+        TRUNC(h.rowcnt - LAG(h.rowcnt,1,NULL) OVER (PARTITION BY h.obj# ORDER BY h.savtime)) / NULLIF(LAG(h.rowcnt,1,NULL) OVER (PARTITION BY h.obj# ORDER BY h.savtime),0),2)*100 rowcnt_change_perc,
+        TRUNC(h.blkcnt - LAG(h.blkcnt,1,NULL) OVER (PARTITION BY h.obj# ORDER BY h.savtime)) / NULLIF(LAG(h.blkcnt,1,NULL) OVER (PARTITION BY h.obj# ORDER BY h.savtime),0),2)*100 blkcnt_change_perc,
         h.*
   FROM (SELECT table_owner, table_name, partition_name, partition_position,
                ROW_NUMBER() OVER (ORDER BY partition_position) rn, COUNT(*) OVER () num_part

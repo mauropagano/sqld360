@@ -1,4 +1,4 @@
-DEF section_id = '2g';
+DEF section_id = '2h';
 DEF section_name = 'Cursor Sharing';
 EXEC DBMS_APPLICATION_INFO.SET_MODULE('&&sqld360_prefix.','&&section_id.');
 SPO &&sqld360_main_report..html APP;

@@ -1,4 +1,4 @@
-DEF section_id = '2e';
+DEF section_id = '2f';
 DEF section_name = 'SQL Monitor';
 EXEC DBMS_APPLICATION_INFO.SET_MODULE('&&sqld360_prefix.','&&section_id.');
 SPO &&sqld360_main_report..html APP;

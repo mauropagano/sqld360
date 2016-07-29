@@ -73,6 +73,12 @@ BEGIN
                object o
          WHERE t.owner = o.owner
            AND t.table_name = o.name
+         UNION 
+        SELECT 'VIEW', o.owner, o.name 
+          FROM dba_views v,
+               object o
+         WHERE v.owner = o.owner
+           AND v.view_name = o.name
          UNION
         SELECT 'TABLE', i.table_owner, i.table_name
           FROM dba_indexes i,

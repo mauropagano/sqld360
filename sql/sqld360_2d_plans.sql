@@ -1,10 +1,49 @@
-DEF section_id = '2a';
-DEF section_name = 'Plans';
+DEF section_id = '2d';
+DEF section_name = 'Execution Plans';
 EXEC DBMS_APPLICATION_INFO.SET_MODULE('&&sqld360_prefix.','&&section_id.');
 SPO &&sqld360_main_report..html APP;
 PRO <h2>&&section_id.. &&section_name.</h2>
 PRO <ol start="&&report_sequence.">
 SPO OFF;
+
+
+COL num_plans NEW_V num_plans
+SELECT TRIM(TO_CHAR(COUNT(plan_hash_value))) num_plans
+  FROM (SELECT plan_hash_value
+          FROM gv$sql
+         WHERE sql_id = '&&sqld360_sqlid.'
+        UNION
+        SELECT plan_hash_value
+          FROM dba_hist_sqlstat
+         WHERE sql_id = '&&sqld360_sqlid.'
+           AND '&&diagnostics_pack.' = 'Y'
+        UNION
+        SELECT cost plan_hash_value
+          FROM plan_table
+         WHERE statement_id LIKE 'SQLD360_ASH_DATA%'
+           AND '&&diagnostics_pack.' = 'Y'
+           AND remarks = '&&sqld360_sqlid.')
+/
+
+DEF title= 'Plan Details'
+DEF main_table = 'GV$SQL_PLAN'
+
+--this one initiated a new file name, need it in the next anchor
+@@sqld360_0s_pre_nondef
+SET TERM OFF ECHO OFF 
+-- need to fix the file name for the partitions
+SPO &&sqld360_main_report..html APP;
+PRO <li>Plans Details 
+PRO <a href="&&one_spool_filename..html">page</a> <small><em>(&&num_plans.)</em></small> 
+PRO </li>
+SPO OFF;
+
+-- this is hardcoded because there are 5 reports in 2a
+EXEC :repo_seq_bck := :repo_seq+5;
+
+@@sqld360_2f_plans_analysis.sql
+
+-------------
 
 DEF title = 'Plans from Memory';
 DEF main_table = 'GV$SQL_PLAN_STATISTICS_ALL';
@@ -306,43 +345,10 @@ HOS zip -q &&sqld360_main_filename._&&sqld360_file_time. &&sqld360_main_report..
 --------------------------------------
 --------------------------------------
 
-COL num_plans NEW_V num_plans
-SELECT TRIM(TO_CHAR(COUNT(plan_hash_value))) num_plans
-  FROM (SELECT plan_hash_value
-          FROM gv$sql
-         WHERE sql_id = '&&sqld360_sqlid.'
-        UNION
-        SELECT plan_hash_value
-          FROM dba_hist_sqlstat
-         WHERE sql_id = '&&sqld360_sqlid.'
-           AND '&&diagnostics_pack.' = 'Y'
-        UNION
-        SELECT cost plan_hash_value
-          FROM plan_table
-         WHERE statement_id LIKE 'SQLD360_ASH_DATA%'
-           AND '&&diagnostics_pack.' = 'Y'
-           AND remarks = '&&sqld360_sqlid.')
-/
-
-DEF title= 'Plan Details'
-DEF main_table = 'GV$SQL_PLAN'
-
---this one initiated a new file name, need it in the next anchor
-@@sqld360_0s_pre_nondef
-SET TERM OFF ECHO OFF 
--- need to fix the file name for the partitions
-SPO &&sqld360_main_report..html APP;
-PRO <li>Plans Details 
-PRO <a href="&&one_spool_filename..html">page</a> <small><em>(&&num_plans.)</em></small> 
-PRO </li>
-PRO </ol>
-SPO OFF;
-
--- this is hardcoded because there are 5 reports in 2a
-EXEC :repo_seq_bck := :repo_seq+5;
-
-@@sqld360_2f_plans_analysis.sql
-
 -- the +1 is to make the <LI> start from the next value
 EXEC :repo_seq := :repo_seq_bck+1;
 SELECT TO_CHAR(:repo_seq) report_sequence FROM DUAL;
+
+SPO &&sqld360_main_report..html APP;
+PRO </ol>
+SPO OFF;

@@ -1,4 +1,4 @@
-SQLd360 v1617 (2016-07-19) by Mauro Pagano
+SQLd360 v1618 (2016-07-28) by Mauro Pagano
 
 SQLd360 is a "free to use" tool to perform an in-depth investigation of a SQL statement. 
 It collects detailed information around the SQL. It also helps to document any findings.

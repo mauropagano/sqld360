@@ -104,8 +104,11 @@ BEGIN
 SELECT /*+ &&top_level_hints. */
        a.*, b.partition_start low_value_translated, b.partition_stop high_value_translated
   FROM dba_tab_cols a, 
-       plan_table b
+       plan_table b,
+       dba_tables c  -- this is to filter out views
  WHERE (a.owner, a.table_name) in &&tables_list.
+   AND a.owner = c.owner
+   AND a.table_name = c.table_name
    AND a.owner = b.object_owner(+)
    AND a.table_name = b.object_name(+)
    AND a.column_name = b.object_type(+)
