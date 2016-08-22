@@ -83,7 +83,8 @@ BEGIN
     put('DEF from_edb360=''--''');
 
     -- this execution is from edb360, call SQLd360 several times passing the appropriare flag
-    FOR i IN (SELECT operation, options FROM plan_table WHERE statement_id = 'SQLD360_SQLID') LOOP
+    --  the DISTINCT here is to make sure we run SQLd360 once even though the SQL is top in multiple categories (e.g. signature and dbtime)
+    FOR i IN (SELECT DISTINCT operation, options FROM plan_table WHERE statement_id = 'SQLD360_SQLID') LOOP
 
        -- check if need to run TCB 
        IF SUBSTR(i.options,3,1) = 0 THEN

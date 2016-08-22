@@ -37,7 +37,7 @@ DECLARE
   cur SYS_REFCURSOR;
   l_step_id VARCHAR2(1000);
   l_parent_id NUMBER;
-  l_text VARCHAR2(1000);
+  l_text VARCHAR2(4000);
   l_sql_text VARCHAR2(32767);
   l_sort NUMBER;
 BEGIN

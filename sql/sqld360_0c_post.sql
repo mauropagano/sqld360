@@ -40,16 +40,16 @@ SET RECSEP WR;
 UNDEF 1 2 3 4 5 6
 
 -- alert log (3 methods)
-COL db_name_upper NEW_V db_name_upper;
-COL db_name_lower NEW_V db_name_lower;
-COL background_dump_dest NEW_V background_dump_dest;
-SELECT UPPER(SYS_CONTEXT('USERENV', 'DB_NAME')) db_name_upper FROM DUAL;
-SELECT LOWER(SYS_CONTEXT('USERENV', 'DB_NAME')) db_name_lower FROM DUAL;
-SELECT value background_dump_dest FROM v$parameter WHERE name = 'background_dump_dest';
-HOS cp &&background_dump_dest./alert_&&db_name_upper.*.log .
-HOS cp &&background_dump_dest./alert_&&db_name_lower.*.log .
-HOS cp &&background_dump_dest./alert_&&_connect_identifier..log .
-HOS rename alert_ 00005_&&common_sqld360_prefix._alert_ alert_*.log
+--COL db_name_upper NEW_V db_name_upper;
+--COL db_name_lower NEW_V db_name_lower;
+--COL background_dump_dest NEW_V background_dump_dest;
+--SELECT UPPER(SYS_CONTEXT('USERENV', 'DB_NAME')) db_name_upper FROM DUAL;
+--SELECT LOWER(SYS_CONTEXT('USERENV', 'DB_NAME')) db_name_lower FROM DUAL;
+--SELECT value background_dump_dest FROM v$parameter WHERE name = 'background_dump_dest';
+--HOS cp &&background_dump_dest./alert_&&db_name_upper.*.log .
+--HOS cp &&background_dump_dest./alert_&&db_name_lower.*.log .
+--HOS cp &&background_dump_dest./alert_&&_connect_identifier..log .
+--HOS rename alert_ 00005_&&common_sqld360_prefix._alert_ alert_*.log
 
 -- zip 
 HOS zip -mq &&sqld360_main_filename._&&sqld360_file_time. 99999_sqld360_&&sqld360_sqlid._drivers*
@@ -61,7 +61,7 @@ HOS zip -mq &&sqld360_main_filename._&&sqld360_file_time. &&sqld360_tkprof._sort
 HOS zip -mq &&sqld360_main_filename._&&sqld360_file_time. &&sqld360_log..txt
 HOS zip -mq &&sqld360_main_filename._&&sqld360_file_time. &&sqld360_main_report..html
 HOS zip -mq &&sqld360_main_filename._&&sqld360_file_time. 00000_readme_first.txt 
-HOS unzip -l &&sqld360_main_filename._&&sqld360_file_time.
+--HOS unzip -l &&sqld360_main_filename._&&sqld360_file_time.
 
 --update plan table with zip file for eDB360 to pull
 UPDATE plan_table SET remarks = '&&sqld360_main_filename._&&sqld360_file_time..zip'  WHERE statement_id = 'SQLD360_SQLID' and operation = '&&sqld360_sqlid.';

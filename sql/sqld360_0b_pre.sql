@@ -9,8 +9,8 @@ CL COL;
 COL row_num FOR 9999999 HEA '#' PRI;
 
 -- version
-DEF sqld360_vYYNN = 'v1618';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2016-07-28)';
+DEF sqld360_vYYNN = 'v1619';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2016-08-22)';
 DEF sqld360_prefix = 'sqld360';
 
 -- parameters
@@ -132,6 +132,10 @@ SELECT SUBSTR('&&host_name_short.', 1, INSTR('&&host_name_short..', '.') - 1) ho
 SELECT TRANSLATE('&&host_name_short.',
 'abcdefghijklmnopqrstuvwxyz0123456789-_ ''`~!@#$%&*()=+[]{}\|;:",.<>/?'||CHR(0)||CHR(9)||CHR(10)||CHR(13)||CHR(38),
 'abcdefghijklmnopqrstuvwxyz0123456789-_') host_name_short FROM DUAL;
+
+-- get block_size
+COL sqld360_db_block_size NEW_V sqld360_db_block_size;
+SELECT TRIM(TO_NUMBER(value)) sqld360_db_block_size FROM v$system_parameter2 WHERE name = 'db_block_size';
 
 COL history_days NEW_V history_days;
 -- range: takes at least 31 days and at most as many as actual history, with a default of 31. parameter restricts within that range. 

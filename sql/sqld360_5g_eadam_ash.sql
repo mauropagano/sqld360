@@ -2,7 +2,7 @@
    Extracted from eAdam
 */
 
-DEF section_id = '5f';
+DEF section_id = '5g';
 DEF section_name = 'eAdam';
 EXEC DBMS_APPLICATION_INFO.SET_MODULE('&&sqld360_prefix.','&&section_id.');
 SPO &&sqld360_main_report..html APP;

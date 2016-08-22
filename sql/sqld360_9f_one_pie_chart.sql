@@ -59,7 +59,7 @@ SET SERVEROUT OFF;
 PRO        ]);;
 PRO        
 PRO        var options = {
-PRO          is3D: true,
+--PRO          is3D: true,
 PRO          backgroundColor: {fill: '#fcfcf0', stroke: '#336699', strokeWidth: 1},
 PRO          title: '&&section_id..&&report_sequence.. &&title.&&title_suffix.',
 PRO          titleTextStyle: {fontSize: 16, bold: false},

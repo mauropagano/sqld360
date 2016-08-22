@@ -12,7 +12,13 @@ BEGIN
   :sql_text := '
 WITH cbo_parameters AS (SELECT /*+ MATERIALIZE */ inst_id, name, value, isdefault FROM gv$sys_optimizer_env),
      fix_controls   AS (SELECT /*+ MATERIALIZE */ inst_id, bugno, value, is_default FROM gv$system_fix_control),
-     instances      AS (SELECT /*+ MATERIALIZE */ inst_id, version FROM gv$instance)
+     instances      AS (SELECT /*+ MATERIALIZE */ inst_id, version FROM gv$instance),
+     systemstats    AS (SELECT /*+ MATERIALIZE */ MAX(CASE WHEN pname = ''CPUSPEED'' THEN pval1 ELSE NULL END) cpuspeed, -- used to determine if workload ss in place
+                                                  MAX(CASE WHEN pname = ''CPUSPEEDNW'' THEN pval1 ELSE NULL END) cpuspeednw,
+                                                  MAX(CASE WHEN pname = ''SREADTIM'' THEN pval1 ELSE NULL END) sreadtim, 
+                                                  MAX(CASE WHEN pname = ''MREADTIM'' THEN pval1 ELSE NULL END) mreadtim, 
+                                                  MAX(CASE WHEN pname = ''MBRC'' THEN pval1 ELSE NULL END) mbrc
+                          FROM sys.aux_stats$)
 SELECT inst_id instance, scope, message
   FROM (SELECT inst_id, ''SYSTEM'' scope, ''There are ''||num_nondef_fixc||'' CBO-related parameters set to non-default value'' message
            FROM (SELECT COUNT(*) num_nondef_fixc, inst_id
@@ -43,6 +49,23 @@ SELECT inst_id instance, scope, message
          WHERE cbo_parameters.name = ''optimizer_features_enable''
            AND cbo_parameters.value <> SUBSTR(version,1,INSTR(version,''.'',1,4)-1)
            AND cbo_parameters.inst_id = db_version.inst_id
+        UNION ALL
+        SELECT NULL, ''SYSTEM_STATS'', ''SREADTIM is not null (''||sreadtim||'') while MREADTIME is null''
+          FROM systemstats 
+         WHERE cpuspeed IS NOT NULL 
+           AND sreadtim IS NOT NULL
+           AND mreadtim IS NULL
+        UNION ALL
+        SELECT NULL, ''SYSTEM_STATS'', ''MREADTIM is not null (''||mreadtim||'') while SREADTIME is null''
+          FROM systemstats 
+         WHERE cpuspeed IS NOT NULL 
+           AND sreadtim IS NULL
+           AND mreadtim IS NOT NULL
+        UNION ALL
+        SELECT NULL, ''SYSTEM_STATS'', ''Workload system stats gathered but MBRC is null''
+          FROM systemstats 
+         WHERE cpuspeed IS NOT NULL 
+           AND mbrc IS NULL
         )
  ORDER BY inst_id, scope, message
 ';
@@ -55,9 +78,9 @@ DEF title = 'Cursors and Plans specific observations';
 DEF main_table = 'V$SQL_PLAN';
 BEGIN
   :sql_text := '
-WITH vsql           AS (SELECT /*+ MATERIALIZE */ DISTINCT optimizer_env_hash_value FROM gv$sql WHERE sql_id = ''&&sqld360_sqlid.''),
+WITH vsql           AS (SELECT /*+ MATERIALIZE */ DISTINCT plan_hash_value, optimizer_env_hash_value FROM gv$sql WHERE sql_id = ''&&sqld360_sqlid.''),
      vsqlplan       AS (SELECT /*+ MATERIALIZE */ DISTINCT plan_hash_value, id, operation, object_owner, object_name, cost, cardinality, filter_predicates FROM gv$sql_plan WHERE sql_id = ''&&sqld360_sqlid.''),
-     dbahistsql     AS (SELECT /*+ MATERIALIZE */ DISTINCT optimizer_env_hash_value FROM dba_hist_sqlstat WHERE sql_id = ''&&sqld360_sqlid.'' AND ''&&diagnostics_pack.'' = ''Y''),
+     dbahistsql     AS (SELECT /*+ MATERIALIZE */ DISTINCT plan_hash_value, optimizer_env_hash_value FROM dba_hist_sqlstat WHERE sql_id = ''&&sqld360_sqlid.'' AND ''&&diagnostics_pack.'' = ''Y''),
      dbahistsqlplan AS (SELECT /*+ MATERIALIZE */ DISTINCT plan_hash_value, id, operation, object_owner, object_name, cost, cardinality, filter_predicates FROM dba_hist_sql_plan WHERE sql_id = ''&&sqld360_sqlid.'' AND ''&&diagnostics_pack.'' = ''Y''),
      indexes        AS (SELECT /*+ MATERIALIZE */ table_owner, table_name, owner, index_name, degree FROM dba_indexes WHERE (table_owner, table_name) IN &&tables_list.),
      ashdata        AS (SELECT /*+ INLINE */ cost sql_plan_hash_value, 
@@ -66,13 +89,15 @@ WITH vsql           AS (SELECT /*+ MATERIALIZE */ DISTINCT optimizer_env_hash_va
                                object_node event, 
                                other_tag wait_class, 
                                id sql_plan_line_id,
+                               partition_id sql_exec_id,
                                TO_NUMBER(SUBSTR(partition_start,INSTR(partition_start,'','',1,2)+1,INSTR(partition_start,'','',1,3)-INSTR(partition_start,'','',1,2)-1)) p1,
                                TO_NUMBER(SUBSTR(partition_start,INSTR(partition_start,'','',1,4)+1,INSTR(partition_start,'','',1,5)-INSTR(partition_start,'','',1,4)-1)) p2,
                                TO_NUMBER(SUBSTR(partition_start,INSTR(partition_start,'','',1,6)+1,INSTR(partition_start,'','',1,7)-INSTR(partition_start,'','',1,6)-1)) p3 
                           FROM plan_table 
                          WHERE statement_id 
                           LIKE ''SQLD360_ASH_DATA%'' 
-                          AND remarks = ''&&sqld360_sqlid.'')
+                          AND remarks = ''&&sqld360_sqlid.''),
+    list_of_plans AS (SELECT plan_hash_value FROM vsql UNION SELECT plan_hash_value FROM dbahistsql UNION SELECT sql_plan_hash_value FROM ashdata)
 SELECT scope, message
   FROM (SELECT ''OPTIMIZER_ENV'' scope, ''There is(are) ''||COUNT(DISTINCT optimizer_env_hash_value)||'' distinct CBO environments between memory and history for this SQL'' message
          FROM (SELECT optimizer_env_hash_value 
@@ -129,6 +154,44 @@ SELECT scope, message
                    AND wait_class = ''User I/O'' 
                  GROUP BY sql_plan_hash_value)
          WHERE TRUNC(num_single_block_reads/num_samples,3) >= 0.02 -- 2%
+         UNION ALL
+        SELECT ''FULL_SCAN_READING_FEW_BLOCKS'', ''From the ASH *sampled* data for physical reads, Plan Hash Value ''||sql_plan_hash_value||'' spends most of its time (''||percent_per_phv_and_p3||''%) reading ''||p3||'' blocks at a time instead of 128 during full scans'' 
+          FROM (SELECT sql_plan_hash_value,
+                       p3,
+                       TRUNC(RATIO_TO_REPORT(COUNT(*)) OVER ()*100,3) percent_per_phv_and_p3, 
+                       ROW_NUMBER() OVER (PARTITION BY sql_plan_hash_value ORDER BY COUNT(*) DESC) rwn
+                  FROM ashdata
+                 WHERE sql_plan_operation IN (''TABLE ACCESS'',''INDEX'')
+                   AND sql_plan_options LIKE ''FULL%''
+                   AND event IN (''db file scattered read'', ''direct path read'')
+                 GROUP BY sql_plan_hash_value, p3)
+         WHERE rwn = 1
+           AND p3 < (POWER(1024,2)/&&sqld360_db_block_size.) 
+         UNION ALL
+        SELECT ''SQL_MOSTLY_NOT_ON_CPU'', ''From the ASH *sampled* data, Plan Hash Value ''||sql_plan_hash_value||'' spends ''||TRUNC(num_samples_per_class/total_samples_per_phv*100,3)||''% of the time on ''||wait_class||''-related wait events instead of CPU (usually preferrable, with exceptions :-)''
+          FROM (SELECT sql_plan_hash_value, 
+                       wait_class,
+                       num_samples_per_class,
+                       ROW_NUMBER() OVER (PARTITION BY sql_plan_hash_value, wait_class ORDER BY num_samples_per_class DESC) rwn,
+                       SUM(num_samples_per_class) OVER(PARTITION BY sql_plan_hash_value) total_samples_per_phv 
+                  FROM (SELECT sql_plan_hash_value,
+                               wait_class, 
+                               COUNT(*) num_samples_per_class
+                          FROM ashdata
+                         GROUP BY sql_plan_hash_value, wait_class))
+         WHERE rwn = 1
+           AND wait_class IS NOT NULL -- so not on CPU
+         UNION ALL
+        SELECT ''MULTIPLE_PLANS'',''This SQL has/had ''||COUNT(*)||'' distinct execution plan(s)''
+               &&skip_10g.&&skip_11r1.||'', list of PHV is (''||LISTAGG(plan_hash_value, '','') WITHIN GROUP (ORDER BY plan_hash_value)||'')''
+          FROM list_of_plans
+         UNION ALL
+        SELECT ''POTENTIAL_PARSE_TIME'', ''From the ASH *sampled* data, Plan Hash Value ''||sql_plan_hash_value||'' spent ''||potential_parse_time||''% of the time not executing (SQL_EXEC_ID NULL), which usually is parse time''
+          FROM (SELECT sql_plan_hash_value, 
+                       TRUNC(SUM(CASE WHEN sql_exec_id IS NULL THEN 1 ELSE 0 END)/COUNT(*),3) potential_parse_time 
+                  FROM ashdata
+                 GROUP BY sql_plan_hash_value)
+         WHERE potential_parse_time >= 0.1
         )
  ORDER BY scope, message
 ';
@@ -141,7 +204,9 @@ DEF title = 'Table-level observations';
 DEF main_table = 'DBA_TABLES';
 BEGIN
   :sql_text := '
-WITH tables    AS (SELECT /*+ MATERIALIZE */ owner, table_name, num_rows, blocks, last_analyzed, degree
+WITH tablespaces AS (SELECT /*+ MATERIALIZE */ tablespace_name, block_size
+                       FROM dba_tablespaces),
+     tables    AS (SELECT /*+ MATERIALIZE */ owner, table_name, tablespace_name, num_rows, blocks, last_analyzed, degree
                      FROM dba_tables 
                     WHERE (owner, table_name) IN &&tables_list.),
      partitions AS (SELECT /*+ MATERIALIZE */ table_owner, table_name, partition_name, num_rows, blocks, last_analyzed
@@ -213,6 +278,12 @@ SELECT scope, owner, table_name, message
         SELECT ''TABLE_DEGREE'', owner, table_name,  ''Table ''||table_name||'' has a non-default DEGREE (''||TRIM(degree)||'')''
           FROM tables
          WHERE TRIM(degree) <> ''1''
+         UNION ALL
+        SELECT ''TABLE_DEGREE'', owner, table_name,  ''Table ''||table_name||'' is smaller than 1G in size (''||TRUNC((tbs.block_size * t.blocks)/POWER(10,9),3)||''G) but has DEGREE different than 1 (''||TRIM(degree)||'')''
+          FROM tables t, tablespaces tbs 
+         WHERE t.tablespace_name = tbs.tablespace_name
+           AND TRIM(degree) <> ''1''
+           AND (tbs.block_size * t.blocks)/POWER(10,9) <= 1
          UNION ALL
         SELECT ''INDEX_DEGREE'', tables.owner, tables.table_name, ''Table ''||tables.table_name||'' has ''||COUNT(*)||'' indexes with DEGREE different than the table itself''
           FROM tables, 
