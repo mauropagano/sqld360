@@ -17,7 +17,7 @@ SET SERVEROUT ON SIZE 1000000;
 BEGIN
   FOR i IN (SELECT DISTINCT owner, table_name 
               FROM dba_tab_cols
-             WHERE (owner, table_name) in &&tables_list_s. 
+             WHERE (owner, table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = 'LIST_OF_TABLES' AND remarks = '&&sqld360_sqlid.')
                AND histogram <> 'NONE'
              ORDER BY 1,2) 
   LOOP
@@ -35,6 +35,7 @@ DEF sqld360_main_report = &&one_spool_filename.
 
 SPO sqld360_histograms_&&sqld360_sqlid._driver.sql
 SET SERVEROUT ON SIZE 1000000;
+SET SERVEROUT ON SIZE UNL;
 
 DECLARE
   PROCEDURE put (p_line IN VARCHAR2)
@@ -49,7 +50,7 @@ BEGIN
   FOR i IN (SELECT DISTINCT a.owner, a.table_name, b.num_rows 
               FROM dba_tab_cols a,
                    dba_tables b
-             WHERE (a.owner, a.table_name) in &&tables_list_s. 
+             WHERE (a.owner, a.table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = 'LIST_OF_TABLES' AND remarks = '&&sqld360_sqlid.')
                AND a.histogram <> 'NONE'
                AND a.owner = b.owner
                AND a.table_name = b.table_name

@@ -82,7 +82,7 @@ WITH vsql           AS (SELECT /*+ MATERIALIZE */ DISTINCT plan_hash_value, opti
      vsqlplan       AS (SELECT /*+ MATERIALIZE */ DISTINCT plan_hash_value, id, operation, object_owner, object_name, cost, cardinality, filter_predicates FROM gv$sql_plan WHERE sql_id = ''&&sqld360_sqlid.''),
      dbahistsql     AS (SELECT /*+ MATERIALIZE */ DISTINCT plan_hash_value, optimizer_env_hash_value FROM dba_hist_sqlstat WHERE sql_id = ''&&sqld360_sqlid.'' AND ''&&diagnostics_pack.'' = ''Y''),
      dbahistsqlplan AS (SELECT /*+ MATERIALIZE */ DISTINCT plan_hash_value, id, operation, object_owner, object_name, cost, cardinality, filter_predicates FROM dba_hist_sql_plan WHERE sql_id = ''&&sqld360_sqlid.'' AND ''&&diagnostics_pack.'' = ''Y''),
-     indexes        AS (SELECT /*+ MATERIALIZE */ table_owner, table_name, owner, index_name, degree FROM dba_indexes WHERE (table_owner, table_name) IN &&tables_list.),
+     indexes        AS (SELECT /*+ MATERIALIZE */ table_owner, table_name, owner, index_name, degree FROM dba_indexes WHERE (table_owner, table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')),
      ashdata        AS (SELECT /*+ INLINE */ cost sql_plan_hash_value, 
                                operation sql_plan_operation, 
                                options sql_plan_options, 
@@ -99,7 +99,7 @@ WITH vsql           AS (SELECT /*+ MATERIALIZE */ DISTINCT plan_hash_value, opti
                           AND remarks = ''&&sqld360_sqlid.''),
     list_of_plans AS (SELECT plan_hash_value FROM vsql UNION SELECT plan_hash_value FROM dbahistsql UNION SELECT sql_plan_hash_value FROM ashdata)
 SELECT scope, message
-  FROM (SELECT ''OPTIMIZER_ENV'' scope, ''There is(are) ''||COUNT(DISTINCT optimizer_env_hash_value)||'' distinct CBO environments between memory and history for this SQL'' message
+  FROM (SELECT ''OPTIMIZER_ENV'' scope, ''There is/are ''||COUNT(DISTINCT optimizer_env_hash_value)||'' distinct CBO environments between memory and history for this SQL'' message
          FROM (SELECT optimizer_env_hash_value 
                  FROM vsql
                 UNION ALL
@@ -155,7 +155,7 @@ SELECT scope, message
                  GROUP BY sql_plan_hash_value)
          WHERE TRUNC(num_single_block_reads/num_samples,3) >= 0.02 -- 2%
          UNION ALL
-        SELECT ''FULL_SCAN_READING_FEW_BLOCKS'', ''From the ASH *sampled* data for physical reads, Plan Hash Value ''||sql_plan_hash_value||'' spends most of its time (''||percent_per_phv_and_p3||''%) reading ''||p3||'' blocks at a time instead of 128 during full scans'' 
+        SELECT ''FULL_SCAN_READING_FEW_BLOCKS'', ''From the ASH *sampled* data for physical reads, Plan Hash Value ''||sql_plan_hash_value||'' spends most of its time (''||percent_per_phv_and_p3||''%) reading ''||p3||'' blocks at a time instead of ''||POWER(1024,2)/&&sqld360_db_block_size.||'' during full scans'' 
           FROM (SELECT sql_plan_hash_value,
                        p3,
                        TRUNC(RATIO_TO_REPORT(COUNT(*)) OVER ()*100,3) percent_per_phv_and_p3, 
@@ -208,17 +208,17 @@ WITH tablespaces AS (SELECT /*+ MATERIALIZE */ tablespace_name, block_size
                        FROM dba_tablespaces),
      tables    AS (SELECT /*+ MATERIALIZE */ owner, table_name, tablespace_name, num_rows, blocks, last_analyzed, degree
                      FROM dba_tables 
-                    WHERE (owner, table_name) IN &&tables_list.),
+                    WHERE (owner, table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')),
      partitions AS (SELECT /*+ MATERIALIZE */ table_owner, table_name, partition_name, num_rows, blocks, last_analyzed
                       FROM dba_tab_partitions 
-                     WHERE (table_owner, table_name) IN &&tables_list.),
+                     WHERE (table_owner, table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')),
      table_and_part_stats AS (SELECT /*+ MATERIALIZE */ owner, table_name, partition_name, stale_stats, stattype_locked
                                 FROM dba_tab_statistics
-                               WHERE (owner, table_name) IN &&tables_list.
+                               WHERE (owner, table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')
                                  AND subpartition_name IS NULL),
      indexes    AS (SELECT /*+ MATERIALIZE */ table_owner, table_name, index_name, degree
                       FROM dba_indexes
-                     WHERE (table_owner, table_name) IN &&tables_list.)
+                     WHERE (table_owner, table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.''))
 SELECT scope, owner, table_name, message
   FROM (SELECT ''TABLE_STATS'' scope, owner, table_name,  ''Table ''||table_name||'' has statistics more than a month old (''||TRUNC(SYSDATE-last_analyzed)||'' days old)'' message
           FROM tables

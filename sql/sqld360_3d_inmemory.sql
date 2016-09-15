@@ -28,7 +28,7 @@ BEGIN
 SELECT /*+ &&top_level_hints. */
        *
   FROM gv$im_segments
- WHERE (owner, segment_name) in &&tables_list.
+ WHERE (owner, segment_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')
  ORDER BY inst_id, owner, segment_name, partition_name, segment_type
 ';
 END;
@@ -42,7 +42,7 @@ BEGIN
 SELECT /*+ &&top_level_hints. */
        *
   FROM gv$im_column_level
- WHERE (owner, table_name) in &&tables_list.
+ WHERE (owner, table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')
  ORDER BY inst_id, owner, table_name, segment_column_id 
 ';
 END;

@@ -59,7 +59,6 @@ SET SERVEROUT OFF;
 PRO        ]);;
 PRO        
 PRO        var options = {
---PRO          is3D: true,
 PRO          backgroundColor: {fill: '#fcfcf0', stroke: '#336699', strokeWidth: 1},
 PRO          title: '&&section_id..&&report_sequence.. &&title.&&title_suffix.',
 PRO          titleTextStyle: {fontSize: 16, bold: false},
@@ -67,7 +66,7 @@ PRO          legend: {position: 'right', textStyle: {fontSize: 12}},
 PRO          tooltip: {textStyle: {fontSize: 14}}
 PRO        };
 PRO
-PRO        var chart = new google.visualization.PieChart(document.getElementById('piechart_3d'));
+PRO        var chart = new google.visualization.PieChart(document.getElementById('piechart'));
 PRO        chart.draw(data, options);
 PRO      }
 PRO    </script>
@@ -79,7 +78,7 @@ PRO <br>
 PRO &&abstract.
 PRO &&abstract2.
 PRO
-PRO    <div id="piechart_3d" style="width: 900px; height: 500px;"></div>
+PRO    <div id="piechart" style="width: 900px; height: 500px;"></div>
 PRO
 
 -- footer

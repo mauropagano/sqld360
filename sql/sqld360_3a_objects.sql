@@ -14,7 +14,7 @@ BEGIN
 SELECT /*+ &&top_level_hints. */
        *
   FROM dba_tables
- WHERE (owner, table_name) in &&tables_list.
+ WHERE (owner, table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')
  ORDER BY owner, table_name
 ';
 END;
@@ -29,7 +29,7 @@ BEGIN
 SELECT /*+ &&top_level_hints. */
        *
   FROM dba_indexes
- WHERE (table_owner, table_name) in &&tables_list.
+ WHERE (table_owner, table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')
  ORDER BY table_owner, table_name, index_name
 ';
 END;
@@ -44,7 +44,7 @@ BEGIN
 SELECT /*+ &&top_level_hints. */
        *
   FROM dba_ind_columns
- WHERE (table_owner, table_name) in &&tables_list.
+ WHERE (table_owner, table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')
  ORDER BY table_owner, table_name, index_name, column_position
 ';
 END;
@@ -80,11 +80,11 @@ DECLARE
 BEGIN
   FOR i IN (SELECT owner, table_name, column_name, data_type, low_value, high_value
               FROM dba_tab_cols
-             WHERE (owner, table_name) IN &&tables_list_s.
+             WHERE (owner, table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = 'LIST_OF_TABLES' AND remarks = '&&sqld360_sqlid.')
                AND '&&sqld360_conf_translate_lowhigh.' = 'Y')
   LOOP
-    l_low := compute_low_high(i.data_type, i.low_value);
-    l_high := compute_low_high(i.data_type, i.high_value);
+    l_low := SUBSTR(compute_low_high(i.data_type, i.low_value),1,32);
+    l_high := SUBSTR(compute_low_high(i.data_type, i.high_value),1,32);
     INSERT INTO plan_table (statement_id, object_owner, object_name, object_type, partition_start, partition_stop)
     VALUES ('SQLD360_LOW_HIGH', i.owner, i.table_name, i.column_name, l_low, l_high);
   END LOOP;
@@ -106,7 +106,7 @@ SELECT /*+ &&top_level_hints. */
   FROM dba_tab_cols a, 
        plan_table b,
        dba_tables c  -- this is to filter out views
- WHERE (a.owner, a.table_name) in &&tables_list.
+ WHERE (a.owner, a.table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')
    AND a.owner = c.owner
    AND a.table_name = c.table_name
    AND a.owner = b.object_owner(+)
@@ -133,7 +133,7 @@ SELECT o.object_name, c.column_name, cu.*
    AND o.object_name = c.table_name
    AND cu.intcol# = c.column_id
    AND o.object_type = ''TABLE''
-   AND (o.owner, o.object_name) IN &&tables_list.
+   AND (o.owner, o.object_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')
  ORDER BY o.object_name, cu.intcol#
 ';
 END;
@@ -145,7 +145,7 @@ END;
 COL num_histograms NEW_V num_histograms
 SELECT TRIM(TO_CHAR(COUNT(DISTINCT owner||'.'||table_name))) num_histograms 
   FROM dba_tab_cols
- WHERE (owner, table_name) in &&tables_list_s.
+ WHERE (owner, table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = 'LIST_OF_TABLES' AND remarks = '&&sqld360_sqlid.')
    AND histogram <> 'NONE';
 DEF title= 'Histograms'
 DEF main_table = 'DBA_TAB_HISTOGRAMS'
@@ -175,7 +175,7 @@ BEGIN
 SELECT /*+ &&top_level_hints. */
        owner, table_name, column_name, data_type, data_length, num_buckets, avg_col_len, char_length
   FROM dba_tab_cols
- WHERE (owner, table_name) IN &&tables_list.
+ WHERE (owner, table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')
    AND num_buckets <= 253
    AND histogram <> ''NONE''
    &&skip_12c.AND char_length > 32
@@ -197,7 +197,7 @@ BEGIN
 SELECT /*+ &&top_level_hints. */
        *
   FROM dba_constraints 
- WHERE (owner, table_name) in &&tables_list.
+ WHERE (owner, table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')
  ORDER BY owner, table_name, constraint_type
 ';
 END;
@@ -212,7 +212,7 @@ BEGIN
 SELECT /*+ &&top_level_hints. */
        *
   FROM dba_views
- WHERE (owner, view_name) in &&tables_list.
+ WHERE (owner, view_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')
  ORDER BY owner, view_name
 ';
 END;
@@ -229,7 +229,7 @@ SELECT /*+ &&top_level_hints. */
   FROM dba_clusters
  WHERE cluster_name IN (select cluster_name 
                           from dba_tables 
-                         where (owner, table_name) in &&tables_list.
+                         where (owner, table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')
                            and cluster_name is not null)
  ORDER BY owner, cluster_name
 ';
@@ -244,7 +244,7 @@ BEGIN
 SELECT /*+ &&top_level_hints. */
        *
   FROM dba_part_key_columns
- WHERE (owner, name) in &&tables_list.
+ WHERE (owner, name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')
  ORDER BY owner, name, column_position
 ';
 END;
@@ -258,7 +258,7 @@ BEGIN
 SELECT /*+ &&top_level_hints. */
        *
   FROM dba_tab_partitions
- WHERE (table_owner, table_name) in &&tables_list.
+ WHERE (table_owner, table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')
  ORDER BY table_owner, table_name, partition_position
 ';
 END;
@@ -274,7 +274,7 @@ SELECT /*+ &&top_level_hints. */
        a.*
   FROM dba_ind_partitions a,
        dba_indexes b
- WHERE (b.table_owner, b.table_name) in &&tables_list.
+ WHERE (b.table_owner, b.table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')
    AND a.index_owner = b.owner
    AND a.index_name = b.index_name
  ORDER BY a.index_owner, a.index_name, a.partition_position
@@ -293,7 +293,7 @@ COL part_tables NEW_V part_tables
 SELECT TRIM(TO_CHAR(COUNT(*))) cols_from_part_tables, 
        TRIM(TO_CHAR(COUNT(DISTINCT owner||' '||table_name))) part_tables
   FROM dba_part_col_statistics
- WHERE (owner, table_name) in &&tables_list_s.;
+ WHERE (owner, table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = 'LIST_OF_TABLES' AND remarks = '&&sqld360_sqlid.');
 
 DEF title= 'Partitions Columns'
 DEF main_table = 'DBA_TAB_PARTITIONS'
@@ -320,7 +320,7 @@ BEGIN
 SELECT /*+ &&top_level_hints. */
        *
   FROM dba_tab_subpartitions
- WHERE (table_owner, table_name) in &&tables_list.
+ WHERE (table_owner, table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')
  ORDER BY table_owner, table_name, subpartition_position
 ';
 END;
@@ -336,7 +336,7 @@ SELECT /*+ &&top_level_hints. */
        a.*
   FROM dba_ind_subpartitions a,
        dba_indexes b
- WHERE (b.table_owner, b.table_name) in &&tables_list.
+ WHERE (b.table_owner, b.table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')
    AND a.index_owner = b.owner
    AND a.index_name = b.index_name
  ORDER BY a.index_owner, a.index_name, a.subpartition_position
@@ -353,7 +353,7 @@ BEGIN
 SELECT /*+ &&top_level_hints. */
        *
   FROM dba_tab_modifications
- WHERE (table_owner, table_name) in &&tables_list.
+ WHERE (table_owner, table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')
  ORDER BY table_owner, table_name, partition_name, subpartition_name
 ';
 END;
@@ -371,7 +371,7 @@ SELECT /*+ &&top_level_hints. */
        dba_objects o
  WHERE pref.obj# = o.object_id
    AND o.object_type = ''TABLE''
-   AND (o.owner, o.object_name) IN &&tables_list.
+   AND (o.owner, o.object_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')
  ORDER BY o.owner, o.object_name, pref.pname
 ';
 END;
@@ -386,7 +386,7 @@ BEGIN
 SELECT /*+ &&top_level_hints. */
        *
   FROM dba_triggers
- WHERE (table_owner, table_name) in &&tables_list.
+ WHERE (table_owner, table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')
  ORDER BY table_owner, table_name, trigger_name
 ';
 END;
@@ -401,7 +401,7 @@ BEGIN
 SELECT /*+ &&top_level_hints. */
        *
   FROM dba_policies
- WHERE (object_owner, object_name) in &&tables_list.
+ WHERE (object_owner, object_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')
  ORDER BY object_owner, object_name, policy_group, policy_name
 ';
 END;
@@ -416,7 +416,7 @@ BEGIN
 SELECT /*+ &&top_level_hints. */
        *
   FROM dba_audit_policies
- WHERE (object_schema, object_name) in &&tables_list.
+ WHERE (object_schema, object_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')
  ORDER BY object_schema, object_name, policy_owner, policy_name
 ';
 END;
@@ -432,12 +432,12 @@ SELECT /*+ &&top_level_hints. */
        *
   FROM (SELECT *
           FROM dba_segments
-         WHERE (owner, segment_name) in &&tables_list.
+         WHERE (owner, segment_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')
         UNION ALL
         SELECT a.*
           FROM dba_segments a,
                dba_indexes b
-         WHERE (b.table_owner, b.table_name) in &&tables_list.
+         WHERE (b.table_owner, b.table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')
            AND a.owner = b.owner
            AND a.segment_name = b.index_name)
  ORDER BY owner, segment_name, segment_type desc
@@ -454,12 +454,12 @@ SELECT /*+ &&top_level_hints. */
        *
   FROM (SELECT *
           FROM dba_objects
-         WHERE (owner, object_name) in &&tables_list.
+         WHERE (owner, object_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')
         UNION ALL
         SELECT a.*
           FROM dba_objects a,
                dba_indexes b
-         WHERE (b.table_owner, b.table_name) in &&tables_list.
+         WHERE (b.table_owner, b.table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')
            AND a.owner = b.owner
            AND a.object_name = b.index_name)
  ORDER BY owner, object_name, object_type desc

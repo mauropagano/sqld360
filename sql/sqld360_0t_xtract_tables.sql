@@ -16,22 +16,22 @@ PRO &&hh_mm_ss.
 PRO Extracting table list
 
 -- double single quoted, used as SQL string
-VAR tables_list CLOB;    
+--VAR tables_list CLOB;    
 -- single quoted, used in straight SQL
-VAR tables_list_s CLOB; 
+--VAR tables_list_s CLOB; 
 -- number of tables, needed for second level reporting
 VAR num_tables NUMBER;
 
-EXEC :tables_list := NULL;
-EXEC :tables_list_s := NULL;
+--EXEC :tables_list := NULL;
+--EXEC :tables_list_s := NULL;
 EXEC :num_tables := 0;
 -- get list of tables from execution plan
 -- format (('owner', 'table_name'), (), ()...)
 DECLARE
   l_pair VARCHAR2(32767);
 BEGIN
-  DBMS_LOB.CREATETEMPORARY(:tables_list, TRUE, DBMS_LOB.SESSION);
-  DBMS_LOB.CREATETEMPORARY(:tables_list_s, TRUE, DBMS_LOB.SESSION);
+  --DBMS_LOB.CREATETEMPORARY(:tables_list, TRUE, DBMS_LOB.SESSION);
+  --DBMS_LOB.CREATETEMPORARY(:tables_list_s, TRUE, DBMS_LOB.SESSION);
   FOR i IN (WITH object AS (
         SELECT /*+ MATERIALIZE */
                object_owner owner, object_name name
@@ -57,15 +57,16 @@ BEGIN
            AND pt.remarks = '&&sqld360_sqlid.'
            AND pt.object_instance > 0
            AND o.object_id = pt.object_instance
-&&skip_10g.&&skip_11r1.   UNION 
-&&skip_10g.&&skip_11r1.   SELECT SUBSTR(owner,1,30) object_owner, SUBSTR(name,1,30) object_name
-&&skip_10g.&&skip_11r1.     FROM v$db_object_cache -- it's intentional here to use V$ instead of GV$ to keep the plan easy 
-&&skip_10g.&&skip_11r1.    WHERE type IN ('TABLE','VIEW') 
-&&skip_10g.&&skip_11r1.      AND hash_value IN (SELECT to_hash
-&&skip_10g.&&skip_11r1.                           FROM v$object_dependency
-&&skip_10g.&&skip_11r1.                          WHERE from_hash IN (SELECT hash_value
-&&skip_10g.&&skip_11r1.                                                FROM v$sqlarea
-&&skip_10g.&&skip_11r1.                                               WHERE sql_id = '&&sqld360_sqlid.'))
+           AND pt.other_tag IN ('Application', 'Cluster', 'Concurrency', 'User I/O') 
+&&skip_10g.&&skip_11r1.&&sqld360_skip_objd.   UNION 
+&&skip_10g.&&skip_11r1.&&sqld360_skip_objd.   SELECT SUBSTR(owner,1,30) object_owner, SUBSTR(name,1,30) object_name
+&&skip_10g.&&skip_11r1.&&sqld360_skip_objd.     FROM v$db_object_cache -- it's intentional here to use V$ instead of GV$ to keep the plan easy 
+&&skip_10g.&&skip_11r1.&&sqld360_skip_objd.    WHERE type IN ('TABLE','VIEW') 
+&&skip_10g.&&skip_11r1.&&sqld360_skip_objd.      AND hash_value IN (SELECT to_hash
+&&skip_10g.&&skip_11r1.&&sqld360_skip_objd.                           FROM v$object_dependency
+&&skip_10g.&&skip_11r1.&&sqld360_skip_objd.                          WHERE from_hash IN (SELECT hash_value
+&&skip_10g.&&skip_11r1.&&sqld360_skip_objd.                                                FROM v$sqlarea
+&&skip_10g.&&skip_11r1.&&sqld360_skip_objd.                                               WHERE sql_id = '&&sqld360_sqlid.'))
         )
         SELECT 'TABLE', o.owner, o.name table_name
           FROM dba_tables t,
@@ -86,35 +87,38 @@ BEGIN
          WHERE i.owner = o.owner
            AND i.index_name = o.name)
   LOOP
-    IF l_pair IS NULL THEN
-      DBMS_LOB.WRITEAPPEND(:tables_list, 1, '(');
-      DBMS_LOB.WRITEAPPEND(:tables_list_s, 1, '(');
-    ELSE
-      DBMS_LOB.WRITEAPPEND(:tables_list, 1, ',');
-      DBMS_LOB.WRITEAPPEND(:tables_list_s, 1, ',');
-    END IF;
-    l_pair := '('''''||i.owner||''''','''''||i.table_name||''''')';
-    DBMS_LOB.WRITEAPPEND(:tables_list, LENGTH(l_pair), l_pair);
-    l_pair := '('''||i.owner||''','''||i.table_name||''')';
-    DBMS_LOB.WRITEAPPEND(:tables_list_s, LENGTH(l_pair), l_pair);
+    --IF l_pair IS NULL THEN
+    --  DBMS_LOB.WRITEAPPEND(:tables_list, 1, '(');
+    --  DBMS_LOB.WRITEAPPEND(:tables_list_s, 1, '(');
+    --ELSE
+    --  DBMS_LOB.WRITEAPPEND(:tables_list, 1, ',');
+    --  DBMS_LOB.WRITEAPPEND(:tables_list_s, 1, ',');
+    --END IF;
+    --l_pair := '('''''||i.owner||''''','''''||i.table_name||''''')';
+    --DBMS_LOB.WRITEAPPEND(:tables_list, LENGTH(l_pair), l_pair);
+    --l_pair := '('''||i.owner||''','''||i.table_name||''')';
+    --DBMS_LOB.WRITEAPPEND(:tables_list_s, LENGTH(l_pair), l_pair);
+
+    -- this is to support SQLs on LOTS of objects (or same SQL executed in tons of schemas)
+    INSERT INTO plan_table (statement_id, remarks, object_owner, object_name) VALUES ('LIST_OF_TABLES','&&sqld360_sqlid.', i.owner, i.table_name);
     :num_tables := :num_tables + 1;
   END LOOP;
-  IF l_pair IS NULL THEN
-    l_pair := '((''''DUMMY'''',''''DUMMY''''))';
-    DBMS_LOB.WRITEAPPEND(:tables_list, LENGTH(l_pair), l_pair);
-    l_pair := '((''DUMMY'',''DUMMY''))';
-    DBMS_LOB.WRITEAPPEND(:tables_list_s, LENGTH(l_pair), l_pair);
-  ELSE
-    DBMS_LOB.WRITEAPPEND(:tables_list, 1, ')');
-    DBMS_LOB.WRITEAPPEND(:tables_list_s, 1, ')');
-  END IF;
+  --IF l_pair IS NULL THEN
+  --  l_pair := '((''''DUMMY'''',''''DUMMY''''))';
+  --  DBMS_LOB.WRITEAPPEND(:tables_list, LENGTH(l_pair), l_pair);
+  --  l_pair := '((''DUMMY'',''DUMMY''))';
+  --  DBMS_LOB.WRITEAPPEND(:tables_list_s, LENGTH(l_pair), l_pair);
+  --ELSE
+  --  DBMS_LOB.WRITEAPPEND(:tables_list, 1, ')');
+  --  DBMS_LOB.WRITEAPPEND(:tables_list_s, 1, ')');
+  --END IF;
 END;
 /
 
-COL tables_list NEW_V tables_list FOR A32767 NOPRI;
-SELECT :tables_list tables_list FROM DUAL;
-COL tables_list_s NEW_V tables_list_s FOR A32767 NOPRI;
-SELECT :tables_list_s tables_list_s FROM DUAL;
+--COL tables_list NEW_V tables_list FOR A32767 NOPRI;
+--SELECT :tables_list tables_list FROM DUAL;
+--COL tables_list_s NEW_V tables_list_s FOR A32767 NOPRI;
+--SELECT :tables_list_s tables_list_s FROM DUAL;
   
 SELECT TO_CHAR(SYSDATE, 'YYYY-MM-DD/HH24:MI:SS') sqld360_time_stamp FROM DUAL;
 SELECT TO_CHAR(SYSDATE, 'HH24:MI:SS') hh_mm_ss FROM DUAL;  

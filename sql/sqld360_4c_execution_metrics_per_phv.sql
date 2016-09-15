@@ -103,8 +103,8 @@ COL db_unique_name FOR A30;
 COL platform_name FOR A101;
 COL version FOR A17;
 
-COL elapsed_time FOR 999999990;
-COL cpu_time FOR 999999990;
+--COL elapsed_time FOR 999999990;
+--COL cpu_time FOR 999999990;
 
 ------------------------------
 ------------------------------
@@ -1424,6 +1424,193 @@ COL phv14_ PRI
 COL phv15_ PRI
 
 DEF skip_lch = 'Y';
+
+-----------------------------
+-----------------------------
+
+
+DEF main_table = 'DBA_HIST_SQLSTAT';
+DEF abstract = 'Average buffer gets per row per execution per Plan Hash Value from AWR, top best 5 and worst 10';
+DEF foot = 'Low number of executions or long executing SQL make values less accurate';
+DEF vaxis = 'Buffer gets';
+
+COL phv1_ NOPRI
+COL phv2_ NOPRI
+COL phv3_ NOPRI
+COL phv4_ NOPRI
+COL phv5_ NOPRI
+COL phv6_ NOPRI
+COL phv7_ NOPRI
+COL phv8_ NOPRI
+COL phv9_ NOPRI
+COL phv10_ NOPRI
+COL phv11_ NOPRI
+COL phv12_ NOPRI
+COL phv13_ NOPRI
+COL phv14_ NOPRI
+COL phv15_ NOPRI
+
+DEF tit_01 = '&&tit_01_awr.'
+DEF tit_02 = '&&tit_02_awr.'
+DEF tit_03 = '&&tit_03_awr.'
+DEF tit_04 = '&&tit_04_awr.'
+DEF tit_05 = '&&tit_05_awr.'
+DEF tit_06 = '&&tit_06_awr.'
+DEF tit_07 = '&&tit_07_awr.'
+DEF tit_08 = '&&tit_08_awr.'
+DEF tit_09 = '&&tit_09_awr.'
+DEF tit_10 = '&&tit_10_awr.'
+DEF tit_11 = '&&tit_11_awr.'
+DEF tit_12 = '&&tit_12_awr.'
+DEF tit_13 = '&&tit_13_awr.'
+DEF tit_14 = '&&tit_14_awr.'
+DEF tit_15 = '&&tit_15_awr.'
+
+BEGIN
+  :sql_text_backup := '
+SELECT b.snap_id snap_id,
+       TO_CHAR(b.begin_interval_time, ''YYYY-MM-DD HH24:MI'')  begin_time, 
+       TO_CHAR(b.end_interval_time, ''YYYY-MM-DD HH24:MI'')  end_time,
+       NVL(phv1 ,0) phv1_&&tit_01.  ,
+       NVL(phv2 ,0) phv2_&&tit_02.  ,
+       NVL(phv3 ,0) phv3_&&tit_03.  ,
+       NVL(phv4 ,0) phv4_&&tit_04.  ,
+       NVL(phv5 ,0) phv5_&&tit_05.  ,
+       NVL(phv6 ,0) phv6_&&tit_06.  ,
+       NVL(phv7 ,0) phv7_&&tit_07.  ,
+       NVL(phv8 ,0) phv8_&&tit_08.  ,
+       NVL(phv9 ,0) phv9_&&tit_09.  ,
+       NVL(phv10,0) phv10_&&tit_10. ,
+       NVL(phv11,0) phv11_&&tit_11. ,
+       NVL(phv12,0) phv12_&&tit_12. ,
+       NVL(phv13,0) phv13_&&tit_13. ,
+       NVL(phv14,0) phv14_&&tit_14. ,
+       NVL(phv15,0) phv15_&&tit_15. 
+  FROM (SELECT snap_id,
+               MAX(CASE WHEN phv = &&phv_01_awr. THEN avg_gets_per_row_per_exec ELSE NULL END) phv1,
+               MAX(CASE WHEN phv = &&phv_02_awr. THEN avg_gets_per_row_per_exec ELSE NULL END) phv2, 
+               MAX(CASE WHEN phv = &&phv_03_awr. THEN avg_gets_per_row_per_exec ELSE NULL END) phv3, 
+               MAX(CASE WHEN phv = &&phv_04_awr. THEN avg_gets_per_row_per_exec ELSE NULL END) phv4, 
+               MAX(CASE WHEN phv = &&phv_05_awr. THEN avg_gets_per_row_per_exec ELSE NULL END) phv5, 
+               MAX(CASE WHEN phv = &&phv_06_awr. THEN avg_gets_per_row_per_exec ELSE NULL END) phv6, 
+               MAX(CASE WHEN phv = &&phv_07_awr. THEN avg_gets_per_row_per_exec ELSE NULL END) phv7, 
+               MAX(CASE WHEN phv = &&phv_08_awr. THEN avg_gets_per_row_per_exec ELSE NULL END) phv8, 
+               MAX(CASE WHEN phv = &&phv_09_awr. THEN avg_gets_per_row_per_exec ELSE NULL END) phv9, 
+               MAX(CASE WHEN phv = &&phv_10_awr. THEN avg_gets_per_row_per_exec ELSE NULL END) phv10, 
+               MAX(CASE WHEN phv = &&phv_11_awr. THEN avg_gets_per_row_per_exec ELSE NULL END) phv11, 
+               MAX(CASE WHEN phv = &&phv_12_awr. THEN avg_gets_per_row_per_exec ELSE NULL END) phv12, 
+               MAX(CASE WHEN phv = &&phv_13_awr. THEN avg_gets_per_row_per_exec ELSE NULL END) phv13, 
+               MAX(CASE WHEN phv = &&phv_14_awr. THEN avg_gets_per_row_per_exec ELSE NULL END) phv14, 
+               MAX(CASE WHEN phv = &&phv_15_awr. THEN avg_gets_per_row_per_exec ELSE NULL END) phv15 
+          FROM (SELECT snap_id,
+                       plan_hash_value phv, 
+                       TRUNC(SUM(buffer_gets_total)/SUM(NVL(NULLIF(rows_processed_total,0),1))/SUM(NVL(NULLIF(executions_total,0),1)),3) avg_gets_per_row_per_exec
+                  FROM dba_hist_sqlstat
+                 WHERE snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.
+                   AND sql_id = ''&&sqld360_sqlid.''
+                   AND ''&&diagnostics_pack.'' = ''Y''
+                   AND instance_number = @instance_number@
+                   AND plan_hash_value IN (&&phv_01_awr.,&&phv_02_awr.,&&phv_03_awr.,&&phv_04_awr.,&&phv_05_awr.,&&phv_06_awr.,
+                                           &&phv_07_awr.,&&phv_08_awr.,&&phv_09_awr.,&&phv_10_awr.,&&phv_11_awr.,&&phv_12_awr.,
+                                           &&phv_13_awr.,&&phv_14_awr.,&&phv_15_awr.)
+                 GROUP BY snap_id, plan_hash_value)
+          GROUP BY snap_id) awr, 
+         dba_hist_snapshot b
+ WHERE awr.snap_id(+) = b.snap_id
+   AND b.snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.
+ ORDER BY 3
+';
+END;
+/
+
+DEF chartype = 'LineChart';
+DEF stacked = '';
+
+DEF skip_lch = '';
+DEF skip_all = '&&is_single_instance.';
+DEF title = 'Avg Buffer Gets/Row/Execution per PHV from AWR for Cluster';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', 'instance_number');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = '';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 1;
+DEF title = 'Avg Buffer Gets/Row/Execution per PHV from AWR for Instance 1';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '1');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = '';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 2;
+DEF title = 'Avg Buffer Gets/Row/Execution per PHV from AWR for Instance 2';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '2');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = '';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 3;
+DEF title = 'Avg Buffer Gets/Row/Execution per PHV from AWR for Instance 3';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '3');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = '';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 4;
+DEF title = 'Avg Buffer Gets/Row/Execution per PHV from AWR for Instance 4';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '4');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = '';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 5;
+DEF title = 'Avg Buffer Gets/Row/Execution per PHV from AWR for Instance 5';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '5');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = '';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 6;
+DEF title = 'Avg Buffer Gets/Row/Execution per PHV from AWR for Instance 6';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '6');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = '';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 7;
+DEF title = 'Avg Buffer Gets/Row/Execution per PHV from AWR for Instance 7';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '7');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = '';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 8;
+DEF title = 'Avg Buffer Gets/Row/Execution per PHV from AWR for Instance 8';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '8');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+COL phv1_ PRI
+COL phv2_ PRI
+COL phv3_ PRI
+COL phv4_ PRI
+COL phv5_ PRI
+COL phv6_ PRI
+COL phv7_ PRI
+COL phv8_ PRI
+COL phv9_ PRI
+COL phv10_ PRI
+COL phv11_ PRI
+COL phv12_ PRI
+COL phv13_ PRI
+COL phv14_ PRI
+COL phv15_ PRI
+
+DEF skip_lch = 'Y';
+
+
+
+
+
+
 
 -----------------------------
 -----------------------------

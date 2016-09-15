@@ -14,6 +14,7 @@ DEF main_table = 'DBMS_METADATA';
 VAR mymetadata CLOB;
 
 SET SERVEROUT ON SIZE 1000000;
+SET SERVEROUT ON SIZE UNL;
 SET TERM OFF
 SPO sqld360_metadata_&&sqld360_sqlid._driver.sql
 DECLARE
@@ -27,11 +28,11 @@ BEGIN
  FOR i IN (SELECT * 
              FROM (SELECT owner object_owner, table_name object_name, 'TABLE' object_type
                      FROM dba_tables
-                    WHERE (owner, table_name) IN &&tables_list_s.
+                    WHERE (owner, table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = 'LIST_OF_TABLES' AND remarks = '&&sqld360_sqlid.')
                    UNION 
                    SELECT owner object_owner, index_name object_name, 'INDEX' object_type
                      FROM dba_indexes
-                    WHERE (table_owner, table_name) IN &&tables_list_s.
+                    WHERE (table_owner, table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = 'LIST_OF_TABLES' AND remarks = '&&sqld360_sqlid.')
 &&skip_10g.&&skip_11r1.   UNION 
 &&skip_10g.&&skip_11r1.   SELECT SUBSTR(owner,1,30) object_owner, SUBSTR(name,1,30) object_name, SUBSTR(type,1,30) object_type
 &&skip_10g.&&skip_11r1.     FROM v$db_object_cache -- it's intentional here to use V$ instead of GV$ to keep the plan easy 

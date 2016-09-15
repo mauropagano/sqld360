@@ -9,8 +9,8 @@ CL COL;
 COL row_num FOR 9999999 HEA '#' PRI;
 
 -- version
-DEF sqld360_vYYNN = 'v1619';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2016-08-22)';
+DEF sqld360_vYYNN = 'v1620';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2016-09-14)';
 DEF sqld360_prefix = 'sqld360';
 
 -- parameters
@@ -97,6 +97,9 @@ BEGIN
 END;
 /
 
+-- suppressing some unnecessary output
+SET TERM OFF;
+
 -- get dbid
 COL sqld360_dbid NEW_V sqld360_dbid;
 SELECT TRIM(TO_CHAR(dbid)) sqld360_dbid FROM v$database;
@@ -143,7 +146,7 @@ SELECT TO_CHAR(LEAST(CEIL(SYSDATE - CAST(MIN(begin_interval_time) AS DATE)),  TO
 SELECT TO_CHAR(TO_DATE('&&sqld360_conf_date_to.', 'YYYY-MM-DD') - TO_DATE('&&sqld360_conf_date_from.', 'YYYY-MM-DD') + 1) history_days FROM DUAL WHERE '&&sqld360_conf_date_from.' != 'YYYY-MM-DD' AND '&&sqld360_conf_date_to.' != 'YYYY-MM-DD';
 SELECT '0' history_days FROM DUAL WHERE NVL(TRIM('&&diagnostics_pack.'), 'N') = 'N';
 
-SET TERM OFF;
+--SET TERM OFF;
 
 -- Dates format
 DEF sqld360_date_format = 'YYYY-MM-DD"T"HH24:MI:SS';
@@ -156,7 +159,7 @@ SELECT CASE '&&sqld360_conf_date_from.' WHEN 'YYYY-MM-DD' THEN TO_CHAR(SYSDATE -
 SELECT CASE '&&sqld360_conf_date_to.' WHEN 'YYYY-MM-DD' THEN TO_CHAR(SYSDATE, '&&sqld360_date_format.') ELSE '&&sqld360_conf_date_to.T23:59:59' END sqld360_date_to FROM DUAL;
 
 
-DEF skip_script = 'sql/sqld360_0f_skip_script.sql ';
+--DEF skip_script = 'sql/sqld360_0f_skip_script.sql ';
 
 -- number fo rows per report
 COL row_num NEW_V row_num HEA '#' PRI;
@@ -397,8 +400,10 @@ COL sqld360_tcb_exp_data NEW_V sqld360_tcb_exp_data;
 COL sqld360_tcb_exp_sample NEW_V sqld360_tcb_exp_sample;
 SELECT CASE WHEN '&&sqld360_conf_tcb_sample.' BETWEEN '1' AND '100' THEN 'TRUE' ELSE 'FALSE' END sqld360_tcb_exp_data, LEAST(TO_NUMBER('&&sqld360_conf_tcb_sample.'),100) sqld360_tcb_exp_sample FROM dual;
 
+COL sqld360_skip_objd NEW_V sqld360_skip_objd;
+SELECT CASE '&&sqld360_conf_incl_obj_dept.' WHEN 'N' THEN '--' END sqld360_skip_objd FROM DUAL;
+
 -- setup
-DEF sql_trace_level = '1';
 DEF main_table = '';
 DEF title = '';
 DEF title_no_spaces = '';
@@ -563,7 +568,12 @@ ALTER SESSION SET optimizer_features_enable = '&&db_vers_ofe.';
 ALTER SESSION SET MAX_DUMP_FILE_SIZE = '1G';
 ALTER SESSION SET TRACEFILE_IDENTIFIER = "&&sqld360_tracefile_identifier.";
 --ALTER SESSION SET STATISTICS_LEVEL = 'ALL';
-ALTER SESSION SET EVENTS '10046 TRACE NAME CONTEXT FOREVER, LEVEL &&sql_trace_level.';
+BEGIN
+ IF TO_NUMBER('&&sqld360_sqltrace_level.') > 0 THEN
+   EXECUTE IMMEDIATE 'ALTER SESSION SET EVENTS ''10046 TRACE NAME CONTEXT FOREVER, LEVEL &&sqld360_sqltrace_level.''';
+ END IF;
+END;
+/
 SET TERM OFF; 
 SET HEA ON; 
 SET LIN 32767; 

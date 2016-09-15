@@ -15,6 +15,7 @@
 -- partition_id     sql_exec_id
 -- cpu_cost         session_id
 -- io_cost          session_serial#
+-- bytes            user_id
 -- parent_id        sample_id
 -- partition_start  seq#,p1text,p1,p2text,p2,p3text,p3,current_file#,current_block#, --current_row#, --tm_delta_time, 
 --                  --tm_delta_cpu_time, --tm_delta_db_time
@@ -49,6 +50,7 @@ SELECT /*+ &&top_level_hints. */
        TO_CHAR(TO_DATE(distribution,''YYYYMMDDHH24MISS''), ''YYYY-MM-DD/HH24:MI:SS'')  sql_exec_start,
        cpu_cost         session_id,
        io_cost          session_serial#,
+       bytes            user_id,
        remarks          sql_id,
        cost             plan_hash_value,
        id               sql_plan_line_id,

@@ -20,7 +20,7 @@ SELECT /*+ &&top_level_hints. */
        CASE WHEN num_rows IS NULL THEN ''YES'' END no_stats,
        CASE WHEN sample_size < num_rows THEN ''YES'' END no_andv_used
   FROM dba_tab_statistics
- WHERE (owner, table_name) in &&tables_list.
+ WHERE (owner, table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')
    AND (stale_stats = ''YES'' 
      OR stattype_locked IS NOT NULL 
      OR empty_blocks > blocks
@@ -47,7 +47,7 @@ SELECT /*+ &&top_level_hints. */
        CASE WHEN ts.last_analyzed - ixs.last_analyzed > 1 THEN ''YES'' END tab_ind_stats_not_sync
   FROM dba_ind_statistics ixs,
        dba_tab_statistics ts
- WHERE (ixs.table_owner, ixs.table_name) in &&tables_list.
+ WHERE (ixs.table_owner, ixs.table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')
    AND ts.owner = ixs.table_owner
    AND ts.table_name = ixs.table_name
    AND ts.partition_name IS NULL

@@ -31,7 +31,7 @@ SELECT /*+ &&top_level_hints. */
   FROM gv$bt_scan_obj_temps bsc,
        dba_objects o
  WHERE bsc.dataobj# = o.data_object_id 
-   AND (o.owner, o.object_name) in &&tables_list.
+   AND (o.owner, o.object_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')
  ORDER BY bsc.inst_id, o.owner, o.object_name, o.subobject_name
 ';
 END;

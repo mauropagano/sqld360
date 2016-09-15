@@ -107,7 +107,7 @@ SELECT /*+ &&top_level_hints. */
           WHERE d.f_id = f.f_id)
  WHERE directive_id IN (SELECT directive_id
                           FROM dba_sql_plan_dir_objects
-                         WHERE (owner, object_name) in &&tables_list.) 
+                         WHERE (owner, object_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')) 
  ORDER BY directive_id
 ';
 END;
@@ -122,7 +122,7 @@ BEGIN
 SELECT /*+ &&top_level_hints. */
        directive_id, owner, object_name, subobject_name, object_type
   FROM dba_sql_plan_dir_objects
- WHERE (owner, object_name) in &&tables_list. 
+ WHERE (owner, object_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')
  ORDER BY owner, object_name, directive_id
 ';
 END;

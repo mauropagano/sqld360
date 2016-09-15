@@ -63,6 +63,9 @@ DEF sqld360_conf_translate_lowhigh = 'Y';
 DEF sqld360_conf_first_part = '10';
 DEF sqld360_conf_last_part = '10';
 
+-- number of PHV to include in Plan Details
+DEF sqld360_num_plan_details = '20';
+
 -- number of top executions to individually analyze, from memory and history
 DEF sqld360_conf_num_top_execs = '3';
 
@@ -74,6 +77,13 @@ DEF sqld360_conf_num_sqlmon_rep = '12';
 
 -- percentile to use in Avg ET based on ASH
 DEF sqld360_conf_avg_et_percth = '90';
+
+-- include/exclude v$object_dependency (tends to pollute the report, but brings more views)
+DEF sqld360_conf_incl_obj_dept = 'N';
+
+-- enable / disable SQLd360 tracing itself (0 => OFF, everything else is ON)
+DEF sqld360_sqltrace_level = '0';
+
 
 /**************************** not recommended to modify *********************************/
 

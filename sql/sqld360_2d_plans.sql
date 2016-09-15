@@ -8,7 +8,7 @@ SPO OFF;
 
 
 COL num_plans NEW_V num_plans
-SELECT TRIM(TO_CHAR(COUNT(plan_hash_value))) num_plans
+SELECT LEAST(TRIM(TO_CHAR(COUNT(plan_hash_value))), '&&sqld360_num_plan_details.') num_plans
   FROM (SELECT plan_hash_value
           FROM gv$sql
          WHERE sql_id = '&&sqld360_sqlid.'
@@ -23,6 +23,7 @@ SELECT TRIM(TO_CHAR(COUNT(plan_hash_value))) num_plans
          WHERE statement_id LIKE 'SQLD360_ASH_DATA%'
            AND '&&diagnostics_pack.' = 'Y'
            AND remarks = '&&sqld360_sqlid.')
+ WHERE ('&&sqld360_is_insert.' IS NULL AND plan_hash_value <> 0) OR ('&&sqld360_is_insert.' = 'Y')
 /
 
 DEF title= 'Plan Details'

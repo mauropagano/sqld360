@@ -25,13 +25,14 @@ DEF tit_13 = '';
 DEF tit_14 = '';
 DEF tit_15 = '';
 
-COL elapsed_time FOR 999999990.000;
-COL cpu_time FOR 999999990.000;
-COL io_time FOR 999999990.000;
-COL cluster_time FOR 999999990.000;
-COL application_time FOR 999999990.000;
-COL concurrency_time FOR 999999990.000;
-COL unaccounted_time FOR 999999990.000;
+--COL elapsed_time FOR 999999990.000;
+--COL db_time FOR 999999990.000;
+--COL cpu_time FOR 999999990.000;
+--COL io_time FOR 999999990.000;
+--COL cluster_time FOR 999999990.000;
+--COL application_time FOR 999999990.000;
+--COL concurrency_time FOR 999999990.000;
+--COL unaccounted_time FOR 999999990.000;
 
 
 DEF main_table = 'DBA_HIST_SQLSTAT';
@@ -42,19 +43,19 @@ BEGIN
 SELECT MIN(a.snap_id) snap_id, 
        TO_CHAR(a.begin_interval_time, ''YYYY-MM-DD HH24:MI'')  begin_time, 
        TO_CHAR(a.end_interval_time, ''YYYY-MM-DD HH24:MI'')  end_time,
-       SUM(NVL(b.elapsed_time_delta,0))/1000000 elapsed_time,
-       SUM(NVL(b.cpu_time_delta,0))/1000000 cpu_time, 
-       SUM(NVL(b.iowait_delta,0))/1000000 io_time,
-       SUM(NVL(b.clwait_delta,0))/1000000 cluster_time,
-       SUM(NVL(b.apwait_delta,0))/1000000 application_time,
-       SUM(NVL(b.ccwait_delta,0))/1000000 concurrency_time,
-       (SUM(NVL(b.elapsed_time_delta,0)) - 
+       TRUNC(SUM(NVL(b.elapsed_time_delta,0))/1e6,3) elapsed_time,
+       TRUNC(SUM(NVL(b.cpu_time_delta,0))/1e6,3) cpu_time, 
+       TRUNC(SUM(NVL(b.iowait_delta,0))/1e6,3) io_time,
+       TRUNC(SUM(NVL(b.clwait_delta,0))/1e6,3) cluster_time,
+       TRUNC(SUM(NVL(b.apwait_delta,0))/1e6,3) application_time,
+       TRUNC(SUM(NVL(b.ccwait_delta,0))/1e6,3) concurrency_time,
+       TRUNC((SUM(NVL(b.elapsed_time_delta,0)) - 
          (SUM(NVL(b.cpu_time_delta,0)) +
           SUM(NVL(b.iowait_delta,0))   +
           SUM(NVL(b.clwait_delta,0))   +
           SUM(NVL(b.apwait_delta,0))   +
           SUM(NVL(b.ccwait_delta,0)))
-       ) / 1000000 unaccounted_time,
+       ) / 1e6,3) unaccounted_time,
        0 dummy_08,
        0 dummy_09,
        0 dummy_10,
@@ -179,6 +180,7 @@ BEGIN
 SELECT NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INSTR(partition_stop,'','',1,4)-INSTR(partition_stop,'','',1,3)-1)),position) instance_id,
        NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,4)+1,INSTR(partition_stop,'','',1,5)-INSTR(partition_stop,'','',1,4)-1)),cpu_cost) session_id,
        NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,5)+1,INSTR(partition_stop,'','',1,6)-INSTR(partition_stop,'','',1,5)-1)),io_cost) session_serial#,
+       bytes user_id, 
        partition_id sql_exec_id,
        TO_CHAR(TO_DATE(distribution, ''YYYYMMDDHH24MISS''), ''YYYY-MM-DD HH24:MI:SS'') sql_exec_start,
        TO_CHAR(MIN(timestamp), ''YYYY-MM-DD HH24:MI:SS'')  start_time,
@@ -216,7 +218,8 @@ SELECT NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INS
        TO_CHAR(TO_DATE(distribution, ''YYYYMMDDHH24MISS''), ''YYYY-MM-DD HH24:MI:SS''),
        NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INSTR(partition_stop,'','',1,4)-INSTR(partition_stop,'','',1,3)-1)),position),
        NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,4)+1,INSTR(partition_stop,'','',1,5)-INSTR(partition_stop,'','',1,4)-1)),cpu_cost),
-       NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,5)+1,INSTR(partition_stop,'','',1,6)-INSTR(partition_stop,'','',1,5)-1)),io_cost)
+       NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,5)+1,INSTR(partition_stop,'','',1,6)-INSTR(partition_stop,'','',1,5)-1)),io_cost),
+       bytes 
  ORDER BY
        TO_CHAR(MIN(timestamp), ''YYYY-MM-DD HH24:MI:SS''),
        partition_id
@@ -290,6 +293,7 @@ BEGIN
 SELECT NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INSTR(partition_stop,'','',1,4)-INSTR(partition_stop,'','',1,3)-1)),position) instance_id,
        NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,4)+1,INSTR(partition_stop,'','',1,5)-INSTR(partition_stop,'','',1,4)-1)),cpu_cost) session_id,
        NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,5)+1,INSTR(partition_stop,'','',1,6)-INSTR(partition_stop,'','',1,5)-1)),io_cost) session_serial#,
+       bytes user_id, 
        partition_id sql_exec_id,
        TO_CHAR(TO_DATE(distribution, ''YYYYMMDDHH24MISS''), ''YYYY-MM-DD HH24:MI:SS'') sql_exec_start,
        TO_CHAR(MIN(timestamp), ''YYYY-MM-DD HH24:MI:SS'')  start_time,
@@ -327,7 +331,8 @@ SELECT NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INS
        TO_CHAR(TO_DATE(distribution, ''YYYYMMDDHH24MISS''), ''YYYY-MM-DD HH24:MI:SS''),
        NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INSTR(partition_stop,'','',1,4)-INSTR(partition_stop,'','',1,3)-1)),position),
        NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,4)+1,INSTR(partition_stop,'','',1,5)-INSTR(partition_stop,'','',1,4)-1)),cpu_cost),
-       NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,5)+1,INSTR(partition_stop,'','',1,6)-INSTR(partition_stop,'','',1,5)-1)),io_cost)
+       NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,5)+1,INSTR(partition_stop,'','',1,6)-INSTR(partition_stop,'','',1,5)-1)),io_cost),
+       bytes 
  ORDER BY
        TO_CHAR(MIN(timestamp), ''YYYY-MM-DD HH24:MI:SS''),
        partition_id

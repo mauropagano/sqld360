@@ -17,7 +17,7 @@ SET SERVEROUT ON SIZE 1000000;
 BEGIN
   FOR i IN (SELECT table_name, owner 
               FROM dba_tables 
-             WHERE (owner, table_name) in &&tables_list_s. 
+             WHERE (owner, table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = 'LIST_OF_TABLES' AND remarks = '&&sqld360_sqlid.') 
                AND partitioned = 'YES'
              ORDER BY 1,2) 
   LOOP
@@ -75,10 +75,10 @@ BEGIN
   put('                      FROM (SELECT table_owner, table_name, partition_name, partition_position, ');
   put('                                   ROW_NUMBER() OVER (ORDER BY partition_position) rn, COUNT(*) OVER () num_part ');
   put('                              FROM dba_tab_partitions ');
-  put('                             WHERE (table_owner, table_name) IN &&tables_list. ) ');
+  put('                             WHERE (table_owner, table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'') ) ');
   put('                     WHERE (rn <= &&sqld360_conf_first_part OR rn >= num_part-&&sqld360_conf_last_part) ');
   put('                     ORDER BY partition_position DESC) c ');
-  put('             WHERE (a.owner, a.table_name) IN &&tables_list.');
+  put('             WHERE (a.owner, a.table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'') ');
   put('               AND ''&&sqld360_conf_translate_lowhigh.'' = ''Y''');
   put('               AND a.owner = b.owner');
   put('               AND a.table_name = b.table_name');
@@ -97,7 +97,7 @@ BEGIN
 
   FOR i IN (SELECT table_name, owner 
               FROM dba_tables 
-             WHERE (owner, table_name) in &&tables_list_s. 
+             WHERE (owner, table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = 'LIST_OF_TABLES' AND remarks = '&&sqld360_sqlid.')
                AND partitioned = 'YES'
              ORDER BY 1,2) 
   LOOP

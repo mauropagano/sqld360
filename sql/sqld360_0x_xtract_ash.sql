@@ -41,7 +41,7 @@ BEGIN
                             &&skip_10g.id,                                 -- sql_plan_line_id
                             &&skip_10g.partition_id,                       -- sql_exec_id
                             &&skip_10g.distribution,                       -- sql_exec_start
-                            cpu_cost, io_cost,                             -- session_id, session_serial#
+                            cpu_cost, io_cost, bytes,                      -- session_id, session_serial#, user_id
                             parent_id,                                     -- sample_id
                             partition_start,                               -- seq#,p1text,p1,p2text,p2,p3text,p3,current_file#,current_block#, --current_row#, --tm_delta_time, 
                                                                            -- --tm_delta_cpu_time, --tm_delta_db_time
@@ -60,7 +60,7 @@ BEGIN
             &&skip_10g.sql_plan_line_id, 
             &&skip_10g.sql_exec_id,
             &&skip_10g.TO_CHAR(sql_exec_start,'YYYYMMDDHH24MISS'),
-            session_id, session_serial#,
+            session_id, session_serial#, user_id,
             sample_id,
             seq#||','||p1text||','||p1||','||p2text||','||p2||','||p3text||','||p3||','||current_file#||','||current_block#||
             ','||&&skip_10g.current_row#||
@@ -109,7 +109,7 @@ BEGIN
             &&skip_10g.sql_plan_line_id, 
             &&skip_10g.sql_exec_id,
             &&skip_10g.TO_CHAR(sql_exec_start,'YYYYMMDDHH24MISS'),
-            session_id, session_serial#,
+            session_id, session_serial#, user_id,
             sample_id,
             seq#||','||p1text||','||p1||','||p2text||','||p2||','||p3text||','||p3||','||current_file#||','||current_block#||
             ','||&&skip_10g.current_row#||

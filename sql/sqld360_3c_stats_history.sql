@@ -33,7 +33,7 @@ SELECT /*+ &&top_level_hints. */
        h.*
   FROM sys.wri$_optstat_tab_history h,
        dba_objects o
- WHERE (o.owner, o.object_name) in &&tables_list.
+ WHERE (o.owner, o.object_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')
    AND o.object_type = ''TABLE''
    AND o.object_id = h.obj#
    AND ''&&diagnostics_pack.'' = ''Y''
@@ -59,7 +59,7 @@ SELECT /*+ &&top_level_hints. */
   FROM sys.wri$_optstat_ind_history h,
        dba_objects o,
        dba_indexes i
- WHERE (i.table_owner, i.table_name) in &&tables_list.
+ WHERE (i.table_owner, i.table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')
    AND i.index_name = o.object_name
    AND i.owner = o.owner
    AND o.object_type = ''INDEX''
@@ -87,7 +87,7 @@ SELECT /*+ &&top_level_hints. */
   FROM sys.wri$_optstat_histhead_history h,
        dba_objects o,
        dba_tab_cols c
- WHERE (c.owner, c.table_name) IN &&tables_list.
+ WHERE (c.owner, c.table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')
    AND c.table_name = o.object_name
    AND c.owner = o.owner
    AND o.object_type = ''TABLE''
@@ -116,7 +116,7 @@ SELECT /*+ &&top_level_hints. */
   FROM (SELECT table_owner, table_name, partition_name, partition_position,
                ROW_NUMBER() OVER (ORDER BY partition_position) rn, COUNT(*) OVER () num_part
           FROM dba_tab_partitions 
-         WHERE (table_owner, table_name) IN &&tables_list.
+         WHERE (table_owner, table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')
        ) p,
        dba_objects o,
        sys.wri$_optstat_tab_history h

@@ -32,8 +32,8 @@ COL db_unique_name FOR A30;
 COL platform_name FOR A101;
 COL version FOR A17;
 
-COL sql_elapsed FOR 999999990.000;
-COL system_elapsed FOR 999999990.000;
+--COL sql_elapsed FOR 999999990.000;
+--COL system_elapsed FOR 999999990.000;
 
 DEF main_table = 'DBA_HIST_SQLSTAT';
 DEF vaxis = 'SQL Execute Elapsed Time in secs';
@@ -451,8 +451,8 @@ DEF tit_13 = '';
 DEF tit_14 = '';
 DEF tit_15 = '';
 
-COL buffer_gets FOR 999999990.000;
-COL physical_reads FOR 999999990.000;
+--COL buffer_gets FOR 999999990.000;
+--COL physical_reads FOR 999999990.000;
 
 DEF main_table = 'DBA_HIST_SQLSTAT';
 DEF vaxis = 'Buffer gets and disk reads';
@@ -600,8 +600,8 @@ DEF tit_13 = '';
 DEF tit_14 = '';
 DEF tit_15 = '';
 
-COL rows_processed FOR 999999990.000;
-COL fetch_calls FOR 999999990.000;
+--COL rows_processed FOR 999999990.000;
+--COL fetch_calls FOR 999999990.000;
 
 DEF main_table = 'DBA_HIST_SQLSTAT';
 DEF vaxis = 'Rows processed and Fetch calls';
@@ -750,8 +750,8 @@ DEF tit_13 = '';
 DEF tit_14 = '';
 DEF tit_15 = '';
 
-COL executions_delta FOR 999999990.000;
-COL parse_calls FOR 999999990.000;
+--COL executions_delta FOR 999999990.000;
+--COL parse_calls FOR 999999990.000;
 
 DEF main_table = 'DBA_HIST_SQLSTAT';
 DEF vaxis = 'Executions and Parse calls';

@@ -18,24 +18,35 @@ SET SERVEROUT ON SIZE UNL;
 
 EXEC :repo_seq := 1;
 
+
+-- The following code sucks but it's the only "easy" (aka not spending too much time computing it) workaround for those 
+--  systems where the same SQL ID has hundreds of PHV, we only provide deeper info for the top sqld360_num_plan_details by amount of data
+--  Each row in GV$SQL, DBA_HIST counts 1 towards the total, each row in ASH counts 0.5 (so this approach still favors ASH a bit over GV$SQL / DBA_HIST)
 BEGIN
   FOR i IN (SELECT plan_hash_value
-              FROM (SELECT plan_hash_value
-                      FROM gv$sql
-                     WHERE sql_id = '&&sqld360_sqlid.'
-                    UNION
-                    SELECT plan_hash_value
-                      FROM dba_hist_sqlstat
-                     WHERE sql_id = '&&sqld360_sqlid.'
-                       AND '&&diagnostics_pack.' = 'Y'
-                    UNION
-                   SELECT cost plan_hash_value
-                     FROM plan_table
-                    WHERE statement_id LIKE 'SQLD360_ASH_DATA%'
-                      AND '&&diagnostics_pack.' = 'Y'
-                      AND remarks = '&&sqld360_sqlid.') 
-               WHERE ('&&sqld360_is_insert.' IS NULL AND plan_hash_value <> 0) OR ('&&sqld360_is_insert.' = 'Y')
-             ORDER BY 1)
+              FROM (SELECT plan_hash_value, ROWNUM num_plans
+                      FROM (SELECT SUM(num_rows) rows_per_phv, plan_hash_value
+                              FROM (SELECT COUNT(*) num_rows, plan_hash_value
+                                      FROM gv$sql
+                                     WHERE sql_id = '&&sqld360_sqlid.'
+                                     GROUP BY plan_hash_value
+                                    UNION ALL
+                                    SELECT COUNT(*) num_rows, plan_hash_value
+                                      FROM dba_hist_sqlstat
+                                     WHERE sql_id = '&&sqld360_sqlid.'
+                                       AND '&&diagnostics_pack.' = 'Y'
+                                     GROUP BY plan_hash_value
+                                    UNION ALL
+                                    SELECT SUM(0.5) num_rows, cost plan_hash_value
+                                      FROM plan_table
+                                     WHERE statement_id LIKE 'SQLD360_ASH_DATA%'
+                                       AND '&&diagnostics_pack.' = 'Y'
+                                       AND remarks = '&&sqld360_sqlid.'
+                                     GROUP BY cost) 
+                             GROUP BY plan_hash_value
+                             ORDER BY 1 DESC)
+                     WHERE ('&&sqld360_is_insert.' IS NULL AND plan_hash_value <> 0) OR ('&&sqld360_is_insert.' = 'Y'))
+             WHERE num_plans <= &&sqld360_num_plan_details.)
   LOOP
     DBMS_OUTPUT.PUT_LINE('<td class="c">PHV '||i.plan_hash_value||'</td>');
   END LOOP;
@@ -69,22 +80,29 @@ BEGIN
 -- this is intentional, showing all the tables including the ones with no histograms
 -- so it's easier to spot the ones with no histograms too
   FOR i IN (SELECT plan_hash_value
-              FROM (SELECT plan_hash_value
-                      FROM gv$sql
-                     WHERE sql_id = '&&sqld360_sqlid.'
-                    UNION
-                    SELECT plan_hash_value
-                      FROM dba_hist_sqlstat
-                     WHERE sql_id = '&&sqld360_sqlid.'
-                       AND '&&diagnostics_pack.' = 'Y'
-                    UNION
-                    SELECT cost plan_hash_value
-                      FROM plan_table
-                     WHERE statement_id LIKE 'SQLD360_ASH_DATA%'
-                       AND '&&diagnostics_pack.' = 'Y'
-                       AND remarks = '&&sqld360_sqlid.') 
-             WHERE ('&&sqld360_is_insert.' IS NULL AND plan_hash_value <> 0) OR ('&&sqld360_is_insert.' = 'Y')
-             ORDER BY 1) 
+              FROM (SELECT plan_hash_value, ROWNUM num_plans
+                      FROM (SELECT SUM(num_rows) rows_per_phv, plan_hash_value
+                              FROM (SELECT COUNT(*) num_rows, plan_hash_value
+                                      FROM gv$sql
+                                     WHERE sql_id = '&&sqld360_sqlid.'
+                                     GROUP BY plan_hash_value
+                                    UNION ALL
+                                    SELECT COUNT(*) num_rows, plan_hash_value
+                                      FROM dba_hist_sqlstat
+                                     WHERE sql_id = '&&sqld360_sqlid.'
+                                       AND '&&diagnostics_pack.' = 'Y'
+                                     GROUP BY plan_hash_value
+                                    UNION ALL
+                                    SELECT SUM(0.5) num_rows, cost plan_hash_value
+                                      FROM plan_table
+                                     WHERE statement_id LIKE 'SQLD360_ASH_DATA%'
+                                       AND '&&diagnostics_pack.' = 'Y'
+                                       AND remarks = '&&sqld360_sqlid.'
+                                     GROUP BY cost) 
+                             GROUP BY plan_hash_value
+                             ORDER BY 1 DESC)
+                     WHERE ('&&sqld360_is_insert.' IS NULL AND plan_hash_value <> 0) OR ('&&sqld360_is_insert.' = 'Y'))
+             WHERE num_plans <= &&sqld360_num_plan_details.) 
   LOOP
     put('SET PAGES 50000');
     put('SPO &&sqld360_main_report..html APP;');
@@ -270,12 +288,12 @@ BEGIN
     put('DEF skip_lch=''''');
     put('DEF chartype = ''LineChart''');
     put('DEF stacked = ''''');
-    put('DEF vaxis = ''Average Elapsed Time in secs''');
+    put('DEF vaxis = ''Elapsed Time in secs''');
     put('DEF tit_01 = ''Average Elapsed Time''');
     put('DEF tit_02 = ''Average Time on CPU''');
     put('DEF tit_03 = ''Average DB Time''');
-    put('DEF tit_04 = ''''');
-    put('DEF tit_05 = ''''');
+    put('DEF tit_04 = ''Min Elapsed Time''');
+    put('DEF tit_05 = ''Max Elapsed Time''');
     put('DEF tit_06 = ''''');
     put('DEF tit_07 = ''''');
     put('DEF tit_08 = ''''');
@@ -294,8 +312,8 @@ BEGIN
     put('       avg_et,');
     put('       avg_cpu_time,');
     put('       avg_db_time,');
-    put('       0 dummy_04,');
-    put('       0 dummy_05,');
+    put('       min_et,');
+    put('       max_et,');
     put('       0 dummy_06,');
     put('       0 dummy_07,');
     put('       0 dummy_08,');
@@ -309,7 +327,9 @@ BEGIN
     put('  FROM (SELECT start_time,');
     put('               TRUNC(AVG(et),2) avg_et,');
     put('               TRUNC(AVG(cpu_time),2) avg_cpu_time,');
-    put('               TRUNC(AVG(db_time),2) avg_db_time');
+    put('               TRUNC(AVG(db_time),2) avg_db_time,');
+    put('               TRUNC(MIN(et),2) min_et,');
+    put('               TRUNC(MAX(et),2) max_et');
     put('          FROM (SELECT TO_DATE(SUBSTR(distribution,1,12),''''YYYYMMDDHH24MI'''') start_time,');
     put('                       NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,3)+1,INSTR(partition_stop,'''','''',1,4)-INSTR(partition_stop,'''','''',1,3)-1)),position)||''''-''''||'); 
     put('                        NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,4)+1,INSTR(partition_stop,'''','''',1,5)-INSTR(partition_stop,'''','''',1,4)-1)),cpu_cost)||''''-''''||'); 
@@ -343,12 +363,12 @@ BEGIN
     put('DEF skip_lch=''''');
     put('DEF chartype = ''LineChart''');
     put('DEF stacked = ''''');
-    put('DEF vaxis = ''Average Elapsed Time in secs''');
+    put('DEF vaxis = ''Elapsed Time in secs''');
     put('DEF tit_01 = ''Average Elapsed Time''');
     put('DEF tit_02 = ''Average Time on CPU''');
     put('DEF tit_03 = ''Average DB Time''');
-    put('DEF tit_04 = ''''');
-    put('DEF tit_05 = ''''');
+    put('DEF tit_04 = ''Min Elapsed Time''');
+    put('DEF tit_05 = ''Max Elapsed Time''');
     put('DEF tit_06 = ''''');
     put('DEF tit_07 = ''''');
     put('DEF tit_08 = ''''');
@@ -367,8 +387,8 @@ BEGIN
     put('       NVL(avg_et,0) avg_et,');
     put('       NVL(avg_cpu_time,0) avg_cpu_time,');
     put('       NVL(avg_db_time,0) avg_db_time,');
-    put('       0 dummy_04,');
-    put('       0 dummy_05,');
+    put('       NVL(min_et,0) min_et,');
+    put('       NVL(max_et,0) max_et,');
     put('       0 dummy_06,');
     put('       0 dummy_07,');
     put('       0 dummy_08,');
@@ -382,12 +402,16 @@ BEGIN
     put('  FROM (SELECT snap_id,');
     put('               TRUNC(MAX(avg_et),2) avg_et,');
     put('               TRUNC(MAX(avg_cpu_time),2) avg_cpu_time,');
-    put('               TRUNC(MAX(avg_db_time),2) avg_db_time');
+    put('               TRUNC(MAX(avg_db_time),2) avg_db_time,');
+    put('               TRUNC(MAX(min_et),2) min_et,');
+    put('               TRUNC(MAX(max_et),2) max_et');
     put('          FROM (SELECT start_time,');
     put('                       MIN(start_snap_id) snap_id,');
     put('                       AVG(et) avg_et,');
     put('                       AVG(cpu_time) avg_cpu_time,');
-    put('                       AVG(db_time) avg_db_time');
+    put('                       AVG(db_time) avg_db_time,');
+    put('                       MIN(et) min_et,');
+    put('                       MAX(et) max_et');
     put('                  FROM (SELECT TO_DATE(SUBSTR(distribution,1,12),''''YYYYMMDDHH24MI'''') start_time,');
     put('                               NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,3)+1,INSTR(partition_stop,'''','''',1,4)-INSTR(partition_stop,'''','''',1,3)-1)),position)||''''-''''||'); 
     put('                                NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,4)+1,INSTR(partition_stop,'''','''',1,5)-INSTR(partition_stop,'''','''',1,4)-1)),cpu_cost)||''''-''''||'); 
@@ -1980,7 +2004,7 @@ BEGIN
        put('           AND NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,5)+1,INSTR(partition_stop,'''','''',1,6)-INSTR(partition_stop,'''','''',1,5)-1)),io_cost) = '||j.session_serial#||'');
        put('           AND timestamp BETWEEN TO_DATE('''''||j.min_sample_time||''''', ''''YYYYMMDDHH24MISS'''') AND TO_DATE('''''||j.max_sample_time||''''', ''''YYYYMMDDHH24MISS'''') ');
        put('           AND remarks = ''''&&sqld360_sqlid.'''''); 
-       put('           AND partition_id IS NOT NULL');
+       --put('           AND partition_id IS NOT NULL');
        put('           AND ''''&&diagnostics_pack.'''' = ''''Y''''');
        put('         GROUP BY timestamp)');
        put(' ORDER BY 3');
@@ -2046,7 +2070,7 @@ BEGIN
        put('           AND NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,5)+1,INSTR(partition_stop,'''','''',1,6)-INSTR(partition_stop,'''','''',1,5)-1)),io_cost) = '||j.session_serial#||'');
        put('           AND timestamp BETWEEN TO_DATE('''''||j.min_sample_time||''''', ''''YYYYMMDDHH24MISS'''') AND TO_DATE('''''||j.max_sample_time||''''', ''''YYYYMMDDHH24MISS'''') ');
        put('           AND remarks = ''''&&sqld360_sqlid.'''''); 
-       put('           AND partition_id IS NOT NULL');
+       --put('           AND partition_id IS NOT NULL');
        put('           AND ''''&&diagnostics_pack.'''' = ''''Y''''');
        put('         GROUP BY timestamp)');
        put(' ORDER BY 3');
@@ -2114,7 +2138,7 @@ BEGIN
        put('           AND NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,5)+1,INSTR(partition_stop,'''','''',1,6)-INSTR(partition_stop,'''','''',1,5)-1)),io_cost) = '||j.session_serial#||'');
        put('           AND timestamp BETWEEN TO_DATE('''''||j.min_sample_time||''''', ''''YYYYMMDDHH24MISS'''') AND TO_DATE('''''||j.max_sample_time||''''', ''''YYYYMMDDHH24MISS'''') ');
        put('           AND remarks = ''''&&sqld360_sqlid.'''''); 
-       put('           AND partition_id IS NOT NULL');
+       --put('           AND partition_id IS NOT NULL');
        put('           AND ''''&&diagnostics_pack.'''' = ''''Y''''');
        put('         GROUP BY timestamp)');
        put(' ORDER BY 3');
@@ -2123,7 +2147,80 @@ BEGIN
        put('/ ');
        put('@sql/sqld360_9a_pre_one.sql');
 
-       put('----------------------------');       
+       put('----------------------------');      
+
+       put('DEF title = ''Raw Data for SQL_EXEC_ID '||j.sql_exec_id||' of PHV '||i.plan_hash_value||'''');
+       put('DEF main_table = ''GV$ACTIVE_SESSION_HISTORY''');
+       put('BEGIN ');
+       put('  :sql_text := ''');
+       put('SELECT /*+ &&top_level_hints. */ ');
+       put('       statement_id     source,  ');
+       put('       search_columns   dbid,    ');
+       put('       cardinality      snap_id, ');
+       put('       position         instance_number,  ');
+       put('       parent_id        sample_id,        ');
+       put('       TO_CHAR(timestamp, ''''YYYY-MM-DD/HH24:MI:SS'''')        sample_time, ');
+       put('       partition_id     sql_exec_id, ');
+       put('       TO_CHAR(TO_DATE(distribution,''''YYYYMMDDHH24MISS''''), ''''YYYY-MM-DD/HH24:MI:SS'''')  sql_exec_start, ');
+       put('       cpu_cost         session_id,        ');
+       put('       io_cost          session_serial#,   ');
+       put('       bytes            user_id,           ');
+       put('       remarks          sql_id,            ');
+       put('       cost             plan_hash_value,   ');
+       put('       id               sql_plan_line_id,  ');
+       put('       operation        sql_plan_operation,');  
+       put('       options          sql_plan_options,  '); 
+       put('       object_node      cpu_or_event,      ');
+       put('       other_tag        wait_class,        ');
+       put('       TO_NUMBER(SUBSTR(partition_start,1,INSTR(partition_start,'''','''',1,1)-1)) seq#, ');
+       put('       SUBSTR(partition_start,INSTR(partition_start,'''','''',1,1)+1,INSTR(partition_start,'''','''',1,2)-INSTR(partition_start,'''','''',1,1)-1) p1text, ');  
+       put('       TO_NUMBER(SUBSTR(partition_start,INSTR(partition_start,'''','''',1,2)+1,INSTR(partition_start,'''','''',1,3)-INSTR(partition_start,'''','''',1,2)-1)) p1, ');
+       put('       SUBSTR(partition_start,INSTR(partition_start,'''','''',1,3)+1,INSTR(partition_start,'''','''',1,4)-INSTR(partition_start,'''','''',1,3)-1) p2text,  ');
+       put('       TO_NUMBER(SUBSTR(partition_start,INSTR(partition_start,'''','''',1,4)+1,INSTR(partition_start,'''','''',1,5)-INSTR(partition_start,'''','''',1,4)-1)) p2, ');
+       put('       SUBSTR(partition_start,INSTR(partition_start,'''','''',1,5)+1,INSTR(partition_start,'''','''',1,6)-INSTR(partition_start,'''','''',1,5)-1) p3text,  ');
+       put('       TO_NUMBER(SUBSTR(partition_start,INSTR(partition_start,'''','''',1,6)+1,INSTR(partition_start,'''','''',1,7)-INSTR(partition_start,'''','''',1,6)-1)) p3, ');
+       put('       object_instance  current_obj#, ');
+       put('       TO_NUMBER(SUBSTR(partition_start,INSTR(partition_start,'''','''',1,7)+1,INSTR(partition_start,'''','''',1,8)-INSTR(partition_start,'''','''',1,7)-1)) current_file#,  ');
+       put('       TO_NUMBER(SUBSTR(partition_start,INSTR(partition_start,'''','''',1,8)+1,INSTR(partition_start,'''','''',1,9)-INSTR(partition_start,'''','''',1,8)-1)) current_block#, ');
+       put('       TO_NUMBER(SUBSTR(partition_start,INSTR(partition_start,'''','''',1,9)+1,INSTR(partition_start,'''','''',1,10)-INSTR(partition_start,'''','''',1,9)-1)) current_row#,  ');
+       put('       SUBSTR(partition_stop,1,INSTR(partition_stop,'''','''',1,1)-1) in_parse, ');
+       put('       SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,1)+1,INSTR(partition_stop,'''','''',1,2)-INSTR(partition_stop,'''','''',1,1)-1) in_hard_parse, ');
+       put('       SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,2)+1,INSTR(partition_stop,'''','''',1,3)-INSTR(partition_stop,'''','''',1,2)-1) in_sql_execution, ');
+       put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,3)+1,INSTR(partition_stop,'''','''',1,4)-INSTR(partition_stop,'''','''',1,3)-1)) qc_instance_id, ');
+       put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,4)+1,INSTR(partition_stop,'''','''',1,5)-INSTR(partition_stop,'''','''',1,4)-1)) qc_session_id,  ');
+       put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,5)+1,INSTR(partition_stop,'''','''',1,6)-INSTR(partition_stop,'''','''',1,5)-1)) qc_session_serial#, ');
+       put('       SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,6)+1,INSTR(partition_stop,'''','''',1,7)-INSTR(partition_stop,'''','''',1,6)-1) blocking_session_status, ');
+       put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,7)+1,INSTR(partition_stop,'''','''',1,8)-INSTR(partition_stop,'''','''',1,7)-1)) blocking_session, ');
+       put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,8)+1,INSTR(partition_stop,'''','''',1,9)-INSTR(partition_stop,'''','''',1,8)-1)) blocking_session_serial#, ');
+       put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,9)+1,INSTR(partition_stop,'''','''',1,10)-INSTR(partition_stop,'''','''',1,9)-1)) blocking_inst_id, ');
+       put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,10)+1,INSTR(partition_stop,'''','''',1,11)-INSTR(partition_stop,'''','''',1,10)-1)) px_flags, ');
+       put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,11)+1,INSTR(partition_stop,'''','''',1,12)-INSTR(partition_stop,'''','''',1,11)-1)) pga_allocated, ');
+       put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,12)+1,INSTR(partition_stop,'''','''',1,13)-INSTR(partition_stop,'''','''',1,12)-1)) temp_space_allocated, ');
+       put('       TO_NUMBER(SUBSTR(partition_start,INSTR(partition_start,'''','''',1,10)+1,INSTR(partition_start,'''','''',1,11)-INSTR(partition_start,'''','''',1,10)-1)) tm_delta_time, ');
+       put('       TO_NUMBER(SUBSTR(partition_start,INSTR(partition_start,'''','''',1,11)+1,INSTR(partition_start,'''','''',1,12)-INSTR(partition_start,'''','''',1,11)-1)) tm_delta_cpu_time, ');
+       put('       TO_NUMBER(SUBSTR(partition_start,INSTR(partition_start,'''','''',1,12)+1)) tm_delta_db_time, '); 
+       put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,13)+1,INSTR(partition_stop,'''','''',1,14)-INSTR(partition_stop,'''','''',1,13)-1)) delta_time, ');
+       put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,14)+1,INSTR(partition_stop,'''','''',1,15)-INSTR(partition_stop,'''','''',1,14)-1)) delta_read_io_requests, ');
+       put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,15)+1,INSTR(partition_stop,'''','''',1,16)-INSTR(partition_stop,'''','''',1,15)-1)) delta_write_io_requests, ');
+       put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,16)+1,INSTR(partition_stop,'''','''',1,17)-INSTR(partition_stop,'''','''',1,16)-1)) delta_read_io_bytes, ');
+       put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,17)+1,INSTR(partition_stop,'''','''',1,18)-INSTR(partition_stop,'''','''',1,17)-1)) delta_write_io_bytes, ');
+       put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,18)+1)) delta_interconnect_io_bytes ');
+       put('  FROM plan_table '); 
+       put(' WHERE remarks = ''''&&sqld360_sqlid.'''' ');
+       put('   AND statement_id = ''''SQLD360_ASH_DATA_MEM'''' ');
+       put('   AND cost =  '||i.plan_hash_value||'');
+       put('   AND NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,3)+1,INSTR(partition_stop,'''','''',1,4)-INSTR(partition_stop,'''','''',1,3)-1)),position) = '||j.inst_id||'');
+       put('   AND NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,4)+1,INSTR(partition_stop,'''','''',1,5)-INSTR(partition_stop,'''','''',1,4)-1)),cpu_cost) = '||j.session_id||'');
+       put('   AND NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,5)+1,INSTR(partition_stop,'''','''',1,6)-INSTR(partition_stop,'''','''',1,5)-1)),io_cost) = '||j.session_serial#||'');
+       put('   AND timestamp BETWEEN TO_DATE('''''||j.min_sample_time||''''', ''''YYYYMMDDHH24MISS'''') AND TO_DATE('''''||j.max_sample_time||''''', ''''YYYYMMDDHH24MISS'''') ');
+       put('   AND ''''&&diagnostics_pack.'''' = ''''Y''''');
+       put(' ORDER BY timestamp,position ');
+       put(''';');
+       put('END;');
+       put('/');
+       put('@sql/sqld360_9a_pre_one.sql');
+
+       put('----------------------------');  
 
        put('SPO &&one_spool_filename..html APP;');
        put('PRO <br>');
@@ -2842,6 +2939,79 @@ BEGIN
        put(''';');
        put('END;');
        put('/ ');
+       put('@sql/sqld360_9a_pre_one.sql');
+
+       put('----------------------------');      
+
+       put('DEF title = ''Raw Data for SQL_EXEC_ID '||j.sql_exec_id||' of PHV '||i.plan_hash_value||'''');
+       put('DEF main_table = ''DBA_HIST_ACTIVE_SESS_HISTORY''');
+       put('BEGIN ');
+       put('  :sql_text := ''');
+       put('SELECT /*+ &&top_level_hints. */ ');
+       put('       statement_id     source,  ');
+       put('       search_columns   dbid,    ');
+       put('       cardinality      snap_id, ');
+       put('       position         instance_number,  ');
+       put('       parent_id        sample_id,        ');
+       put('       TO_CHAR(timestamp, ''''YYYY-MM-DD/HH24:MI:SS'''')        sample_time, ');
+       put('       partition_id     sql_exec_id, ');
+       put('       TO_CHAR(TO_DATE(distribution,''''YYYYMMDDHH24MISS''''), ''''YYYY-MM-DD/HH24:MI:SS'''')  sql_exec_start, ');
+       put('       cpu_cost         session_id,        ');
+       put('       io_cost          session_serial#,   ');
+       put('       bytes            user_id,           ');
+       put('       remarks          sql_id,            ');
+       put('       cost             plan_hash_value,   ');
+       put('       id               sql_plan_line_id,  ');
+       put('       operation        sql_plan_operation,');  
+       put('       options          sql_plan_options,  '); 
+       put('       object_node      cpu_or_event,      ');
+       put('       other_tag        wait_class,        ');
+       put('       TO_NUMBER(SUBSTR(partition_start,1,INSTR(partition_start,'''','''',1,1)-1)) seq#, ');
+       put('       SUBSTR(partition_start,INSTR(partition_start,'''','''',1,1)+1,INSTR(partition_start,'''','''',1,2)-INSTR(partition_start,'''','''',1,1)-1) p1text, ');  
+       put('       TO_NUMBER(SUBSTR(partition_start,INSTR(partition_start,'''','''',1,2)+1,INSTR(partition_start,'''','''',1,3)-INSTR(partition_start,'''','''',1,2)-1)) p1, ');
+       put('       SUBSTR(partition_start,INSTR(partition_start,'''','''',1,3)+1,INSTR(partition_start,'''','''',1,4)-INSTR(partition_start,'''','''',1,3)-1) p2text,  ');
+       put('       TO_NUMBER(SUBSTR(partition_start,INSTR(partition_start,'''','''',1,4)+1,INSTR(partition_start,'''','''',1,5)-INSTR(partition_start,'''','''',1,4)-1)) p2, ');
+       put('       SUBSTR(partition_start,INSTR(partition_start,'''','''',1,5)+1,INSTR(partition_start,'''','''',1,6)-INSTR(partition_start,'''','''',1,5)-1) p3text,  ');
+       put('       TO_NUMBER(SUBSTR(partition_start,INSTR(partition_start,'''','''',1,6)+1,INSTR(partition_start,'''','''',1,7)-INSTR(partition_start,'''','''',1,6)-1)) p3, ');
+       put('       object_instance  current_obj#, ');
+       put('       TO_NUMBER(SUBSTR(partition_start,INSTR(partition_start,'''','''',1,7)+1,INSTR(partition_start,'''','''',1,8)-INSTR(partition_start,'''','''',1,7)-1)) current_file#,  ');
+       put('       TO_NUMBER(SUBSTR(partition_start,INSTR(partition_start,'''','''',1,8)+1,INSTR(partition_start,'''','''',1,9)-INSTR(partition_start,'''','''',1,8)-1)) current_block#, ');
+       put('       TO_NUMBER(SUBSTR(partition_start,INSTR(partition_start,'''','''',1,9)+1,INSTR(partition_start,'''','''',1,10)-INSTR(partition_start,'''','''',1,9)-1)) current_row#,  ');
+       put('       SUBSTR(partition_stop,1,INSTR(partition_stop,'''','''',1,1)-1) in_parse, ');
+       put('       SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,1)+1,INSTR(partition_stop,'''','''',1,2)-INSTR(partition_stop,'''','''',1,1)-1) in_hard_parse, ');
+       put('       SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,2)+1,INSTR(partition_stop,'''','''',1,3)-INSTR(partition_stop,'''','''',1,2)-1) in_sql_execution, ');
+       put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,3)+1,INSTR(partition_stop,'''','''',1,4)-INSTR(partition_stop,'''','''',1,3)-1)) qc_instance_id, ');
+       put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,4)+1,INSTR(partition_stop,'''','''',1,5)-INSTR(partition_stop,'''','''',1,4)-1)) qc_session_id,  ');
+       put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,5)+1,INSTR(partition_stop,'''','''',1,6)-INSTR(partition_stop,'''','''',1,5)-1)) qc_session_serial#, ');
+       put('       SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,6)+1,INSTR(partition_stop,'''','''',1,7)-INSTR(partition_stop,'''','''',1,6)-1) blocking_session_status, ');
+       put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,7)+1,INSTR(partition_stop,'''','''',1,8)-INSTR(partition_stop,'''','''',1,7)-1)) blocking_session, ');
+       put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,8)+1,INSTR(partition_stop,'''','''',1,9)-INSTR(partition_stop,'''','''',1,8)-1)) blocking_session_serial#, ');
+       put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,9)+1,INSTR(partition_stop,'''','''',1,10)-INSTR(partition_stop,'''','''',1,9)-1)) blocking_inst_id, ');
+       put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,10)+1,INSTR(partition_stop,'''','''',1,11)-INSTR(partition_stop,'''','''',1,10)-1)) px_flags, ');
+       put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,11)+1,INSTR(partition_stop,'''','''',1,12)-INSTR(partition_stop,'''','''',1,11)-1)) pga_allocated, ');
+       put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,12)+1,INSTR(partition_stop,'''','''',1,13)-INSTR(partition_stop,'''','''',1,12)-1)) temp_space_allocated, ');
+       put('       TO_NUMBER(SUBSTR(partition_start,INSTR(partition_start,'''','''',1,10)+1,INSTR(partition_start,'''','''',1,11)-INSTR(partition_start,'''','''',1,10)-1)) tm_delta_time, ');
+       put('       TO_NUMBER(SUBSTR(partition_start,INSTR(partition_start,'''','''',1,11)+1,INSTR(partition_start,'''','''',1,12)-INSTR(partition_start,'''','''',1,11)-1)) tm_delta_cpu_time, ');
+       put('       TO_NUMBER(SUBSTR(partition_start,INSTR(partition_start,'''','''',1,12)+1)) tm_delta_db_time, '); 
+       put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,13)+1,INSTR(partition_stop,'''','''',1,14)-INSTR(partition_stop,'''','''',1,13)-1)) delta_time, ');
+       put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,14)+1,INSTR(partition_stop,'''','''',1,15)-INSTR(partition_stop,'''','''',1,14)-1)) delta_read_io_requests, ');
+       put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,15)+1,INSTR(partition_stop,'''','''',1,16)-INSTR(partition_stop,'''','''',1,15)-1)) delta_write_io_requests, ');
+       put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,16)+1,INSTR(partition_stop,'''','''',1,17)-INSTR(partition_stop,'''','''',1,16)-1)) delta_read_io_bytes, ');
+       put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,17)+1,INSTR(partition_stop,'''','''',1,18)-INSTR(partition_stop,'''','''',1,17)-1)) delta_write_io_bytes, ');
+       put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,18)+1)) delta_interconnect_io_bytes ');
+       put('  FROM plan_table '); 
+       put(' WHERE remarks = ''''&&sqld360_sqlid.'''' ');
+       put('   AND statement_id = ''''SQLD360_ASH_DATA_HIST'''' ');
+       put('   AND cost =  '||i.plan_hash_value||'');
+       put('   AND NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,3)+1,INSTR(partition_stop,'''','''',1,4)-INSTR(partition_stop,'''','''',1,3)-1)),position) = '||j.inst_id||'');
+       put('   AND NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,4)+1,INSTR(partition_stop,'''','''',1,5)-INSTR(partition_stop,'''','''',1,4)-1)),cpu_cost) = '||j.session_id||'');
+       put('   AND NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,5)+1,INSTR(partition_stop,'''','''',1,6)-INSTR(partition_stop,'''','''',1,5)-1)),io_cost) = '||j.session_serial#||'');
+       put('   AND timestamp BETWEEN TO_DATE('''''||j.min_sample_time||''''', ''''YYYYMMDDHH24MISS'''') AND TO_DATE('''''||j.max_sample_time||''''', ''''YYYYMMDDHH24MISS'''') ');
+       put('   AND ''''&&diagnostics_pack.'''' = ''''Y''''');
+       put(' ORDER BY timestamp,position ');
+       put(''';');
+       put('END;');
+       put('/');
        put('@sql/sqld360_9a_pre_one.sql');
 
        put('----------------------------');       
