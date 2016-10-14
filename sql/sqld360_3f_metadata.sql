@@ -33,6 +33,14 @@ BEGIN
                    SELECT owner object_owner, index_name object_name, 'INDEX' object_type
                      FROM dba_indexes
                     WHERE (table_owner, table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = 'LIST_OF_TABLES' AND remarks = '&&sqld360_sqlid.')
+                   UNION 
+                   SELECT owner object_owner, view_name object_name, 'VIEW' object_type
+                     FROM dba_views
+                    WHERE (owner, view_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = 'LIST_OF_TABLES' AND remarks = '&&sqld360_sqlid.')
+                   UNION 
+                   SELECT owner object_owner, mview_name object_name, 'MATERIALIZED_VIEW' object_type
+                     FROM dba_mviews
+                    WHERE (owner, mview_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = 'LIST_OF_TABLES' AND remarks = '&&sqld360_sqlid.')
 &&skip_10g.&&skip_11r1.   UNION 
 &&skip_10g.&&skip_11r1.   SELECT SUBSTR(owner,1,30) object_owner, SUBSTR(name,1,30) object_name, SUBSTR(type,1,30) object_type
 &&skip_10g.&&skip_11r1.     FROM v$db_object_cache -- it's intentional here to use V$ instead of GV$ to keep the plan easy 

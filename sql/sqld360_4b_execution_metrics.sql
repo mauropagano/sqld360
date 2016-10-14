@@ -34,6 +34,13 @@ DEF tit_15 = '';
 --COL concurrency_time FOR 999999990.000;
 --COL unaccounted_time FOR 999999990.000;
 
+DEF series_01 = 'color :''#000000''';
+DEF series_02 = 'color :''#34CF27''';
+DEF series_03 = 'color :''#0252D7''';
+DEF series_04 = 'color :''#CEC3B5''';
+DEF series_05 = 'color :''#C42A05''';
+DEF series_06 = 'color :''#871C12''';
+DEF series_07 = 'color :''#F571A0''';
 
 DEF main_table = 'DBA_HIST_SQLSTAT';
 DEF vaxis = 'SQL Execute Elapsed Time in secs';
@@ -166,7 +173,13 @@ EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '8');
 
 DEF skip_lch = 'Y';
 DEF skip_pch = 'Y';
-
+DEF series_01 = '';
+DEF series_02 = '';
+DEF series_03 = '';
+DEF series_04 = '';
+DEF series_05 = '';
+DEF series_06 = '';
+DEF series_07 = '';
 ------------------------
 ------------------------
 
@@ -186,7 +199,8 @@ SELECT NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INS
        TO_CHAR(MIN(timestamp), ''YYYY-MM-DD HH24:MI:SS'')  start_time,
        TO_CHAR(MAX(timestamp), ''YYYY-MM-DD HH24:MI:SS'')  end_time,
        MIN(cost) plan_hash_value,
-       LEAST(1+86400*(MAX(timestamp)-MIN(timestamp)),COUNT(*)) elapsed_time,
+       --LEAST(1+86400*(MAX(timestamp)-MIN(timestamp)),COUNT(*)) elapsed_time,
+       1+86400*(MAX(timestamp)-MIN(timestamp)) elapsed_time,
        SUM(CASE WHEN object_node = ''ON CPU'' THEN 1 ELSE 0 END) cpu_time,
        COUNT(*) db_time,
        COUNT(DISTINCT position||''-''||cpu_cost||''-''||io_cost) num_processes_ash,
@@ -299,7 +313,8 @@ SELECT NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INS
        TO_CHAR(MIN(timestamp), ''YYYY-MM-DD HH24:MI:SS'')  start_time,
        TO_CHAR(MAX(timestamp), ''YYYY-MM-DD HH24:MI:SS'')  end_time,
        MIN(cost) plan_hash_value,
-       LEAST(10+86400*(MAX(timestamp)-MIN(timestamp)),SUM(10)) elapsed_time, 
+       --LEAST(10+86400*(MAX(timestamp)-MIN(timestamp)),SUM(10)) elapsed_time, 
+       10+86400*(MAX(timestamp)-MIN(timestamp)) elapsed_time,
        SUM(CASE WHEN object_node = ''ON CPU'' THEN 10 ELSE 0 END) cpu_time,
        SUM(10) db_time,
        COUNT(DISTINCT position||''-''||cpu_cost||''-''||io_cost) num_processes_ash,

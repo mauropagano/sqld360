@@ -81,11 +81,17 @@ BEGIN
          WHERE v.owner = o.owner
            AND v.view_name = o.name
          UNION
-        SELECT 'TABLE', i.table_owner, i.table_name
+        SELECT 'TABLE', o.owner, o.name
           FROM dba_indexes i,
                object o
          WHERE i.owner = o.owner
-           AND i.index_name = o.name)
+           AND i.index_name = o.name
+         UNION
+        SELECT 'TABLE', o.owner, o.name
+          FROM dba_mviews m,
+               object o
+         WHERE m.owner = o.owner
+           AND m.mview_name = o.name)
   LOOP
     --IF l_pair IS NULL THEN
     --  DBMS_LOB.WRITEAPPEND(:tables_list, 1, '(');

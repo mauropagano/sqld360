@@ -37,19 +37,18 @@ DECLARE
   cur SYS_REFCURSOR;
   l_bar VARCHAR2(1000);
   l_value NUMBER;
-  l_value2 NUMBER;
-  l_value3 VARCHAR2(1000);
-  l_text VARCHAR2(1000);
+  l_style VARCHAR2(1000);
+  l_tooltip VARCHAR2(1000);
   l_sql_text VARCHAR2(32767);
 BEGIN
-  DBMS_OUTPUT.PUT_LINE('[''Bucket'', ''Number of Rows'', { role: ''tooltip'' }]');
+  DBMS_OUTPUT.PUT_LINE('[''Bucket'', ''Number of Rows'', { role: ''style'' }, { role: ''tooltip'' }]');
   --OPEN cur FOR :sql_text;
   l_sql_text := DBMS_LOB.SUBSTR(:sql_text); -- needed for 10g
   OPEN cur FOR l_sql_text; -- needed for 10g
   LOOP
-    FETCH cur INTO l_bar, l_value, l_value2, l_text;
+    FETCH cur INTO l_bar, l_value, l_style, l_tooltip;
     EXIT WHEN cur%NOTFOUND;
-    DBMS_OUTPUT.PUT_LINE(',['''||l_bar||''', '||l_value||', '''||l_text||''']');
+    DBMS_OUTPUT.PUT_LINE(',['''||l_bar||''', '||l_value||', '''||l_style||''', '''||l_tooltip||''']');
   END LOOP;
   CLOSE cur;
 END;
@@ -64,6 +63,7 @@ PRO          backgroundColor: {fill: '#fcfcf0', stroke: '#336699', strokeWidth: 
 PRO          title: '&&section_id..&&report_sequence.. &&title.&&title_suffix.',
 PRO          titleTextStyle: {fontSize: 16, bold: false},
 PRO          legend: {position: 'none'},
+PRO          vAxis: {minValue: 0}, 
 PRO          tooltip: {textStyle: {fontSize: 14}}
 PRO        };
 PRO

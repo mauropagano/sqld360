@@ -8,7 +8,7 @@ SPO OFF;
 
 
 COL num_plans NEW_V num_plans
-SELECT LEAST(TRIM(TO_CHAR(COUNT(plan_hash_value))), '&&sqld360_num_plan_details.') num_plans
+SELECT TRIM(LEAST((COUNT(plan_hash_value)), TO_NUMBER('&&sqld360_num_plan_details.'))) num_plans
   FROM (SELECT plan_hash_value
           FROM gv$sql
          WHERE sql_id = '&&sqld360_sqlid.'

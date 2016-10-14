@@ -115,14 +115,31 @@ END;
 @@&&skip_10g.&&skip_11g.sqld360_9a_pre_one.sql
 
 
+--DEF title = 'SQL Plan Directives Objects';
+--DEF main_table = 'DBA_SQL_PLAN_DIR_OBJECTS';
+--BEGIN
+--  :sql_text := '
+--SELECT /*+ &&top_level_hints. */
+--       directive_id, owner, object_name, subobject_name, object_type
+--  FROM dba_sql_plan_dir_objects
+-- WHERE (owner, object_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')
+-- ORDER BY owner, object_name, directive_id
+--';
+--END;
+--/
+--@@&&skip_10g.&&skip_11g.sqld360_9a_pre_one.sql
+
+-- this only makes sense in 12.2 because of the other object_type so can't filter on just owner, object_name
 DEF title = 'SQL Plan Directives Objects';
 DEF main_table = 'DBA_SQL_PLAN_DIR_OBJECTS';
 BEGIN
   :sql_text := '
-SELECT /*+ &&top_level_hints. */
-       directive_id, owner, object_name, subobject_name, object_type
+WITH dir_id AS (SELECT directive_id 
+                  FROM dba_sql_plan_dir_objects
+                 WHERE (owner, object_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.''))
+SELECT /*+ &&top_level_hints. */ *
   FROM dba_sql_plan_dir_objects
- WHERE (owner, object_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')
+ WHERE directive_id IN (SELECT directive_id FROM dir_id)
  ORDER BY owner, object_name, directive_id
 ';
 END;

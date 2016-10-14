@@ -55,8 +55,8 @@ BEGIN
             snap_id, dbid,
             &&skip_10g.sql_plan_operation, 
             &&skip_10g.sql_plan_options, 
-            current_obj#, nvl(event,'ON CPU'), instance_number, sql_plan_hash_value, 
-            wait_class,
+            current_obj#, NVL(event,'ON CPU'), instance_number, sql_plan_hash_value, 
+            NVL(wait_class,'CPU'),
             &&skip_10g.sql_plan_line_id, 
             &&skip_10g.sql_exec_id,
             &&skip_10g.TO_CHAR(sql_exec_start,'YYYYMMDDHH24MISS'),
@@ -87,17 +87,13 @@ BEGIN
             ','||&&skip_10g.&&skip_11r1.delta_write_io_bytes||
             ','&&skip_10g.&&skip_11r1.||delta_interconnect_io_bytes
        FROM dba_hist_active_sess_history a,
-            (SELECT DISTINCT operation -- the DISTINCT is to avoid collecting data twice when SQLd360 is called by eDB360 and the SQL is top in multiple categories
+            (SELECT DISTINCT operation 
                FROM plan_table 
               WHERE SUBSTR(options,1,1) = '1'  -- load data only for those SQL IDs that have diagnostics enabled
                 &&from_edb360.AND operation = '&&sqld360_sqlid.'
                 AND statement_id = 'SQLD360_SQLID') b
       WHERE a.sql_id = b.operation -- plan table has the SQL ID to load
-        --AND b.statement_id = 'SQLD360_SQLID' -- flag to identify the rows that stores SQL ID info
-        --AND a.sample_time > systimestamp-&&history_days.  -- extract only data of interest
         AND a.sample_time BETWEEN TO_TIMESTAMP('&&sqld360_date_from.','&&sqld360_date_format.') AND TO_TIMESTAMP('&&sqld360_date_to.','&&sqld360_date_format.')  -- extract only data of interest        
-        --AND SUBSTR(b.options,1,1) = '1'  -- load data only for those SQL IDs that have diagnostics enabled
-        --&&from_edb360.AND b.operation = '&&sqld360_sqlid.'
         AND '&&sqld360_conf_incl_ash_hist.' = 'Y'
      UNION ALL
      SELECT 'SQLD360_ASH_DATA_MEM', sample_time, sql_id, 
@@ -105,7 +101,7 @@ BEGIN
             &&skip_10g.sql_plan_operation, 
             &&skip_10g.sql_plan_options,
             current_obj#, nvl(event,'ON CPU'), inst_id, sql_plan_hash_value, 
-            wait_class,
+            NVL(wait_class,'CPU'),
             &&skip_10g.sql_plan_line_id, 
             &&skip_10g.sql_exec_id,
             &&skip_10g.TO_CHAR(sql_exec_start,'YYYYMMDDHH24MISS'),
@@ -136,17 +132,13 @@ BEGIN
             ','||&&skip_10g.&&skip_11r1.delta_write_io_bytes||
             ','&&skip_10g.&&skip_11r1.||delta_interconnect_io_bytes
        FROM gv$active_session_history a,
-            (SELECT DISTINCT operation -- the DISTINCT is to avoid collecting data twice when SQLd360 is called by eDB360 and the SQL is top in multiple categories
+            (SELECT operation 
                FROM plan_table
               WHERE SUBSTR(options,1,1) = '1'  -- load data only for those SQL IDs that have diagnostics enabled
                 &&from_edb360.AND operation = '&&sqld360_sqlid.'
                 AND statement_id = 'SQLD360_SQLID') b
       WHERE a.sql_id = b.operation -- plan table has the SQL ID to load
-        --AND b.statement_id = 'SQLD360_SQLID' -- flag to identify the rows that stores SQL ID info
-        --AND a.sample_time > systimestamp - &&history_days.  -- extract only data of interest
         AND a.sample_time BETWEEN TO_TIMESTAMP('&&sqld360_date_from.','&&sqld360_date_format.') AND TO_TIMESTAMP('&&sqld360_date_to.','&&sqld360_date_format.')
-        --AND SUBSTR(b.options,1,1) = '1'  -- load data only for those SQL IDs that have diagnostics enabled
-        --&&from_edb360.AND b.operation = '&&sqld360_sqlid.'
      ;   
      
      --INSERT INTO plan_table (statement_id, timestamp, operation) VALUES ('SQLD360_ASH_LOAD',sysdate, 'Loaded');

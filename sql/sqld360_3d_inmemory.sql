@@ -35,6 +35,23 @@ END;
 /
 @@sqld360_9a_pre_one.sql
 
+-- keep an eye on this one, might be expensive
+DEF title = 'In-Memory Header';
+DEF main_table = 'GV$IM_HEADER';
+BEGIN
+  :sql_text := '
+SELECT /*+ &&top_level_hints. */
+       *
+  FROM gv$im_header
+ WHERE objd IN (SELECT object_id 
+                 FROM dba_objects 
+                WHERE (owner, object_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.''))
+ ORDER BY objd, inst_id
+';
+END;
+/
+@@sqld360_9a_pre_one.sql
+
 DEF title = 'In-Memory Column Level';
 DEF main_table = 'GV$IM_COLUMN_LEVEL';
 BEGIN
@@ -48,6 +65,21 @@ SELECT /*+ &&top_level_hints. */
 END;
 /
 @@sqld360_9a_pre_one.sql
+
+DEF title = 'In-Memory Join Groups';
+DEF main_table = 'DBA_JOINGROUPS';
+BEGIN
+  :sql_text := '
+SELECT /*+ &&top_level_hints. */
+       *
+  FROM dba_joingroups
+ WHERE (table_owner, table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')
+ ORDER BY table_owner, table_name, joingroup_name 
+';
+END;
+/
+@@&&skip_10g.&&skip_11g.&&skip_12r1.sqld360_9a_pre_one.sql
+
 
 SPO &&sqld360_main_report..html APP;
 PRO </ol>

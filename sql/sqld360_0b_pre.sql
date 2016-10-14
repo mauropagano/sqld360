@@ -9,8 +9,8 @@ CL COL;
 COL row_num FOR 9999999 HEA '#' PRI;
 
 -- version
-DEF sqld360_vYYNN = 'v1620';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2016-09-14)';
+DEF sqld360_vYYNN = 'v1621';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2016-10-14)';
 DEF sqld360_prefix = 'sqld360';
 
 -- parameters
@@ -188,6 +188,9 @@ SELECT '--' skip_12c FROM v$instance WHERE version LIKE '12.%';
 DEF skip_12r101 = '';
 COL skip_12r101 NEW_V skip_12r101;
 SELECT '--' skip_12r101 FROM v$instance WHERE version LIKE '12.1.0.1%';
+DEF skip_12r1 = '';
+COL skip_12r1 NEW_V skip_12r1;
+SELECT '--' skip_12r1 FROM v$instance WHERE version LIKE '12.1.%';
 
 -- get average number of CPUs
 COL avg_cpu_count NEW_V avg_cpu_count FOR A3;
@@ -446,6 +449,32 @@ DEF skip_csv = '';
 DEF skip_lch = 'Y';
 DEF skip_pch = 'Y';
 DEF skip_bch = 'Y';
+-- I really don't like this, I would rather insert some metadata into the plan table and join back (keep an eye on it, 2016/09/27)
+DEF wait_class_colors = 'CASE wait_class WHEN ''''''''CPU'''''''' THEN ''''''''34CF27'''''''' WHEN ''''''''Scheduler'''''''' THEN ''''''''9FFA9D'''''''' WHEN ''''''''User I/O'''''''' THEN ''''''''0252D7'''''''' WHEN ''''''''System I/O'''''''' THEN ''''''''1E96DD'''''''' ';
+DEF wait_class_colors2 = ' WHEN ''''''''Concurrency'''''''' THEN ''''''''871C12'''''''' WHEN ''''''''Application'''''''' THEN ''''''''C42A05'''''''' WHEN ''''''''Commit'''''''' THEN ''''''''EA6A05'''''''' WHEN ''''''''Configuration'''''''' THEN ''''''''594611''''''''  ';
+DEF wait_class_colors3 = ' WHEN ''''''''Administrative'''''''' THEN ''''''''75763E''''''''  WHEN ''''''''Network'''''''' THEN ''''''''989779'''''''' WHEN ''''''''Other'''''''' THEN ''''''''F571A0'''''''' ';
+DEF wait_class_colors4 = ' WHEN ''''''''Cluster'''''''' THEN ''''''''CEC3B5'''''''' WHEN ''''''''Queueing'''''''' THEN ''''''''C6BAA5'''''''' END';
+DEF wait_class_colors_s = 'CASE wait_class WHEN ''''CPU'''' THEN ''''color: ''''''''#34CF27'''''''''''' WHEN ''''Scheduler'''' THEN ''''color: ''''''''#9FFA9D'''''''''''' WHEN ''''User I/O'''' THEN ''''color: ''''''''#0252D7'''''''''''' WHEN ''''System I/O'''' THEN ''''color: ''''''''#1E96DD'''''''''''' ';
+DEF wait_class_colors2_s = ' WHEN ''''Concurrency'''' THEN ''''color: ''''''''#871C12'''''''''''' WHEN ''''Application'''' THEN ''''color: ''''''''#C42A05'''''''''''' WHEN ''''Commit'''' THEN ''''color: ''''''''#EA6A05'''''''''''' WHEN ''''Configuration'''' THEN ''''color: ''''''''#594611''''''''''''  ';
+DEF wait_class_colors3_s = ' WHEN ''''Administrative'''' THEN ''''color: ''''''''#75763E''''''''''''  WHEN ''''Network'''' THEN ''''color: ''''''''#989779'''''''''''' WHEN ''''Other'''' THEN ''''color: ''''''''#F571A0'''''''''''' ';
+DEF wait_class_colors4_s = ' WHEN ''''Cluster'''' THEN ''''color: ''''''''#CEC3B5'''''''''''' WHEN ''''Queueing'''' THEN ''''color: ''''''''#C6BAA5'''''''''''' END';
+--
+DEF series_01 = ''
+DEF series_02 = ''
+DEF series_03 = ''
+DEF series_04 = ''
+DEF series_05 = ''
+DEF series_06 = ''
+DEF series_07 = ''
+DEF series_08 = ''
+DEF series_09 = ''
+DEF series_10 = ''
+DEF series_11 = ''
+DEF series_12 = ''
+DEF series_13 = ''
+DEF series_14 = ''
+DEF series_15 = ''
+---
 DEF skip_tch = 'Y';
 DEF skip_uch = 'Y';
 DEF skip_all = '';
@@ -454,7 +483,7 @@ DEF abstract2 = '';
 DEF foot = '';
 DEF treeColor = '';
 DEF bubbleMaxValue = '';
-DEF bubbleSeries = '';
+DEF bubbleSeries = 'series: {''CPU'': {color: ''#34CF27''}, ''I/O'': {color: ''#0252D7''}, ''Concurrency'': {color: ''#871C12''}, ''Cluster'': {color: ''#CEC3B5''}, ''Other'': {color: ''#C6BAA5''}, ''Multiple'': {color: ''#CCFFFF''}},';
 DEF bubblesDetails = '';
 DEF sql_text = '';
 DEF chartype = '';

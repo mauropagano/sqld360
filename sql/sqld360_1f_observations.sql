@@ -172,7 +172,7 @@ SELECT scope, message
           FROM (SELECT sql_plan_hash_value, 
                        wait_class,
                        num_samples_per_class,
-                       ROW_NUMBER() OVER (PARTITION BY sql_plan_hash_value, wait_class ORDER BY num_samples_per_class DESC) rwn,
+                       ROW_NUMBER() OVER (PARTITION BY sql_plan_hash_value ORDER BY num_samples_per_class DESC) rwn,
                        SUM(num_samples_per_class) OVER(PARTITION BY sql_plan_hash_value) total_samples_per_phv 
                   FROM (SELECT sql_plan_hash_value,
                                wait_class, 
@@ -180,7 +180,7 @@ SELECT scope, message
                           FROM ashdata
                          GROUP BY sql_plan_hash_value, wait_class))
          WHERE rwn = 1
-           AND wait_class IS NOT NULL -- so not on CPU
+           AND wait_class <> ''CPU'' -- so not on CPU
          UNION ALL
         SELECT ''MULTIPLE_PLANS'',''This SQL has/had ''||COUNT(*)||'' distinct execution plan(s)''
                &&skip_10g.&&skip_11r1.||'', list of PHV is (''||LISTAGG(plan_hash_value, '','') WITHIN GROUP (ORDER BY plan_hash_value)||'')''
@@ -218,7 +218,30 @@ WITH tablespaces AS (SELECT /*+ MATERIALIZE */ tablespace_name, block_size
                                  AND subpartition_name IS NULL),
      indexes    AS (SELECT /*+ MATERIALIZE */ table_owner, table_name, index_name, degree
                       FROM dba_indexes
-                     WHERE (table_owner, table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.''))
+                     WHERE (table_owner, table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')),
+     ind_cols AS (SELECT col.index_owner, col.index_name, col.table_owner, col.table_name, idx.index_type, idx.uniqueness,
+                         MAX(CASE col.column_position WHEN 01 THEN      col.column_name END)||
+                         MAX(CASE col.column_position WHEN 02 THEN '':''||col.column_name END)||
+                         MAX(CASE col.column_position WHEN 03 THEN '':''||col.column_name END)||
+                         MAX(CASE col.column_position WHEN 04 THEN '':''||col.column_name END)||
+                         MAX(CASE col.column_position WHEN 05 THEN '':''||col.column_name END)||
+                         MAX(CASE col.column_position WHEN 06 THEN '':''||col.column_name END)||
+                         MAX(CASE col.column_position WHEN 07 THEN '':''||col.column_name END)||
+                         MAX(CASE col.column_position WHEN 08 THEN '':''||col.column_name END)||
+                         MAX(CASE col.column_position WHEN 09 THEN '':''||col.column_name END)||
+                         MAX(CASE col.column_position WHEN 10 THEN '':''||col.column_name END)||
+                         MAX(CASE col.column_position WHEN 11 THEN '':''||col.column_name END)||
+                         MAX(CASE col.column_position WHEN 12 THEN '':''||col.column_name END)||
+                         MAX(CASE col.column_position WHEN 13 THEN '':''||col.column_name END)||
+                         MAX(CASE col.column_position WHEN 14 THEN '':''||col.column_name END)||
+                         MAX(CASE col.column_position WHEN 15 THEN '':''||col.column_name END)||
+                         MAX(CASE col.column_position WHEN 16 THEN '':''||col.column_name END) indexed_columns
+                    FROM dba_ind_columns col,
+                         dba_indexes idx
+                   WHERE (idx.table_owner, idx.table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')
+                     AND idx.owner = col.index_owner
+                     AND idx.index_name = col.index_name
+                   GROUP BY col.index_owner,col.index_name,col.table_owner,col.table_name,idx.index_type,idx.uniqueness)
 SELECT scope, owner, table_name, message
   FROM (SELECT ''TABLE_STATS'' scope, owner, table_name,  ''Table ''||table_name||'' has statistics more than a month old (''||TRUNC(SYSDATE-last_analyzed)||'' days old)'' message
           FROM tables
@@ -293,6 +316,16 @@ SELECT scope, owner, table_name, message
            AND tables.degree <> indexes.degree
          GROUP BY tables.owner, tables.table_name
          HAVING COUNT(*) > 0
+         UNION ALL
+        SELECT ''REDUNDANT_INDEX'', r.table_owner, r.table_name, ''Index ''||r.index_name||'' (''||r.indexed_columns||'') is redundant because of ''||i.index_name||'' (''||i.indexed_columns||'')''
+          FROM ind_cols r,
+               ind_cols i
+         WHERE i.table_owner = r.table_owner
+           AND i.table_name = r.table_name
+           AND i.index_type = r.index_type
+           AND i.index_name != r.index_name
+           AND i.indexed_columns LIKE r.indexed_columns||'':%''
+           AND r.uniqueness = ''NONUNIQUE''
         )
  ORDER BY owner, table_name, scope DESC
 ';

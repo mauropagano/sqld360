@@ -110,8 +110,8 @@ SELECT /*+ &&top_level_hints. */
         p.table_name,
         p.partition_name,
         p.partition_position, 
-        TRUNC(h.rowcnt - LAG(h.rowcnt,1,NULL) OVER (PARTITION BY h.obj# ORDER BY h.savtime)) / NULLIF(LAG(h.rowcnt,1,NULL) OVER (PARTITION BY h.obj# ORDER BY h.savtime),0),2)*100 rowcnt_change_perc,
-        TRUNC(h.blkcnt - LAG(h.blkcnt,1,NULL) OVER (PARTITION BY h.obj# ORDER BY h.savtime)) / NULLIF(LAG(h.blkcnt,1,NULL) OVER (PARTITION BY h.obj# ORDER BY h.savtime),0),2)*100 blkcnt_change_perc,
+        TRUNC((h.rowcnt - LAG(h.rowcnt,1,NULL) OVER (PARTITION BY h.obj# ORDER BY h.savtime)) / NULLIF(LAG(h.rowcnt,1,NULL) OVER (PARTITION BY h.obj# ORDER BY h.savtime),0),2)*100 rowcnt_change_perc,
+        TRUNC((h.blkcnt - LAG(h.blkcnt,1,NULL) OVER (PARTITION BY h.obj# ORDER BY h.savtime)) / NULLIF(LAG(h.blkcnt,1,NULL) OVER (PARTITION BY h.obj# ORDER BY h.savtime),0),2)*100 blkcnt_change_perc,
         h.*
   FROM (SELECT table_owner, table_name, partition_name, partition_position,
                ROW_NUMBER() OVER (ORDER BY partition_position) rn, COUNT(*) OVER () num_part

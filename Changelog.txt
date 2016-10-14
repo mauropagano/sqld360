@@ -1,0 +1,29 @@
+Changelog
+=========
+
+I suggest to rely on Github for details about code changes, this will only be a macro about "functionalities"
+Was supposed to start on day 1, better late than never no? :-)
+
+v1621
+=====
+1. Added support for Materialized Views under Object and Metadata section
+2. Replaced pie charts with bar charts, easier to show differences in size
+3. Modified charts to show similar colors to EM when dealing with wait events / wait classes
+4. Removed calls to procedure DBMS_STATS.CONVERT_RAW inserting result into the plan_table, replaced with inline calls to functions in UTL_RAW
+5. Added Observation on redundant indexes
+6. Modified SQL Plan Directives SQL to support DS results stored in SPD (new in 12.2)
+7. Added new report under In-Memory section (some new in 12.2)
+8. Modified formula for "Elapsed time per .. execution" removing the LEAST(max-min, count) to be just max-min (not sure why it was the other way around)
+9. Fixed bug on Partition Statistics History 
+
+
+v1620
+=====
+1. Introduced limit (configurable) to number of plans to focus on unde Plan Details page. Plans are selected based on the amount of data we have for each of them
+2. Disabled by default the usage of v$object_dependency to build list of tables (too much unnecessary info brought over)
+3. Disabled SQL_TRACE for SQLd360 execution itself, never used so why doing it in the first place.
+4. Replaced list of tables stored in SQLPlus variable with rows into plan_table, allows to handle long list (SQLPlus variable is max 3k chars)
+5. Added USER_ID into from ASH, included in Raw ASH and List of executions from ASH reports
+6. Added Raw ASH into to Top SQL executions under Plan Details
+7. Added report Average buffer gets per row per execution per Plan Hash Value from AWR, will help spot "bad plans on paper"
+8. Minor cosmetic changes
