@@ -84,6 +84,8 @@ DEF sqld360_conf_incl_obj_dept = 'N';
 -- enable / disable SQLd360 tracing itself (0 => OFF, everything else is ON)
 DEF sqld360_sqltrace_level = '0';
 
+-- specify a different DBID than default
+DEF sqld360_conf_dbid = '';
 
 /**************************** not recommended to modify *********************************/
 

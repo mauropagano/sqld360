@@ -20,4 +20,15 @@ select /* ^^pathfinder_testid / t1.n1, t1.n2, t2.n1, t2.n2
    and t2.n2 = 400;
    */
 
-SELECT /* ^^pathfinder_testid */ /*+ USE_CONCAT(@SEL$1 2) */ owner, count(*) mycount from t1 a where status ='VALID' or status = 'B' group by owner;
+with a as (select 1 n1, 1 n2 from dual union all 
+           select 2 n1, 3 n2 from dual union all
+           select 3 n1, 3 n2 from dual )
+select /* ^^pathfinder_testid */* from (
+  select *
+  from a
+ where n1 = 1
+union all
+select *
+  from a
+ where n1 = 2)
+where n2 = 3;

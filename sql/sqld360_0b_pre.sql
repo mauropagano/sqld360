@@ -9,8 +9,8 @@ CL COL;
 COL row_num FOR 9999999 HEA '#' PRI;
 
 -- version
-DEF sqld360_vYYNN = 'v1621';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2016-10-14)';
+DEF sqld360_vYYNN = 'v1622';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2016-11-20)';
 DEF sqld360_prefix = 'sqld360';
 
 -- parameters
@@ -102,7 +102,7 @@ SET TERM OFF;
 
 -- get dbid
 COL sqld360_dbid NEW_V sqld360_dbid;
-SELECT TRIM(TO_CHAR(dbid)) sqld360_dbid FROM v$database;
+SELECT TRIM(NVL('&&sqld360_conf_dbid.',TO_CHAR(dbid))) sqld360_dbid FROM v$database;
 
 -- get dbmod
 COL sqld360_dbmod NEW_V sqld360_dbmod;
@@ -406,6 +406,18 @@ SELECT CASE WHEN '&&sqld360_conf_tcb_sample.' BETWEEN '1' AND '100' THEN 'TRUE' 
 COL sqld360_skip_objd NEW_V sqld360_skip_objd;
 SELECT CASE '&&sqld360_conf_incl_obj_dept.' WHEN 'N' THEN '--' END sqld360_skip_objd FROM DUAL;
 
+COL sqld360_has_plsql NEW_V sqld360_has_plsql;
+SELECT CASE WHEN SUM(has_plsql) = 0 THEN '--' ELSE NULL END sqld360_has_plsql 
+  FROM (SELECT COUNT(*) has_plsql
+          FROM gv$sql 
+         WHERE sql_id = '&&sqld360_sqlid.' 
+           AND plsql_exec_time <> 0 
+        UNION ALL 
+        SELECT COUNT(*) 
+          FROM dba_hist_sqlstat 
+         WHERE sql_id = '&&sqld360_sqlid.' 
+           AND plsexec_time_delta <> 0);
+
 -- setup
 DEF main_table = '';
 DEF title = '';
@@ -597,8 +609,9 @@ ALTER SESSION SET optimizer_features_enable = '&&db_vers_ofe.';
 ALTER SESSION SET MAX_DUMP_FILE_SIZE = '1G';
 ALTER SESSION SET TRACEFILE_IDENTIFIER = "&&sqld360_tracefile_identifier.";
 --ALTER SESSION SET STATISTICS_LEVEL = 'ALL';
+-- keep tracing level as-is in eDB360 in case this is a "nested" execution 
 BEGIN
- IF TO_NUMBER('&&sqld360_sqltrace_level.') > 0 THEN
+ IF TO_NUMBER('&&sqld360_sqltrace_level.') > 0 AND '&&from_edb360.' IS NULL THEN
    EXECUTE IMMEDIATE 'ALTER SESSION SET EVENTS ''10046 TRACE NAME CONTEXT FOREVER, LEVEL &&sqld360_sqltrace_level.''';
  END IF;
 END;

@@ -118,7 +118,7 @@ BEGIN
 SELECT phv,
        num_execs,
        NULL style,
-       ''Total number of execs: ''||num_execs||'' Percentage: ''||TRUNC(100*RATIO_TO_REPORT(num_execs) OVER (),2) tooltip
+       phv||'' - Total number of execs: ''||num_execs||'' Percentage: ''||TRUNC(100*RATIO_TO_REPORT(num_execs) OVER (),2) tooltip
   FROM (SELECT cost phv,
                COUNT(DISTINCT NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INSTR(partition_stop,'','',1,4)-INSTR(partition_stop,'','',1,3)-1)),position)||''-''|| 
                               NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,4)+1,INSTR(partition_stop,'','',1,5)-INSTR(partition_stop,'','',1,4)-1)),cpu_cost)||''-''|| 
@@ -395,7 +395,7 @@ SELECT phv,
        num_samples,
        NULL style,
        --TRUNC(100*RATIO_TO_REPORT(num_samples) OVER (),2) percent,
-       ''Total number of samples: ''||num_samples||'' Percentage: ''||TRUNC(100*RATIO_TO_REPORT(num_samples) OVER (),2) tooltip
+       phv||'' - Total number of samples: ''||num_samples||'' Percentage: ''||TRUNC(100*RATIO_TO_REPORT(num_samples) OVER (),2) tooltip
   FROM (SELECT cost phv,
                COUNT(*) num_samples
           FROM plan_table
@@ -484,7 +484,7 @@ BEGIN
 SELECT phv,
        num_samples,
        NULL style,
-       ''Total number of samples: ''||num_samples||'' Percentage: ''||TRUNC(100*RATIO_TO_REPORT(num_samples) OVER (),2) tooltip
+       phv||'' - Total number of samples: ''||num_samples||'' Percentage: ''||TRUNC(100*RATIO_TO_REPORT(num_samples) OVER (),2) tooltip
        --TRUNC(100*RATIO_TO_REPORT(num_samples) OVER (),2) percent,
   FROM (SELECT cost phv,
                SUM(10) num_samples

@@ -82,9 +82,21 @@ BEGIN
     -- disable "non desired" report sections when called from eDB360
     put('DEF from_edb360=''--''');
 
+    /*
+     * The following code is to handle the timeout from eDB360    
+     * Column COST is "time to go" from eDB360, Cardinality is time left
+     *
+     * To future Mauro, this is because the SQLPlus variables gave you trouble when coming out of a SQLd360 execution
+     * Even though the variable were defined, it wasn't possible to overwrite their value, so used plan_table to count down time
+     */
+    put('INSERT INTO plan_table (statement_id, cost, cardinality) VALUES (''EDB360_SECS2GO'', &&edb360_secs2go., &&edb360_secs2go.);');
+
     -- this execution is from edb360, call SQLd360 several times passing the appropriare flag
     --  the DISTINCT here is to make sure we run SQLd360 once even though the SQL is top in multiple categories (e.g. signature and dbtime)
-    FOR i IN (SELECT operation, options FROM plan_table WHERE statement_id = 'SQLD360_SQLID' ORDER BY id) LOOP
+    FOR i IN (SELECT operation, options 
+                FROM plan_table 
+               WHERE statement_id = 'SQLD360_SQLID' 
+               ORDER BY id) LOOP
 
        -- check if need to run TCB 
        IF SUBSTR(i.options,3,1) = 0 THEN
@@ -108,8 +120,24 @@ BEGIN
        num_days := TO_NUMBER(TRIM(SUBSTR(i.options,4,3)));
        put('DEF sqld360_fromedb360_days='''||num_days||'''');
 
-       put('@@sql/sqld360_0a_main.sql '||i.operation||' '||license);
+       -- the following code is to handle the timeout from eDB360
+       put('COL secs2go_starttime NEW_V secs2go_starttime');
+       put('COL skip_sqld360 NEW_V skip_sqld360');
+       put('SELECT TO_CHAR(sysdate,''YYYYMMDDHH24MISS'') secs2go_starttime, ');
+       put('       CASE WHEN cardinality <= 0 THEN ''--'' ELSE NULL END skip_sqld360 ');
+       put('  FROM plan_table ');
+       put(' WHERE statement_id = ''EDB360_SECS2GO'';');
+
+       put('@@&&skip_sqld360.sql/sqld360_0a_main.sql '||i.operation||' '||license);
        put('HOS unzip -l &&sqld360_main_filename._&&sqld360_file_time.');
+
+       -- the following code is to handle the timeout from eDB360
+       put('SET DEF @');
+       put('UPDATE plan_table ');
+       put('   SET cardinality = cardinality - ((sysdate - TO_DATE(''@@secs2go_starttime.'', ''YYYYMMDDHH24MISS''))*86400) ');
+       put(' WHERE statement_id = ''EDB360_SECS2GO'' ');
+       put('   AND cardinality > 0;');
+       put('SET DEF &');
 
     END LOOP;
       

@@ -60,8 +60,7 @@ BEGIN
     put('SPO &&sqld360_main_report..html APP;');
     put('PRO <td>');
     put('SPO OFF');
-    FOR j IN (SELECT owner, table_name, column_name, data_type, 
-                     histogram, sample_size, num_nulls, num_buckets 
+    FOR j IN (SELECT owner, table_name, column_name, data_type, histogram, sample_size, num_nulls, num_buckets 
                 FROM dba_tab_cols
                WHERE owner = i.owner
                  AND table_name = i.table_name
@@ -70,7 +69,7 @@ BEGIN
     LOOP
       -- frequency and top-freq can be handled the same since sample_size is the whole set including "non popular" values
       IF j.histogram IN ('FREQUENCY','TOP-FREQUENCY') THEN
-        put('DEF title= ''Histogram on Column '||j.table_name||'.'||j.column_name||'''');
+        put('DEF title= '''||INITCAP(j.histogram)||' histogram on Column '||j.table_name||'.'||j.column_name||'''');
         put('DEF main_table = ''DBA_TAB_HISTOGRAMS''');
         put('BEGIN');
         put(' :sql_text := ''');

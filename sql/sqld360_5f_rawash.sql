@@ -94,6 +94,79 @@ SELECT /*+ &&top_level_hints. */
   FROM plan_table
  WHERE remarks = ''&&sqld360_sqlid.''
    AND statement_id LIKE ''SQLD360_ASH_DATA%''
+&&sqld360_has_plsql.UNION ALL 
+&&sqld360_has_plsql.SELECT ''TOP_LEVEL_ASH_MEM'', NULL, NULL, instance_number, sample_id, sample_time, 
+&&sqld360_has_plsql.        &&skip_10g.sql_exec_id,
+&&sqld360_has_plsql.        &&skip_10g.TO_CHAR(sql_exec_start,''YYYYMMDDHH24MISS''),
+&&sqld360_has_plsql.        session_id, session_serial#, user_id, sql_id, sql_plan_hash_value, 
+&&sqld360_has_plsql.        &&skip_10g.sql_plan_line_id, 
+&&sqld360_has_plsql.        &&skip_10g.sql_plan_operation, 
+&&sqld360_has_plsql.        &&skip_10g.sql_plan_options, 
+&&sqld360_has_plsql.        NVL(event,''ON CPU''),
+&&sqld360_has_plsql.        NVL(wait_class,''CPU''),
+&&sqld360_has_plsql.        seq#, p1text, p1, p2text, p2, p3text, p3, current_obj#,  
+&&sqld360_has_plsql.        current_file#, current_block#,
+&&sqld360_has_plsql.        &&skip_10g.current_row#,
+&&sqld360_has_plsql.        &&skip_10g.in_parse,
+&&sqld360_has_plsql.        &&skip_10g.in_hard_parse,
+&&sqld360_has_plsql.        &&skip_10g.in_sql_execution,
+&&sqld360_has_plsql.        qc_instance_id, qc_session_id,
+&&sqld360_has_plsql.        &&skip_10g.qc_session_serial#,
+&&sqld360_has_plsql.        blocking_session_status, blocking_session, blocking_session_serial#,
+&&sqld360_has_plsql.        &&skip_10g.&&skip_11r1.blocking_inst_id,
+&&sqld360_has_plsql.        &&skip_10g.&&skip_11r1.&&skip_11r201.px_flags,
+&&sqld360_has_plsql.        &&skip_10g.&&skip_11r1.pga_allocated,
+&&sqld360_has_plsql.        &&skip_10g.&&skip_11r1.temp_space_allocated,
+&&sqld360_has_plsql.        &&skip_10g.&&skip_11r1.tm_delta_time,
+&&sqld360_has_plsql.        &&skip_10g.&&skip_11r1.tm_delta_cpu_time,
+&&sqld360_has_plsql.        &&skip_10g.&&skip_11r1.tm_delta_db_time,
+&&sqld360_has_plsql.        &&skip_10g.&&skip_11r1.delta_time,
+&&sqld360_has_plsql.        &&skip_10g.&&skip_11r1.delta_read_io_requests,
+&&sqld360_has_plsql.        &&skip_10g.&&skip_11r1.delta_write_io_requests,
+&&sqld360_has_plsql.        &&skip_10g.&&skip_11r1.delta_read_io_bytes,
+&&sqld360_has_plsql.        &&skip_10g.&&skip_11r1.delta_write_io_bytes,
+&&sqld360_has_plsql.        &&skip_10g.&&skip_11r1.delta_interconnect_io_bytes
+&&sqld360_has_plsql.  FROM gv$active_session_history
+&&sqld360_has_plsql. WHERE sql_id <> ''&&sqld360_sqlid.''
+&&sqld360_has_plsql.   AND top_level_sql_id = ''&&sqld360_sqlid.''
+&&sqld360_has_plsql.   AND sample_time BETWEEN TO_TIMESTAMP(''&&sqld360_date_from.'',''&&sqld360_date_format.'') AND TO_TIMESTAMP(''&&sqld360_date_to.'',''&&sqld360_date_format.'')
+&&sqld360_has_plsql.UNION ALL
+&&sqld360_has_plsql. SELECT ''TOP_LEVEL_ASH_HIST'', dbid, snap_id, instance_number, sample_id, sample_time, 
+&&sqld360_has_plsql.        &&skip_10g.sql_exec_id,
+&&sqld360_has_plsql.        &&skip_10g.TO_CHAR(sql_exec_start,''YYYYMMDDHH24MISS''),
+&&sqld360_has_plsql.        session_id, session_serial#, user_id, sql_id, sql_plan_hash_value, 
+&&sqld360_has_plsql.        &&skip_10g.sql_plan_line_id, 
+&&sqld360_has_plsql.        &&skip_10g.sql_plan_operation, 
+&&sqld360_has_plsql.        &&skip_10g.sql_plan_options, 
+&&sqld360_has_plsql.        NVL(event,''ON CPU''),
+&&sqld360_has_plsql.        NVL(wait_class,''CPU''),
+&&sqld360_has_plsql.        seq#, p1text, p1, p2text, p2, p3text, p3, current_obj#,  
+&&sqld360_has_plsql.        current_file#, current_block#,
+&&sqld360_has_plsql.        &&skip_10g.current_row#,
+&&sqld360_has_plsql.        &&skip_10g.in_parse,
+&&sqld360_has_plsql.        &&skip_10g.in_hard_parse,
+&&sqld360_has_plsql.        &&skip_10g.in_sql_execution,
+&&sqld360_has_plsql.        qc_instance_id, qc_session_id,
+&&sqld360_has_plsql.        &&skip_10g.qc_session_serial#,
+&&sqld360_has_plsql.        blocking_session_status, blocking_session, blocking_session_serial#,
+&&sqld360_has_plsql.        &&skip_10g.&&skip_11r1.blocking_inst_id,
+&&sqld360_has_plsql.        &&skip_10g.&&skip_11r1.&&skip_11r201.px_flags,
+&&sqld360_has_plsql.        &&skip_10g.&&skip_11r1.pga_allocated,
+&&sqld360_has_plsql.        &&skip_10g.&&skip_11r1.temp_space_allocated,
+&&sqld360_has_plsql.        &&skip_10g.&&skip_11r1.tm_delta_time,
+&&sqld360_has_plsql.        &&skip_10g.&&skip_11r1.tm_delta_cpu_time,
+&&sqld360_has_plsql.        &&skip_10g.&&skip_11r1.tm_delta_db_time,
+&&sqld360_has_plsql.        &&skip_10g.&&skip_11r1.delta_time,
+&&sqld360_has_plsql.        &&skip_10g.&&skip_11r1.delta_read_io_requests,
+&&sqld360_has_plsql.        &&skip_10g.&&skip_11r1.delta_write_io_requests,
+&&sqld360_has_plsql.        &&skip_10g.&&skip_11r1.delta_read_io_bytes,
+&&sqld360_has_plsql.        &&skip_10g.&&skip_11r1.delta_write_io_bytes,
+&&sqld360_has_plsql.        &&skip_10g.&&skip_11r1.delta_interconnect_io_bytes
+&&sqld360_has_plsql.  FROM dba_hist_active_sess_history
+&&sqld360_has_plsql. WHERE sql_id <> ''&&sqld360_sqlid.''
+&&sqld360_has_plsql.   AND top_level_sql_id = ''&&sqld360_sqlid.''
+&&sqld360_has_plsql.   AND sample_time BETWEEN TO_TIMESTAMP(''&&sqld360_date_from.'',''&&sqld360_date_format.'') AND TO_TIMESTAMP(''&&sqld360_date_to.'',''&&sqld360_date_format.'')         
+&&sqld360_has_plsql.   AND ''&&sqld360_conf_incl_ash_hist.'' = ''Y''
  ORDER BY timestamp,position
 ';
 END;
