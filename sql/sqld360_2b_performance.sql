@@ -46,7 +46,7 @@ BEGIN
            AND ''&&diagnostics_pack.'' = ''Y''
            AND snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.
            AND a.plan_hash_value = dop.plan_hash_value(+))
- GROUP BY source, plan_hash_value, force_matching_signature, sql_profile, sql_plan_baseline
+ GROUP BY source, plan_hash_value, force_matching_signature, sql_profile, sql_plan_baseline, sql_patch
 ';
 END;
 /

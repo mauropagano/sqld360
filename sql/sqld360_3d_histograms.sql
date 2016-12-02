@@ -107,7 +107,7 @@ BEGIN
         put('DEF skip_bch=''''');
         put('@sql/sqld360_9a_pre_one.sql');
       ELSIF j.histogram = 'HEIGHT BALANCED' THEN
-        put('DEF title= ''Histogram on Column '||j.table_name||'.'||j.column_name||'''');
+        put('DEF title= '''||INITCAP(j.histogram)||' histogram on Column '||j.table_name||'.'||j.column_name||'''');
         put('DEF main_table = ''DBA_TAB_HISTOGRAMS''');
         put('BEGIN');
         put(' :sql_text := ''');
@@ -145,7 +145,7 @@ BEGIN
         put('DEF skip_bch=''''');
         put('@sql/sqld360_9a_pre_one.sql');
       ELSIF j.histogram = 'HYBRID' THEN
-        put('DEF title= ''Histogram on Column '||j.table_name||'.'||j.column_name||'''');
+        put('DEF title= '''||INITCAP(j.histogram)||' histogram on Column '||j.table_name||'.'||j.column_name||'''');
         put('DEF main_table = ''DBA_TAB_HISTOGRAMS''');
         put('BEGIN');
         put(' :sql_text := ''');

@@ -81,7 +81,7 @@ BEGIN
          WHERE v.owner = o.owner
            AND v.view_name = o.name
          UNION
-        SELECT 'TABLE', o.owner, o.name
+        SELECT 'TABLE', i.table_owner, i.table_name
           FROM dba_indexes i,
                object o
          WHERE i.owner = o.owner

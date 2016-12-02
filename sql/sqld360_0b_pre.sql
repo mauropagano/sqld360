@@ -9,8 +9,8 @@ CL COL;
 COL row_num FOR 9999999 HEA '#' PRI;
 
 -- version
-DEF sqld360_vYYNN = 'v1622';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2016-11-20)';
+DEF sqld360_vYYNN = 'v1623';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2016-12-02)';
 DEF sqld360_prefix = 'sqld360';
 
 -- parameters
@@ -381,6 +381,9 @@ SELECT CASE '&&sqld360_conf_incl_ashrpt.' WHEN 'N' THEN '--' END sqld360_skip_as
 COL sqld360_skip_sqlmon NEW_V sqld360_skip_sqlmon;
 SELECT CASE '&&sqld360_conf_incl_sqlmon.' WHEN 'N' THEN '--' END sqld360_skip_sqlmon FROM DUAL;
 
+COL sqld360_skip_sta NEW_V sqld360_skip_sta;
+SELECT CASE '&&sqld360_conf_incl_sta.' WHEN 'N' THEN '--' END sqld360_skip_sta FROM DUAL;
+
 COL sqld360_skip_eadam NEW_V sqld360_skip_eadam;
 SELECT CASE '&&sqld360_conf_incl_eadam.' WHEN 'N' THEN '--' END sqld360_skip_eadam FROM DUAL;
 
@@ -395,6 +398,9 @@ SELECT CASE '&&sqld360_conf_incl_fmatch.' WHEN 'N' THEN '--' END sqld360_skip_fm
 
 COL sqld360_skip_metadata NEW_V sqld360_skip_metadata;
 SELECT CASE '&&sqld360_conf_incl_metadata.' WHEN 'N' THEN '--' END sqld360_skip_metadata FROM DUAL;
+
+COL sqld360_skip_stats NEW_V sqld360_skip_stats;
+SELECT CASE '&&sqld360_conf_incl_stats.' WHEN 'N' THEN '--' END sqld360_skip_stats FROM DUAL;
 
 COL sqld360_skip_tcb NEW_V sqld360_skip_tcb;
 SELECT CASE '&&sqld360_conf_incl_tcb.' WHEN 'N' THEN '--' END sqld360_skip_tcb FROM DUAL;

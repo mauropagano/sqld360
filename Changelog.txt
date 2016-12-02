@@ -4,6 +4,14 @@ Changelog
 I suggest to rely on Github for details about code changes, this will only be a macro about "functionalities"
 Was supposed to start on day 1, better late than never no? :-)
 
+v1623
+=====
+1. Added SQL Tuning Advisor section to column 5, will only report on past tasks, won't run STA for the SQL (like SQLT does)
+2. Modified report Buffer gets/row/execution to keep just buffer gets/row (dropping executions)
+3. Fixed bug on report Top 15 Step/Wait/Object where the sorting was on the wrong column
+4. Fixed bug on SQL Performance Summary
+5. Added script to extract basic table stats 
+
 v1622
 =====
 1. Raw ASH includes data for SQL with TOP_LEVEL_SQL_ID equals to the seeded one and SQL_ID different than that, goal is to capture recursive (enabled only when SQL spends time on PL/SQL)

@@ -35,6 +35,7 @@ DEF sqld360_main_report = &&one_spool_filename.
 
 SPO sqld360_partitions_columns_&&sqld360_sqlid._driver.sql
 SET SERVEROUT ON SIZE 1000000;
+SET SERVEROUT ON SIZE UNL;
 
 DECLARE
   PROCEDURE put (p_line IN VARCHAR2)

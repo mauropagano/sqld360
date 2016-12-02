@@ -49,8 +49,14 @@ DEF sqld360_conf_incl_fmatch = 'Y';
 -- include/exclude Metadata section (useful to work around DBMS_METADATA bugs) 
 DEF sqld360_conf_incl_metadata = 'Y';
 
+-- include/exclude basic stats commands 
+DEF sqld360_conf_incl_stats = 'Y';
+
 -- include/exclude Testcase Builder (only for standalone execs, always skipped for eDB360 execs) 
 DEF sqld360_conf_incl_tcb = 'N';
+
+-- include/exclude SQL Tuning Advisor reports (not calling the API, just reporting on already executed tasks)
+DEF sqld360_conf_incl_sta = 'Y';
 
 -- TCB data, sampling percentage, 0 means no data, any other value between 1 and 100 is ok (only for standalone execs, always skipped for eDB360 execs) 
 -- THIS OPTION IS INTENTIONALLY INGORED, email me if you'd like to have TCB with data

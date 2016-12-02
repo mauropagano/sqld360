@@ -118,7 +118,7 @@ BEGIN
 SELECT phv,
        num_execs,
        NULL style,
-       phv||'' - Total number of execs: ''||num_execs||'' Percentage: ''||TRUNC(100*RATIO_TO_REPORT(num_execs) OVER (),2) tooltip
+       phv||'' - Number of execs: ''||num_execs||'' (''||TRUNC(100*RATIO_TO_REPORT(num_execs) OVER (),2)||''%)'' tooltip
   FROM (SELECT cost phv,
                COUNT(DISTINCT NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INSTR(partition_stop,'','',1,4)-INSTR(partition_stop,'','',1,3)-1)),position)||''-''|| 
                               NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,4)+1,INSTR(partition_stop,'','',1,5)-INSTR(partition_stop,'','',1,4)-1)),cpu_cost)||''-''|| 
@@ -395,7 +395,7 @@ SELECT phv,
        num_samples,
        NULL style,
        --TRUNC(100*RATIO_TO_REPORT(num_samples) OVER (),2) percent,
-       phv||'' - Total number of samples: ''||num_samples||'' Percentage: ''||TRUNC(100*RATIO_TO_REPORT(num_samples) OVER (),2) tooltip
+       phv||'' - 1s-samples: ''||num_samples||'' (''||TRUNC(100*RATIO_TO_REPORT(num_samples) OVER (),2)||''% of DB Time)'' tooltip
   FROM (SELECT cost phv,
                COUNT(*) num_samples
           FROM plan_table
@@ -484,7 +484,7 @@ BEGIN
 SELECT phv,
        num_samples,
        NULL style,
-       phv||'' - Total number of samples: ''||num_samples||'' Percentage: ''||TRUNC(100*RATIO_TO_REPORT(num_samples) OVER (),2) tooltip
+       phv||'' - 10s-samples: ''||num_samples||'' (''||TRUNC(100*RATIO_TO_REPORT(num_samples) OVER (),2)||''% of DB Time)'' tooltip
        --TRUNC(100*RATIO_TO_REPORT(num_samples) OVER (),2) percent,
   FROM (SELECT cost phv,
                SUM(10) num_samples
@@ -1509,7 +1509,8 @@ SELECT b.snap_id snap_id,
                MAX(CASE WHEN phv = &&phv_15_awr. THEN avg_gets_per_row_per_exec ELSE NULL END) phv15 
           FROM (SELECT snap_id,
                        plan_hash_value phv, 
-                       TRUNC(SUM(buffer_gets_total)/SUM(NVL(NULLIF(rows_processed_total,0),1))/SUM(NVL(NULLIF(executions_total,0),1)),3) avg_gets_per_row_per_exec
+                       --TRUNC(SUM(buffer_gets_total)/SUM(NVL(NULLIF(rows_processed_total,0),1))/SUM(NVL(NULLIF(executions_total,0),1)),3) avg_gets_per_row_per_exec
+                       TRUNC(SUM(buffer_gets_total) / SUM(NVL(NULLIF(executions_total,0),1)) / (SUM(NVL(NULLIF(rows_processed_total,0),1))/SUM(NVL(NULLIF(executions_total,0),1))),3) avg_gets_per_row_per_exec
                   FROM dba_hist_sqlstat
                  WHERE snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.
                    AND sql_id = ''&&sqld360_sqlid.''

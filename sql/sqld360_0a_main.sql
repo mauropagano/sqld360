@@ -95,7 +95,10 @@ SPO OFF;
 @@&&skip_diagnostics.&&sqld360_skip_ashrpt.sqld360_5d_ash.sql
 @@&&skip_tcb.&&skip_10g.&&sqld360_skip_tcb.&&sqld360_local_exec.sqld360_5e_tcb.sql
 @@&&from_edb360.&&skip_diagnostics.&&sqld360_skip_rawash.sqld360_5f_rawash.sql
+@@&&sqld360_skip_stats.sqld360_5i_stats.sql
 @@&&from_edb360.&&skip_diagnostics.&&sqld360_skip_eadam.sqld360_5g_eadam_ash.sql
+@@&&skip_tuning.&&sqld360_skip_sta.sqld360_5h_sta.sql
+
 
 PRO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
