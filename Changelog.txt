@@ -4,6 +4,11 @@ Changelog
 I suggest to rely on Github for details about code changes, this will only be a macro about "functionalities"
 Was supposed to start on day 1, better late than never no? :-)
 
+v1624
+=====
+1. Added column SQL_FULL_PLAN_HASH_VALUE
+2. Translated virtual column into underlying expression in histogram page for expressions
+
 v1623
 =====
 1. Added SQL Tuning Advisor section to column 5, will only report on past tasks, won't run STA for the SQL (like SQLT does)

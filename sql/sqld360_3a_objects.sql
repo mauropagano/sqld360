@@ -52,6 +52,25 @@ END;
 @@sqld360_9a_pre_one.sql
 
 
+DEF title = 'Index Usage';
+DEF main_table = 'DBA_INDEX_USAGE';
+BEGIN
+  :sql_text := '
+SELECT /*+ &&top_level_hints. */
+       *
+  FROM dba_index_usage
+ WHERE (name, owner) IN (SELECT index_name, owner 
+                           FROM dba_indexes 
+                          WHERE (table_owner, table_name) IN (SELECT /*+ UNNEST */ object_owner, object_name 
+                                                                FROM plan_table 
+                                                               WHERE statement_id = ''LIST_OF_TABLES'' 
+                                                                 AND remarks = ''&&sqld360_sqlid.''))
+ ORDER BY owner, name
+';
+END;
+/
+@@&&skip_10g.&&skip_11g.&&skip_12r1.sqld360_9a_pre_one.sql
+
 -- compute low and high values for each table column
 -- the delete is safe, one SQL at a time
 --DELETE plan_table WHERE statement_id = 'SQLD360_LOW_HIGH'; 
@@ -120,6 +139,9 @@ END;
 --@@sqld360_9a_pre_one.sql
 
 ----------------------------------------------
+
+COL data_default FOR a100
+
 -- removed calls to DBMS_STATS using inline convert thanks for Martin Widlake blog post
 DEF title = 'Columns';
 DEF main_table = 'DBA_TAB_COLS';
@@ -179,6 +201,9 @@ SELECT /*+ &&top_level_hints. */
 END;
 /
 @@sqld360_9a_pre_one.sql
+
+-- need to clear the column but this syntax is wrong, need to fix it
+--CLEAR COL data_default
 
 -----------------------------------------------
 

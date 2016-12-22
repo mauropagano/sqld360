@@ -2446,6 +2446,7 @@ BEGIN
        put('       bytes            user_id,           ');
        put('       remarks          sql_id,            ');
        put('       cost             plan_hash_value,   ');
+       put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,19)+1)) sql_full_plan_hash_value, ');
        put('       id               sql_plan_line_id,  ');
        put('       operation        sql_plan_operation,');  
        put('       options          sql_plan_options,  '); 
@@ -2483,7 +2484,7 @@ BEGIN
        put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,15)+1,INSTR(partition_stop,'''','''',1,16)-INSTR(partition_stop,'''','''',1,15)-1)) delta_write_io_requests, ');
        put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,16)+1,INSTR(partition_stop,'''','''',1,17)-INSTR(partition_stop,'''','''',1,16)-1)) delta_read_io_bytes, ');
        put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,17)+1,INSTR(partition_stop,'''','''',1,18)-INSTR(partition_stop,'''','''',1,17)-1)) delta_write_io_bytes, ');
-       put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,18)+1)) delta_interconnect_io_bytes ');
+       put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,18)+1,INSTR(partition_stop,'''','''',1,19)-INSTR(partition_stop,'''','''',1,18)-1)) delta_interconnect_io_bytes ');
        put('  FROM plan_table '); 
        put(' WHERE remarks = ''''&&sqld360_sqlid.'''' ');
        put('   AND statement_id = ''''SQLD360_ASH_DATA_MEM'''' ');
@@ -3295,6 +3296,7 @@ BEGIN
        put('       bytes            user_id,           ');
        put('       remarks          sql_id,            ');
        put('       cost             plan_hash_value,   ');
+       put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,19)+1)) sql_full_plan_hash_value, ');
        put('       id               sql_plan_line_id,  ');
        put('       operation        sql_plan_operation,');  
        put('       options          sql_plan_options,  '); 
@@ -3332,7 +3334,7 @@ BEGIN
        put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,15)+1,INSTR(partition_stop,'''','''',1,16)-INSTR(partition_stop,'''','''',1,15)-1)) delta_write_io_requests, ');
        put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,16)+1,INSTR(partition_stop,'''','''',1,17)-INSTR(partition_stop,'''','''',1,16)-1)) delta_read_io_bytes, ');
        put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,17)+1,INSTR(partition_stop,'''','''',1,18)-INSTR(partition_stop,'''','''',1,17)-1)) delta_write_io_bytes, ');
-       put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,18)+1)) delta_interconnect_io_bytes ');
+       put('       TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,18)+1,INSTR(partition_stop,'''','''',1,19)-INSTR(partition_stop,'''','''',1,18)-1)) delta_interconnect_io_bytes ');
        put('  FROM plan_table '); 
        put(' WHERE remarks = ''''&&sqld360_sqlid.'''' ');
        put('   AND statement_id = ''''SQLD360_ASH_DATA_HIST'''' ');

@@ -5,12 +5,12 @@ SET FEED OFF;
 SET ECHO OFF;
 SET TIM OFF;
 SET TIMI OFF;
-CL COL;
+--CL COL;
 COL row_num FOR 9999999 HEA '#' PRI;
 
 -- version
-DEF sqld360_vYYNN = 'v1623';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2016-12-02)';
+DEF sqld360_vYYNN = 'v1624';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2016-12-23)';
 DEF sqld360_prefix = 'sqld360';
 
 -- parameters
@@ -146,6 +146,22 @@ SELECT TO_CHAR(LEAST(CEIL(SYSDATE - CAST(MIN(begin_interval_time) AS DATE)),  TO
 SELECT TO_CHAR(TO_DATE('&&sqld360_conf_date_to.', 'YYYY-MM-DD') - TO_DATE('&&sqld360_conf_date_from.', 'YYYY-MM-DD') + 1) history_days FROM DUAL WHERE '&&sqld360_conf_date_from.' != 'YYYY-MM-DD' AND '&&sqld360_conf_date_to.' != 'YYYY-MM-DD';
 SELECT '0' history_days FROM DUAL WHERE NVL(TRIM('&&diagnostics_pack.'), 'N') = 'N';
 
+-- get average number of Cores
+COL avg_core_count NEW_V avg_core_count FOR A5;
+SELECT TO_CHAR(ROUND(AVG(TO_NUMBER(value)),1)) avg_core_count FROM gv$osstat WHERE stat_name = 'NUM_CPU_CORES';
+
+-- get average number of Threads
+COL avg_thread_count NEW_V avg_thread_count FOR A6;
+SELECT TO_CHAR(ROUND(AVG(TO_NUMBER(value)),1)) avg_thread_count FROM gv$osstat WHERE stat_name = 'NUM_CPUS';
+
+-- get number of Hosts
+COL hosts_count NEW_V hosts_count FOR A2;
+SELECT TO_CHAR(COUNT(DISTINCT inst_id)) hosts_count FROM gv$osstat WHERE stat_name = 'NUM_CPU_CORES';
+
+-- get cores_threads_hosts
+COL cores_threads_hosts NEW_V cores_threads_hosts;
+SELECT CASE TO_NUMBER('&&hosts_count.') WHEN 1 THEN 'cores:&&avg_core_count. threads:&&avg_thread_count.' ELSE 'cores:&&avg_core_count.(avg) threads:&&avg_thread_count.(avg) hosts:&&hosts_count.' END cores_threads_hosts FROM DUAL;
+
 --SET TERM OFF;
 
 -- Dates format
@@ -262,8 +278,9 @@ SELECT CASE WHEN a.port <> 0 AND a.machine <> b.host_name THEN '--' ELSE NULL EN
 COL sqld360_udump_path NEW_V sqld360_udump_path FOR A500;
 SELECT value||DECODE(INSTR(value, '/'), 0, '\', '/') sqld360_udump_path FROM v$parameter2 WHERE name = 'user_dump_dest';
 
--- get diag_trace path
+-- get diag_trace path (first SQL below is for 10g)
 COL sqld360_diagtrace_path NEW_V sqld360_diagtrace_path FOR A500;
+SELECT NULL sqld360_diagtrace_path FROM dual;
 SELECT value||DECODE(INSTR(value, '/'), 0, '\', '/') sqld360_diagtrace_path FROM v$diag_info WHERE name = 'Diag Trace';
 
 -- get pid
@@ -506,7 +523,7 @@ DEF bubblesDetails = '';
 DEF sql_text = '';
 DEF chartype = '';
 DEF stacked = '';
-DEF haxis = '&&db_version. dbname:&&sqld360_dbmod. host:&&host_hash. (avg cpu_count: &&avg_cpu_count.)';
+DEF haxis = '&&db_version. &&cores_threads_hosts.';
 DEF vaxis = '';
 DEF vbaseline = '';
 DEF tit_01 = '';
@@ -615,6 +632,7 @@ ALTER SESSION SET optimizer_features_enable = '&&db_vers_ofe.';
 ALTER SESSION SET MAX_DUMP_FILE_SIZE = '1G';
 ALTER SESSION SET TRACEFILE_IDENTIFIER = "&&sqld360_tracefile_identifier.";
 --ALTER SESSION SET STATISTICS_LEVEL = 'ALL';
+
 -- keep tracing level as-is in eDB360 in case this is a "nested" execution 
 BEGIN
  IF TO_NUMBER('&&sqld360_sqltrace_level.') > 0 AND '&&from_edb360.' IS NULL THEN
@@ -622,6 +640,7 @@ BEGIN
  END IF;
 END;
 /
+
 SET TERM OFF; 
 SET HEA ON; 
 SET LIN 32767; 

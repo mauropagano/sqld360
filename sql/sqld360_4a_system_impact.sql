@@ -165,7 +165,6 @@ EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '8');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
 
 DEF skip_lch = 'Y';
-DEF skip_pch = 'Y';
 
 ----------------------------
 ----------------------------
@@ -577,7 +576,6 @@ EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '8');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
 
 DEF skip_lch = 'Y';
-DEF skip_pch = 'Y';
 
 ------------------------------------
 ------------------------------------
@@ -726,7 +724,6 @@ EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '8');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
 
 DEF skip_lch = 'Y';
-DEF skip_pch = 'Y';
 
 
 ------------------------------------
@@ -876,7 +873,6 @@ EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '8');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
 
 DEF skip_lch = 'Y';
-DEF skip_pch = 'Y';
 
 ----------------------
 ----------------------
@@ -1022,7 +1018,6 @@ EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '8');
 @@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
 
 DEF skip_lch = 'Y';
-DEF skip_pch = 'Y';
 
 ----------------------
 ----------------------

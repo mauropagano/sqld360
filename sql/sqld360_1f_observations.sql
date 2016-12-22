@@ -313,7 +313,7 @@ SELECT scope, owner, table_name, message
                indexes
          WHERE tables.owner = indexes.table_owner
            AND tables.table_name = indexes.table_name
-           AND tables.degree <> indexes.degree
+           AND TRIM(tables.degree) <> TRIM(indexes.degree)
          GROUP BY tables.owner, tables.table_name
          HAVING COUNT(*) > 0
          UNION ALL

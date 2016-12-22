@@ -94,7 +94,7 @@ DEF skip_bch = 'Y';
 DEF skip_tch = 'Y';
 DEF skip_uch = 'Y';
 DEF title_suffix = '';
-DEF haxis = '&&db_version. dbmod:&&sqld360_dbmod. host:&&host_hash. (avg cpu_count: &&avg_cpu_count.)';
+DEF haxis = '&&db_version. &&cores_threads_hosts.';
 
 -- report sequence
 EXEC :repo_seq := :repo_seq + 1;

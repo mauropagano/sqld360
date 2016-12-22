@@ -49,7 +49,8 @@ BEGIN
                                                                            -- blocking_session_status, blocking_session, blocking_session_serial#, --blocking_inst_id (11gR1 also), 
                                                                            -- --px_flags (11gR201 also), --pga_allocated (11gR1 also), --temp_space_allocated (11gR1 also)
                                                                            -- --delta_time (11gR1 also), --delta_read_io_requests (11gR1 also), --delta_write_io_requests (11gR1 also), 
-                                                                           -- --delta_read_io_bytesi (11gR1 also), --delta_write_io_bytes (11gR1 also), --delta_interconnect_io_bytes (11gR1 also)     
+                                                                           -- --delta_read_io_bytesi (11gR1 also), --delta_write_io_bytes (11gR1 also), --delta_interconnect_io_bytes (11gR1 also)
+                                                                           -- --sql_full_plan_hash_value (12c only so this 10g and 11g)     
                            )
      SELECT 'SQLD360_ASH_DATA_HIST', sample_time, sql_id, 
             snap_id, dbid,
@@ -85,7 +86,8 @@ BEGIN
             ','||&&skip_10g.&&skip_11r1.delta_write_io_requests||
             ','||&&skip_10g.&&skip_11r1.delta_read_io_bytes||
             ','||&&skip_10g.&&skip_11r1.delta_write_io_bytes||
-            ','&&skip_10g.&&skip_11r1.||delta_interconnect_io_bytes
+            ','||&&skip_10g.&&skip_11r1.delta_interconnect_io_bytes||
+            ','&&skip_10g.&&skip_11g.||sql_full_plan_hash_value
        FROM dba_hist_active_sess_history a,
             (SELECT DISTINCT operation 
                FROM plan_table 
@@ -130,7 +132,8 @@ BEGIN
             ','||&&skip_10g.&&skip_11r1.delta_write_io_requests||
             ','||&&skip_10g.&&skip_11r1.delta_read_io_bytes||
             ','||&&skip_10g.&&skip_11r1.delta_write_io_bytes||
-            ','&&skip_10g.&&skip_11r1.||delta_interconnect_io_bytes
+            ','||&&skip_10g.&&skip_11r1.delta_interconnect_io_bytes||
+            ','&&skip_10g.&&skip_11g.||sql_full_plan_hash_value
        FROM gv$active_session_history a,
             (SELECT operation 
                FROM plan_table

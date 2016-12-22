@@ -60,16 +60,24 @@ BEGIN
     put('SPO &&sqld360_main_report..html APP;');
     put('PRO <td>');
     put('SPO OFF');
-    FOR j IN (SELECT owner, table_name, column_name, data_type, histogram, sample_size, num_nulls, num_buckets 
-                FROM dba_tab_cols
-               WHERE owner = i.owner
-                 AND table_name = i.table_name
-                 AND histogram <> 'NONE'
-               ORDER BY owner, table_name, column_id) 
+    -- need to check if dba_stat_extensions existed in 10g, likely not so need to introduce conditional code here
+    FOR j IN (SELECT col.owner, col.table_name, column_name, 
+                     &&skip_10g.NVL2(exts.extension, exts.extension, col.column_name) display_name, 
+                     &&skip_11g.&&skip_12c.col.column_name display_name,
+                     col.data_type, col.histogram, col.sample_size, col.num_nulls, col.num_buckets
+                FROM dba_tab_cols col
+                     &&skip_10g.,dba_stat_extensions exts
+               WHERE col.owner = i.owner
+                 AND col.table_name = i.table_name
+                 &&skip_10g.AND col.owner = exts.owner(+)
+                 &&skip_10g.AND col.table_name = exts.table_name(+)
+                 &&skip_10g.AND col.column_name = exts.extension_name(+)
+                 AND col.histogram <> 'NONE'
+               ORDER BY col.owner, col.table_name, col.column_id) 
     LOOP
       -- frequency and top-freq can be handled the same since sample_size is the whole set including "non popular" values
       IF j.histogram IN ('FREQUENCY','TOP-FREQUENCY') THEN
-        put('DEF title= '''||INITCAP(j.histogram)||' histogram on Column '||j.table_name||'.'||j.column_name||'''');
+        put('DEF title= '''||INITCAP(j.histogram)||' histogram on Column '||j.table_name||'.'||j.display_name||'''');
         put('DEF main_table = ''DBA_TAB_HISTOGRAMS''');
         put('BEGIN');
         put(' :sql_text := ''');
@@ -107,7 +115,7 @@ BEGIN
         put('DEF skip_bch=''''');
         put('@sql/sqld360_9a_pre_one.sql');
       ELSIF j.histogram = 'HEIGHT BALANCED' THEN
-        put('DEF title= '''||INITCAP(j.histogram)||' histogram on Column '||j.table_name||'.'||j.column_name||'''');
+        put('DEF title= '''||INITCAP(j.histogram)||' histogram on Column '||j.table_name||'.'||j.display_name||'''');
         put('DEF main_table = ''DBA_TAB_HISTOGRAMS''');
         put('BEGIN');
         put(' :sql_text := ''');
@@ -145,7 +153,7 @@ BEGIN
         put('DEF skip_bch=''''');
         put('@sql/sqld360_9a_pre_one.sql');
       ELSIF j.histogram = 'HYBRID' THEN
-        put('DEF title= '''||INITCAP(j.histogram)||' histogram on Column '||j.table_name||'.'||j.column_name||'''');
+        put('DEF title= '''||INITCAP(j.histogram)||' histogram on Column '||j.table_name||'.'||j.display_name||'''');
         put('DEF main_table = ''DBA_TAB_HISTOGRAMS''');
         put('BEGIN');
         put(' :sql_text := ''');
