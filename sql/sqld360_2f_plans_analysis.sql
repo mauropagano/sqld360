@@ -218,7 +218,7 @@ BEGIN
     -- the DISTINCT here is to handle multiple child cursors with the same PHV (otherise the ROW_NUMBER makes them all distinct)    
     put('                                FROM (SELECT DISTINCT a.sql_id, a.plan_hash_value, a.id, a.parent_id, NVL(b.dep,0) dep, a.operation, a.options, a.object_name, a.access_predicates, a.filter_predicates, b.skp ');
     put('                                        FROM  (SELECT sql_id, plan_hash_value, id, parent_id, operation, options, object_name, ');
-    put('                                                      REPLACE(access_predicates, CHR(39) , CHR(92)||CHR(39)) access_predicates, REPLACE(filter_predicates, CHR(39) , CHR(92)||CHR(39)) filter_predicates, ');
+    put('                                                      REPLACE(SUBSTR(access_predicates,1,1500), CHR(39) , CHR(92)||CHR(39)) access_predicates, REPLACE(SUBSTR(filter_predicates,1,1500), CHR(39) , CHR(92)||CHR(39)) filter_predicates, ');
     -- the RANK here is to handle same PHV with different predicate ordering    
     put('                                                      RANK() OVER (ORDER BY inst_id, child_number) rnk ');
     put('                                                 FROM gv$sql_plan_statistics_all ');
@@ -1792,7 +1792,7 @@ BEGIN
        -- the DISTINCT here is to handle multiple child cursors with the same PHV (otherise the ROW_NUMBER makes them all distinct)    
        put('                                FROM (SELECT DISTINCT a.sql_id, a.plan_hash_value, a.id, a.parent_id, NVL(b.dep,0) dep, a.operation, a.options, a.object_name, a.access_predicates, a.filter_predicates, b.skp ');
        put('                                        FROM  (SELECT sql_id, plan_hash_value, id, parent_id, operation, options, object_name, ');
-       put('                                                      REPLACE(access_predicates, CHR(39) , CHR(92)||CHR(39)) access_predicates, REPLACE(filter_predicates, CHR(39) , CHR(92)||CHR(39)) filter_predicates, ');
+       put('                                                      REPLACE(SUBSTR(access_predicates,1,1500), CHR(39) , CHR(92)||CHR(39)) access_predicates, REPLACE(SUBSTR(filter_predicates,1,1500), CHR(39) , CHR(92)||CHR(39)) filter_predicates, ');
        -- the RANK here is to handle same PHV with different predicate ordering    
        put('                                                      RANK() OVER (ORDER BY inst_id, child_number) rnk ');
        put('                                                 FROM gv$sql_plan_statistics_all ');
@@ -2643,7 +2643,7 @@ BEGIN
        -- the DISTINCT here is to handle multiple child cursors with the same PHV (otherise the ROW_NUMBER makes them all distinct)    
        put('                                FROM (SELECT DISTINCT a.sql_id, a.plan_hash_value, a.id, a.parent_id, NVL(b.dep,0) dep, a.operation, a.options, a.object_name, a.access_predicates, a.filter_predicates, b.skp ');
        put('                                        FROM  (SELECT sql_id, plan_hash_value, id, parent_id, operation, options, object_name, ');
-       put('                                                      REPLACE(access_predicates, CHR(39) , CHR(92)||CHR(39)) access_predicates, REPLACE(filter_predicates, CHR(39) , CHR(92)||CHR(39)) filter_predicates, ');
+       put('                                                      REPLACE(SUBSTR(access_predicates,1,1500), CHR(39) , CHR(92)||CHR(39)) access_predicates, REPLACE(SUBSTR(filter_predicates,1,1500), CHR(39) , CHR(92)||CHR(39)) filter_predicates, ');
        -- the RANK here is to handle same PHV with different predicate ordering    
        put('                                                      RANK() OVER (ORDER BY inst_id, child_number) rnk ');
        put('                                                 FROM gv$sql_plan_statistics_all ');

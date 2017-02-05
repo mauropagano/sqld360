@@ -55,15 +55,18 @@ END;
 /
 SET SERVEROUT OFF;
 
--- chart footer
+-- pie chart footer
 PRO        ]);;
 PRO        
 PRO        var options = {
+PRO          chartArea: {left:25, top:75, width:'95%', height:'80%'},
 PRO          backgroundColor: {fill: '#fcfcf0', stroke: '#336699', strokeWidth: 1},
 PRO          title: '&&section_id..&&report_sequence.. &&title.&&title_suffix.',
-PRO          titleTextStyle: {fontSize: 16, bold: false},
-PRO          legend: {position: 'right', textStyle: {fontSize: 12}},
-PRO          tooltip: {textStyle: {fontSize: 14}}
+PRO          titleTextStyle: {fontSize: 18, bold: false},
+PRO          legend: {position: 'right', textStyle: {fontSize: 14}},
+PRO          tooltip: {textStyle: {fontSize: 14}},
+PRO          pieHole: 0.4,
+PRO          sliceVisibilityThreshold: 1/1440
 PRO        };
 PRO
 PRO        var chart = new google.visualization.PieChart(document.getElementById('piechart'));
@@ -74,11 +77,12 @@ PRO  </head>
 PRO  <body>
 PRO <h1> &&sqld360_conf_all_pages_icon. &&section_id..&&report_sequence.. &&title.&&title_suffix. <em>(&&main_table.)</em> &&sqld360_conf_all_pages_logo. </h1>
 PRO
-PRO <br>
+PRO <br />
 PRO &&abstract.
 PRO &&abstract2.
+PRO <br />
 PRO
-PRO    <div id="piechart" style="width: 900px; height: 500px;"></div>
+PRO    <div id="piechart" class="google-chart"></div>
 PRO
 
 -- footer

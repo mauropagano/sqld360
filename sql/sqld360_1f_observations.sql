@@ -208,17 +208,29 @@ WITH tablespaces AS (SELECT /*+ MATERIALIZE */ tablespace_name, block_size
                        FROM dba_tablespaces),
      tables    AS (SELECT /*+ MATERIALIZE */ owner, table_name, tablespace_name, num_rows, blocks, last_analyzed, degree
                      FROM dba_tables 
-                    WHERE (owner, table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')),
+                    WHERE (owner, table_name) IN (SELECT object_owner, object_name 
+                                                    FROM plan_table 
+                                                   WHERE statement_id = ''LIST_OF_TABLES'' 
+                                                     AND remarks = ''&&sqld360_sqlid.'')),
      partitions AS (SELECT /*+ MATERIALIZE */ table_owner, table_name, partition_name, num_rows, blocks, last_analyzed
                       FROM dba_tab_partitions 
-                     WHERE (table_owner, table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')),
+                     WHERE (table_owner, table_name) IN (SELECT object_owner, object_name 
+                                                           FROM plan_table 
+                                                          WHERE statement_id = ''LIST_OF_TABLES'' 
+                                                            AND remarks = ''&&sqld360_sqlid.'')),
      table_and_part_stats AS (SELECT /*+ MATERIALIZE */ owner, table_name, partition_name, stale_stats, stattype_locked
                                 FROM dba_tab_statistics
-                               WHERE (owner, table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')
+                               WHERE (owner, table_name) IN (SELECT object_owner, object_name 
+                                                               FROM plan_table 
+                                                              WHERE statement_id = ''LIST_OF_TABLES'' 
+                                                                AND remarks = ''&&sqld360_sqlid.'')
                                  AND subpartition_name IS NULL),
      indexes    AS (SELECT /*+ MATERIALIZE */ table_owner, table_name, index_name, degree
                       FROM dba_indexes
-                     WHERE (table_owner, table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')),
+                     WHERE (table_owner, table_name) IN (SELECT object_owner, object_name 
+                                                           FROM plan_table 
+                                                          WHERE statement_id = ''LIST_OF_TABLES'' 
+                                                            AND remarks = ''&&sqld360_sqlid.'')),
      ind_cols AS (SELECT col.index_owner, col.index_name, col.table_owner, col.table_name, idx.index_type, idx.uniqueness,
                          MAX(CASE col.column_position WHEN 01 THEN      col.column_name END)||
                          MAX(CASE col.column_position WHEN 02 THEN '':''||col.column_name END)||
@@ -238,10 +250,27 @@ WITH tablespaces AS (SELECT /*+ MATERIALIZE */ tablespace_name, block_size
                          MAX(CASE col.column_position WHEN 16 THEN '':''||col.column_name END) indexed_columns
                     FROM dba_ind_columns col,
                          dba_indexes idx
-                   WHERE (idx.table_owner, idx.table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')
+                   WHERE (idx.table_owner, idx.table_name) IN (SELECT object_owner, object_name 
+                                                                 FROM plan_table 
+                                                                WHERE statement_id = ''LIST_OF_TABLES'' 
+                                                                  AND remarks = ''&&sqld360_sqlid.'')
                      AND idx.owner = col.index_owner
                      AND idx.index_name = col.index_name
                    GROUP BY col.index_owner,col.index_name,col.table_owner,col.table_name,idx.index_type,idx.uniqueness)
+     &&sqld360_no_read_stats_h.&&sqld360_skip_stats_h., tab_stats_history AS (SELECT o.owner, o.object_name, h.analyzetime, h.rowcnt
+     &&sqld360_no_read_stats_h.&&sqld360_skip_stats_h.                          FROM sys.wri$_optstat_tab_history h,
+     &&sqld360_no_read_stats_h.&&sqld360_skip_stats_h.                               dba_objects o
+     &&sqld360_no_read_stats_h.&&sqld360_skip_stats_h.                         WHERE (o.owner, o.object_name) IN (SELECT object_owner, object_name 
+     &&sqld360_no_read_stats_h.&&sqld360_skip_stats_h.                                                              FROM plan_table 
+     &&sqld360_no_read_stats_h.&&sqld360_skip_stats_h.                                                             WHERE statement_id = ''LIST_OF_TABLES'' 
+     &&sqld360_no_read_stats_h.&&sqld360_skip_stats_h.                                                               AND remarks = ''&&sqld360_sqlid.'')
+     &&sqld360_no_read_stats_h.&&sqld360_skip_stats_h.                           AND o.object_type = ''TABLE''
+     &&sqld360_no_read_stats_h.&&sqld360_skip_stats_h.                           AND o.object_id = h.obj#
+     &&sqld360_no_read_stats_h.&&sqld360_skip_stats_h.                           AND ''&&diagnostics_pack.'' = ''Y''
+     &&sqld360_no_read_stats_h.&&sqld360_skip_stats_h.                         UNION ALL
+     &&sqld360_no_read_stats_h.&&sqld360_skip_stats_h.                        SELECT owner, table_name, last_analyzed, num_rows
+     &&sqld360_no_read_stats_h.&&sqld360_skip_stats_h.                          FROM tables
+     &&sqld360_no_read_stats_h.&&sqld360_skip_stats_h.                       ) 
 SELECT scope, owner, table_name, message
   FROM (SELECT ''TABLE_STATS'' scope, owner, table_name,  ''Table ''||table_name||'' has statistics more than a month old (''||TRUNC(SYSDATE-last_analyzed)||'' days old)'' message
           FROM tables
@@ -326,6 +355,22 @@ SELECT scope, owner, table_name, message
            AND i.index_name != r.index_name
            AND i.indexed_columns LIKE r.indexed_columns||'':%''
            AND r.uniqueness = ''NONUNIQUE''
+        &&skip_10g.&&skip_11g. UNION ALL
+        &&skip_10g.&&skip_11g. SELECT ''TABLE_STATS_HISTORY'', owner, table_name, ''Stats were 0 at some point, starting ''||init_zero||'' up until stats gathering on ''||end_zero
+        &&skip_10g.&&skip_11g.   FROM (SELECT owner, object_name table_name, to_char(init_zero,''YYYY-MM-DD/HH24:MI:SS'') init_zero, to_char(end_zero,''YYYY-MM-DD/HH24:MI:SS'') end_zero
+        &&skip_10g.&&skip_11g.           FROM tab_stats_history
+        &&skip_10g.&&skip_11g.           MATCH_RECOGNIZE (
+        &&skip_10g.&&skip_11g.             PARTITION BY owner, object_name ORDER BY analyzetime
+        &&skip_10g.&&skip_11g.             MEASURES FIRST(iszero.analyzetime) init_zero,
+        &&skip_10g.&&skip_11g.                      FIRST(a_nonzero.analyzetime) end_zero
+        &&skip_10g.&&skip_11g.             --ALL ROWS PER MATCH
+        &&skip_10g.&&skip_11g.             AFTER MATCH SKIP TO FIRST a_nonzero
+        &&skip_10g.&&skip_11g.             PATTERN (b_nonzero+ iszero+ a_nonzero+)  
+        &&skip_10g.&&skip_11g.             DEFINE b_nonzero AS rowcnt <> 0,
+        &&skip_10g.&&skip_11g.                    iszero  AS rowcnt = 0,
+        &&skip_10g.&&skip_11g.                    a_nonzero AS rowcnt <> 0
+        &&skip_10g.&&skip_11g.           )
+        &&skip_10g.&&skip_11g.        )
         )
  ORDER BY owner, table_name, scope DESC
 ';

@@ -5,12 +5,12 @@ SET FEED OFF;
 SET ECHO OFF;
 SET TIM OFF;
 SET TIMI OFF;
---CL COL;
+CL COL;
 COL row_num FOR 9999999 HEA '#' PRI;
 
 -- version
-DEF sqld360_vYYNN = 'v1624';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2016-12-23)';
+DEF sqld360_vYYNN = 'v1701';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2016-02-05)';
 DEF sqld360_prefix = 'sqld360';
 
 -- parameters
@@ -440,6 +440,11 @@ SELECT CASE WHEN SUM(has_plsql) = 0 THEN '--' ELSE NULL END sqld360_has_plsql
           FROM dba_hist_sqlstat 
          WHERE sql_id = '&&sqld360_sqlid.' 
            AND plsexec_time_delta <> 0);
+
+-- this is to avoid the whole observation block to error if the user can't just read stats_h because of grants
+COL sqld360_no_read_stats_h new_V sqld360_no_read_stats_h
+SELECT '--' sqld360_no_read_stats_h FROM DUAL;
+SELECT NULL sqld360_no_read_stats_h FROM sys.wri$_optstat_tab_history WHERE rownum <= 1;
 
 -- setup
 DEF main_table = '';

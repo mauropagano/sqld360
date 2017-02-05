@@ -55,13 +55,14 @@ END;
 /
 SET SERVEROUT OFF;
 
--- chart footer
+-- bar chart footer
 PRO        ]);;
 PRO        
 PRO        var options = {
+PRO          chartArea:{left:90, top:90, width:'85%', height:'65%'},
 PRO          backgroundColor: {fill: '#fcfcf0', stroke: '#336699', strokeWidth: 1},
 PRO          title: '&&section_id..&&report_sequence.. &&title.&&title_suffix.',
-PRO          titleTextStyle: {fontSize: 16, bold: false},
+PRO          titleTextStyle: {fontSize: 18, bold: false},
 PRO          legend: {position: 'none'},
 PRO          vAxis: {minValue: 0}, 
 PRO          tooltip: {textStyle: {fontSize: 14}}
@@ -75,11 +76,12 @@ PRO  </head>
 PRO  <body>
 PRO <h1> &&sqld360_conf_all_pages_icon. &&section_id..&&report_sequence.. &&title.&&title_suffix. <em>(&&main_table.)</em> &&sqld360_conf_all_pages_logo. </h1>
 PRO
-PRO <br>
+PRO <br />
 PRO &&abstract.
 PRO &&abstract2.
+PRO <br />
 PRO
-PRO    <div id="barchart" style="width: 900px; height: 500px;"></div>
+PRO    <div id="barchart" class="google-chart"></div>
 PRO
 
 -- footer

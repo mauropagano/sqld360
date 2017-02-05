@@ -4,6 +4,12 @@ Changelog
 I suggest to rely on Github for details about code changes, this will only be a macro about "functionalities"
 Was supposed to start on day 1, better late than never no? :-)
 
+v1701
+=====
+1. Changed a few charts parameter to make it nicer during copy&paste
+2. Added new observation on num_rows = 0 at some point in the same, implemented using MATCH_RECOGNIZE
+3. Put back the CLEAR COL at the beginning of SQLd360 execution
+
 v1624
 =====
 1. Added column SQL_FULL_PLAN_HASH_VALUE

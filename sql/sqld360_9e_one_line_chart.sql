@@ -167,25 +167,26 @@ END;
 /
 SET SERVEROUT OFF;
 
--- chart footer
+-- line chart footer
 PRO        ]);;
 PRO        
 PRO        var options = {&&stacked.
+PRO          chartArea:{left:90, top:75, width:'65%', height:'70%'},
 PRO          backgroundColor: {fill: '#fcfcf0', stroke: '#336699', strokeWidth: 1},
-PRO          explorer: {actions: ['dragToZoom', 'rightClickToReset'], maxZoomIn: 0.1},
+PRO          explorer: {actions: ['dragToZoom', 'rightClickToReset'], maxZoomIn: 0.01},
 PRO          title: '&&section_id..&&report_sequence.. &&title.&&title_suffix.',
-PRO          titleTextStyle: {fontSize: 16, bold: false},
+PRO          titleTextStyle: {fontSize: 18, bold: false},
 PRO          focusTarget: 'category',
-PRO          legend: {position: 'right', textStyle: {fontSize: 12}},
-PRO          tooltip: {textStyle: {fontSize: 10}},
-PRO          hAxis: {title: '&&haxis.', gridlines: {count: -1}},
+PRO          legend: {position: 'right', textStyle: {fontSize: 14}},
+PRO          tooltip: {textStyle: {fontSize: 14}},
+PRO          hAxis: {title: '&&haxis.', gridlines: {count: -1}, titleTextStyle: {fontSize: 16, bold: false}},
 PRO          series: { 0: { &&series_01.}, 1: { &&series_02.},  2: { &&series_03.},  3: { &&series_04.},  4: { &&series_05.},  5: { &&series_06.},  6: { &&series_07.}, 7: {&&series_08.},
 PRO                    8: { &&series_09.}, 9: { &&series_10.}, 10: { &&series_11.}, 11: { &&series_12.}, 12: { &&series_13.}, 13: { &&series_14.}, 14: { &&series_15.}
 PRO          },
-PRO          vAxis: {title: '&&vaxis.', &&vbaseline. gridlines: {count: -1}}
+PRO          vAxis: {title: '&&vaxis.', &&vbaseline. gridlines: {count: -1}, titleTextStyle: {fontSize: 16, bold: false}}
 PRO        };
 PRO
-PRO        var chart = new google.visualization.&&chartype.(document.getElementById('chart_div'));
+PRO        var chart = new google.visualization.&&chartype.(document.getElementById('linechart'));
 PRO        chart.draw(data, options);
 PRO      }
 PRO    </script>
@@ -193,11 +194,12 @@ PRO  </head>
 PRO  <body>
 PRO <h1> &&sqld360_conf_all_pages_icon. &&section_id..&&report_sequence.. &&title.&&title_suffix. <em>(&&main_table.)</em> &&sqld360_conf_all_pages_logo. </h1>
 PRO
-PRO <br>
+PRO <br />
 PRO &&abstract.
 PRO &&abstract2.
+PRO <br />
 PRO
-PRO    <div id="chart_div" style="width: 900px; height: 500px;"></div>
+PRO    <div id="linechart" class="google-chart"></div>
 PRO
 
 -- footer
