@@ -36,10 +36,12 @@ PRO &&abstract.
 PRO &&abstract2.
 PRO
 
+COL style NOPRI
 -- body
 SET MARK HTML ON TABLE "class=sortable" SPOOL OFF;
 /
 SET MARK HTML OFF;
+COL style PRI
 
 -- footer
 PRO &&foot.

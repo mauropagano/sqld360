@@ -396,12 +396,12 @@ BEGIN
     put('DEF chartype = ''LineChart''');
     put('DEF stacked = ''''');
     put('DEF vaxis = ''Elapsed Time in secs''');
-    put('DEF tit_01 = ''Average Elapsed Time''');
-    put('DEF tit_02 = ''Average Time on CPU''');
-    put('DEF tit_03 = ''Average DB Time''');
-    put('DEF tit_04 = ''Min Elapsed Time''');
-    put('DEF tit_05 = ''Max Elapsed Time''');
-    put('DEF tit_06 = ''''');
+    put('DEF tit_01 = ''Average Elapsed Time/exec''');
+    put('DEF tit_02 = ''Average Time on CPU/exec''');
+    put('DEF tit_03 = ''Average DB Time/exec''');
+    put('DEF tit_04 = ''Min Elapsed Time/exec''');
+    put('DEF tit_05 = ''Max Elapsed Time/exec''');
+    put('DEF tit_06 = ''Average Elapsed Time/exec Trend''');
     put('DEF tit_07 = ''''');
     put('DEF tit_08 = ''''');
     put('DEF tit_09 = ''''');
@@ -421,7 +421,7 @@ BEGIN
     put('       avg_db_time,');
     put('       min_et,');
     put('       max_et,');
-    put('       0 dummy_06,');
+    put('       AVG(avg_et) OVER (ORDER BY start_time ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) avg_et_trend,');
     put('       0 dummy_07,');
     put('       0 dummy_08,');
     put('       0 dummy_09,');
@@ -471,12 +471,12 @@ BEGIN
     put('DEF chartype = ''LineChart''');
     put('DEF stacked = ''''');
     put('DEF vaxis = ''Elapsed Time in secs''');
-    put('DEF tit_01 = ''Average Elapsed Time''');
-    put('DEF tit_02 = ''Average Time on CPU''');
-    put('DEF tit_03 = ''Average DB Time''');
-    put('DEF tit_04 = ''Min Elapsed Time''');
-    put('DEF tit_05 = ''Max Elapsed Time''');
-    put('DEF tit_06 = ''''');
+    put('DEF tit_01 = ''Average Elapsed Time/exec''');
+    put('DEF tit_02 = ''Average Time on CPU/exec''');
+    put('DEF tit_03 = ''Average DB Time/exec''');
+    put('DEF tit_04 = ''Min Elapsed Time/exec''');
+    put('DEF tit_05 = ''Max Elapsed Time/exec''');
+    put('DEF tit_06 = ''Average Elapsed Time/exec Trend''');
     put('DEF tit_07 = ''''');
     put('DEF tit_08 = ''''');
     put('DEF tit_09 = ''''');
@@ -496,7 +496,7 @@ BEGIN
     put('       NVL(avg_db_time,0) avg_db_time,');
     put('       NVL(min_et,0) min_et,');
     put('       NVL(max_et,0) max_et,');
-    put('       0 dummy_06,');
+    put('       NVL(AVG(avg_et) OVER (ORDER BY b.snap_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),0) avg_et_trend,');
     put('       0 dummy_07,');
     put('       0 dummy_08,');
     put('       0 dummy_09,');
@@ -1671,8 +1671,14 @@ BEGIN
                                      NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,4)+1,INSTR(partition_stop,',',1,5)-INSTR(partition_stop,',',1,4)-1)),cpu_cost) session_id,  
                                      NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,5)+1,INSTR(partition_stop,',',1,6)-INSTR(partition_stop,',',1,5)-1)),io_cost) session_serial#, 
                                      timestamp sample_time, 
-                                     NVL(partition_id, FIRST_VALUE(partition_id IGNORE NULLS) OVER (PARTITION BY position, cpu_cost, io_cost ORDER BY timestamp ROWS BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING)) sql_exec_id, 
-                                     NVL(distribution, FIRST_VALUE(distribution IGNORE NULLS) OVER (PARTITION BY position, cpu_cost, io_cost ORDER BY timestamp ROWS BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING)) sql_exec_start 
+                                     NVL(partition_id, FIRST_VALUE(partition_id IGNORE NULLS) OVER (PARTITION BY NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,3)+1,INSTR(partition_stop,',',1,4)-INSTR(partition_stop,',',1,3)-1)),position), 
+                                                                                                                 NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,4)+1,INSTR(partition_stop,',',1,5)-INSTR(partition_stop,',',1,4)-1)),cpu_cost), 
+                                                                                                                 NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,5)+1,INSTR(partition_stop,',',1,6)-INSTR(partition_stop,',',1,5)-1)),io_cost) 
+                                                                                                    ORDER BY timestamp ROWS BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING)) sql_exec_id, 
+                                     NVL(distribution, FIRST_VALUE(distribution IGNORE NULLS) OVER (PARTITION BY NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,3)+1,INSTR(partition_stop,',',1,4)-INSTR(partition_stop,',',1,3)-1)),position), 
+                                                                                                                 NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,4)+1,INSTR(partition_stop,',',1,5)-INSTR(partition_stop,',',1,4)-1)),cpu_cost), 
+                                                                                                                 NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,5)+1,INSTR(partition_stop,',',1,6)-INSTR(partition_stop,',',1,5)-1)),io_cost)
+                                                                                                    ORDER BY timestamp ROWS BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING)) sql_exec_start 
                                 FROM plan_table 
                                WHERE statement_id = 'SQLD360_ASH_DATA_MEM'
                                  AND cost =  i.plan_hash_value
@@ -2523,8 +2529,14 @@ BEGIN
                                      NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,4)+1,INSTR(partition_stop,',',1,5)-INSTR(partition_stop,',',1,4)-1)),cpu_cost) session_id,  
                                      NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,5)+1,INSTR(partition_stop,',',1,6)-INSTR(partition_stop,',',1,5)-1)),io_cost) session_serial#,  
                                      timestamp sample_time, 
-                                     NVL(partition_id, FIRST_VALUE(partition_id IGNORE NULLS) OVER (PARTITION BY position, cpu_cost, io_cost ORDER BY timestamp ROWS BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING)) sql_exec_id, 
-                                     NVL(distribution, FIRST_VALUE(distribution IGNORE NULLS) OVER (PARTITION BY position, cpu_cost, io_cost ORDER BY timestamp ROWS BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING)) sql_exec_start 
+                                     NVL(partition_id, FIRST_VALUE(partition_id IGNORE NULLS) OVER (PARTITION BY NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,3)+1,INSTR(partition_stop,',',1,4)-INSTR(partition_stop,',',1,3)-1)),position), 
+                                                                                                                 NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,4)+1,INSTR(partition_stop,',',1,5)-INSTR(partition_stop,',',1,4)-1)),cpu_cost), 
+                                                                                                                 NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,5)+1,INSTR(partition_stop,',',1,6)-INSTR(partition_stop,',',1,5)-1)),io_cost) 
+                                                                                                    ORDER BY timestamp ROWS BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING)) sql_exec_id, 
+                                     NVL(distribution, FIRST_VALUE(distribution IGNORE NULLS) OVER (PARTITION BY NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,3)+1,INSTR(partition_stop,',',1,4)-INSTR(partition_stop,',',1,3)-1)),position), 
+                                                                                                                 NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,4)+1,INSTR(partition_stop,',',1,5)-INSTR(partition_stop,',',1,4)-1)),cpu_cost), 
+                                                                                                                 NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,5)+1,INSTR(partition_stop,',',1,6)-INSTR(partition_stop,',',1,5)-1)),io_cost) 
+                                                                                                    ORDER BY timestamp ROWS BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING)) sql_exec_start 
                                 FROM plan_table 
                                WHERE statement_id = 'SQLD360_ASH_DATA_HIST'
                                  AND cost =  i.plan_hash_value

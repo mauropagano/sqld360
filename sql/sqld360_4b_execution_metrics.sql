@@ -413,7 +413,7 @@ EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '8');
 DEF chartype = 'LineChart';
 DEF stacked = '';
 DEF tit_01 = 'Avg Buffer Gets/exec';
-DEF tit_02 = '';
+DEF tit_02 = 'Avg Buffer Gets/exec Trend';
 DEF tit_03 = '';
 DEF tit_04 = '';
 DEF tit_05 = '';
@@ -433,11 +433,11 @@ DEF vaxis = 'Avg Buffer Gets per Execution';
 DEF vbaseline = '';
 BEGIN
   :sql_text_backup := '
-SELECT MIN(a.snap_id) snap_id, 
-       TO_CHAR(a.begin_interval_time, ''YYYY-MM-DD HH24:MI'')  begin_time, 
-       TO_CHAR(a.end_interval_time, ''YYYY-MM-DD HH24:MI'')  end_time,
-       NVL(TRUNC(SUM(b.buffer_gets_total)/SUM(NVL(NULLIF(executions_total,0),1)),3),0) buffer_gets,
-       0 dummy_02, 
+SELECT snap_id snap_id, 
+       TO_CHAR(begin_interval_time, ''YYYY-MM-DD HH24:MI'')  begin_time, 
+       TO_CHAR(end_interval_time, ''YYYY-MM-DD HH24:MI'')  end_time,
+       NVL(buffer_gets, 0) buffer_gets,
+       NVL(AVG(buffer_gets) OVER (ORDER BY snap_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW), 0) buffer_gets_trend,
        0 dummy_03,
        0 dummy_04,
        0 dummy_05,
@@ -451,21 +451,23 @@ SELECT MIN(a.snap_id) snap_id,
        0 dummy_13,
        0 dummy_14,
        0 dummy_15
-  FROM (SELECT snap_id, instance_number, buffer_gets_total, executions_total
-          FROM dba_hist_sqlstat
-         WHERE sql_id = ''&&sqld360_sqlid.'') b,
-       (SELECT snap_id, instance_number, begin_interval_time, end_interval_time
-          FROM dba_hist_snapshot
-         WHERE snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.) a
- WHERE a.snap_id = b.snap_id(+)
-   AND a.instance_number = b.instance_number(+)
-   AND ''&&diagnostics_pack.'' = ''Y''
-   AND a.instance_number = @instance_number@
- GROUP BY
-       TO_CHAR(a.begin_interval_time, ''YYYY-MM-DD HH24:MI''), 
-       TO_CHAR(a.end_interval_time, ''YYYY-MM-DD HH24:MI'')
+  FROM (SELECT a.snap_id, 
+               MIN(begin_interval_time) begin_interval_time, 
+               MIN(end_interval_time) end_interval_time,
+               TRUNC(SUM(b.buffer_gets_total)/SUM(NVL(NULLIF(executions_total,0),1)),3) buffer_gets
+          FROM (SELECT snap_id, instance_number, begin_interval_time, end_interval_time
+                  FROM dba_hist_snapshot
+                 WHERE snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.) a,
+               (SELECT snap_id, instance_number, buffer_gets_total, executions_total
+                  FROM dba_hist_sqlstat
+                 WHERE sql_id = ''&&sqld360_sqlid.'') b
+          WHERE a.snap_id = b.snap_id(+)
+            AND a.instance_number = b.instance_number(+)
+            AND ''&&diagnostics_pack.'' = ''Y''
+            AND a.instance_number = @instance_number@
+          GROUP BY a.snap_id)
  ORDER BY
-       TO_CHAR(a.end_interval_time, ''YYYY-MM-DD HH24:MI'')
+       TO_CHAR(end_interval_time, ''YYYY-MM-DD HH24:MI'')
 ';
 END;
 /
@@ -559,7 +561,7 @@ DEF skip_lch = 'Y';
 DEF chartype = 'LineChart';
 DEF stacked = '';
 DEF tit_01 = 'Avg Rows Processed/exec';
-DEF tit_02 = '';
+DEF tit_02 = 'Avg Rows Processed/exec Trend';
 DEF tit_03 = '';
 DEF tit_04 = '';
 DEF tit_05 = '';
@@ -579,11 +581,11 @@ DEF vaxis = 'Avg Rows Processed per Execution';
 DEF vbaseline = '';
 BEGIN
   :sql_text_backup := '
-SELECT MIN(a.snap_id) snap_id, 
-       TO_CHAR(a.begin_interval_time, ''YYYY-MM-DD HH24:MI'')  begin_time, 
-       TO_CHAR(a.end_interval_time, ''YYYY-MM-DD HH24:MI'')  end_time,
-       NVL(TRUNC(SUM(b.rows_processed_total)/SUM(NVL(NULLIF(executions_total,0),1)),3),0) rows_processed,
-       0 dummy_02, 
+SELECT snap_id snap_id, 
+       TO_CHAR(begin_interval_time, ''YYYY-MM-DD HH24:MI'')  begin_time, 
+       TO_CHAR(end_interval_time, ''YYYY-MM-DD HH24:MI'')  end_time,
+       NVL(rows_processed,0) rows_processed,
+       NVL(AVG(rows_processed) OVER (ORDER BY snap_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW), 0) rows_processed_trend,
        0 dummy_03,
        0 dummy_04,
        0 dummy_05,
@@ -597,21 +599,23 @@ SELECT MIN(a.snap_id) snap_id,
        0 dummy_13,
        0 dummy_14,
        0 dummy_15
-  FROM (SELECT snap_id, instance_number, rows_processed_total, executions_total
-          FROM dba_hist_sqlstat
-         WHERE sql_id = ''&&sqld360_sqlid.'') b,
-       (SELECT snap_id, instance_number, begin_interval_time, end_interval_time
-          FROM dba_hist_snapshot
-         WHERE snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.) a
- WHERE a.snap_id = b.snap_id(+)
-   AND a.instance_number = b.instance_number(+)
-   AND ''&&diagnostics_pack.'' = ''Y''
-   AND a.instance_number = @instance_number@
- GROUP BY
-       TO_CHAR(a.begin_interval_time, ''YYYY-MM-DD HH24:MI''), 
-       TO_CHAR(a.end_interval_time, ''YYYY-MM-DD HH24:MI'')
+  FROM (SELECT a.snap_id,
+               MIN(begin_interval_time) begin_interval_time, 
+               MIN(end_interval_time) end_interval_time,
+               TRUNC(SUM(b.rows_processed_total)/SUM(NVL(NULLIF(executions_total,0),1)),3) rows_processed
+          FROM (SELECT snap_id, instance_number, begin_interval_time, end_interval_time
+                  FROM dba_hist_snapshot
+                 WHERE snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.) a,
+               (SELECT snap_id, instance_number, rows_processed_total, executions_total
+                  FROM dba_hist_sqlstat
+                 WHERE sql_id = ''&&sqld360_sqlid.'') b
+         WHERE a.snap_id = b.snap_id(+)
+           AND a.instance_number = b.instance_number(+)
+           AND ''&&diagnostics_pack.'' = ''Y''
+           AND a.instance_number = @instance_number@
+         GROUP BY a.snap_id)
  ORDER BY
-       TO_CHAR(a.end_interval_time, ''YYYY-MM-DD HH24:MI'')
+       TO_CHAR(end_interval_time, ''YYYY-MM-DD HH24:MI'')
 ';
 END;
 /
@@ -710,7 +714,7 @@ DEF tit_03 = 'Avg IO Time/exec';
 DEF tit_04 = 'Avg Cluster Time/exec';
 DEF tit_05 = 'Avg Application Time/exec';
 DEF tit_06 = 'Avg Concurrency Time/exec';
-DEF tit_07 = '';
+DEF tit_07 = 'Avg Elapsed Time/exec Trend';
 DEF tit_08 = '';
 DEF tit_09 = '';
 DEF tit_10 = '';
@@ -725,16 +729,16 @@ DEF vaxis = 'Avg Elapsed Time per Execution in secs';
 DEF vbaseline = '';
 BEGIN
   :sql_text_backup := '
-SELECT MIN(a.snap_id) snap_id, 
-       TO_CHAR(a.begin_interval_time, ''YYYY-MM-DD HH24:MI'')  begin_time, 
-       TO_CHAR(a.end_interval_time, ''YYYY-MM-DD HH24:MI'')  end_time,
-       NVL(TRUNC(SUM(b.elapsed_time_total)/SUM(NVL(NULLIF(executions_total,0),1))/1e6,3),0) elapsed_time,
-       NVL(TRUNC(SUM(b.cpu_time_total)/SUM(NVL(NULLIF(executions_total,0),1))/1e6,3),0) cpu_time, 
-       NVL(TRUNC(SUM(b.iowait_total)/SUM(NVL(NULLIF(executions_total,0),1))/1e6,3),0) iowait,
-       NVL(TRUNC(SUM(b.clwait_total)/SUM(NVL(NULLIF(executions_total,0),1))/1e6,3),0) clwait,
-       NVL(TRUNC(SUM(b.apwait_total)/SUM(NVL(NULLIF(executions_total,0),1))/1e6,3),0) apwait,
-       NVL(TRUNC(SUM(b.ccwait_total)/SUM(NVL(NULLIF(executions_total,0),1))/1e6,3),0) ccwait,
-       0 dummy_07,
+SELECT snap_id snap_id, 
+       TO_CHAR(begin_interval_time, ''YYYY-MM-DD HH24:MI'')  begin_time, 
+       TO_CHAR(end_interval_time, ''YYYY-MM-DD HH24:MI'')  end_time,
+       NVL(elapsed_time,0) elapsed_time,
+       NVL(cpu_time,0) cpu_time, 
+       NVL(iowait,0) iowait,
+       NVL(clwait,0) clwait,
+       NVL(apwait,0) apwait,
+       NVL(ccwait,0) ccwait,
+       NVL(AVG(elapsed_time) OVER (ORDER BY snap_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),0) elapsed_time_trend,
        0 dummy_08,
        0 dummy_09,
        0 dummy_10,
@@ -743,22 +747,29 @@ SELECT MIN(a.snap_id) snap_id,
        0 dummy_13,
        0 dummy_14,
        0 dummy_15
-  FROM (SELECT snap_id, instance_number, elapsed_time_total, cpu_time_total, 
-               iowait_total, clwait_total, apwait_total, ccwait_total, executions_total
-          FROM dba_hist_sqlstat
-         WHERE sql_id = ''&&sqld360_sqlid.'') b,
-       (SELECT snap_id, instance_number, begin_interval_time, end_interval_time
-          FROM dba_hist_snapshot
-         WHERE snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.) a
- WHERE a.snap_id = b.snap_id(+)
-   AND a.instance_number = b.instance_number(+)
-   AND ''&&diagnostics_pack.'' = ''Y''
-   AND a.instance_number = @instance_number@
- GROUP BY
-       TO_CHAR(a.begin_interval_time, ''YYYY-MM-DD HH24:MI''), 
-       TO_CHAR(a.end_interval_time, ''YYYY-MM-DD HH24:MI'')
+  FROM (SELECT a.snap_id, 
+               MIN(begin_interval_time) begin_interval_time, 
+               MIN(end_interval_time) end_interval_time,
+               TRUNC(SUM(elapsed_time_total)/SUM(NVL(NULLIF(executions_total,0),1))/1e6,3) elapsed_time, 
+               TRUNC(SUM(cpu_time_total)/SUM(NVL(NULLIF(executions_total,0),1))/1e6,3) cpu_time, 
+               TRUNC(SUM(iowait_total)/SUM(NVL(NULLIF(executions_total,0),1))/1e6,3) iowait, 
+               TRUNC(SUM(clwait_total)/SUM(NVL(NULLIF(executions_total,0),1))/1e6,3) clwait, 
+               TRUNC(SUM(apwait_total)/SUM(NVL(NULLIF(executions_total,0),1))/1e6,3) apwait, 
+               TRUNC(SUM(ccwait_total)/SUM(NVL(NULLIF(executions_total,0),1))/1e6,3) ccwait
+          FROM (SELECT snap_id, instance_number, begin_interval_time, end_interval_time
+                  FROM dba_hist_snapshot
+                 WHERE snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.) a,
+               (SELECT snap_id, instance_number,  elapsed_time_total, cpu_time_total, 
+                       iowait_total, clwait_total, apwait_total, ccwait_total, executions_total
+                  FROM dba_hist_sqlstat
+                 WHERE sql_id = ''&&sqld360_sqlid.'') b
+         WHERE a.snap_id = b.snap_id(+)
+           AND a.instance_number = b.instance_number(+)
+           AND ''&&diagnostics_pack.'' = ''Y''
+           AND a.instance_number = @instance_number@
+         GROUP BY a.snap_id)
  ORDER BY
-       TO_CHAR(a.end_interval_time, ''YYYY-MM-DD HH24:MI'')
+       TO_CHAR(end_interval_time, ''YYYY-MM-DD HH24:MI'')
 ';
 END;
 /
@@ -867,7 +878,7 @@ SELECT 0 snap_id,
        avg_db_time,
        med_db_time,
        percth_db_time,
-       0 dummy_10,
+       NVL(AVG(avg_et) OVER (ORDER BY start_time ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),0) avg_et_trend,
        0 dummy_11,
        0 dummy_12,
        0 dummy_13,
@@ -911,16 +922,16 @@ END;
 DEF chartype = 'LineChart';
 DEF stacked = '';
 
-DEF tit_01 = 'Average Elapsed Time';
-DEF tit_02 = 'Median Elapsed Time';
-DEF tit_03 = '&&sqld360_conf_avg_et_percth.th Elapsed Time';
-DEF tit_04 = 'Average Time on CPU';
-DEF tit_05 = 'Median Time on CPU';
-DEF tit_06 = '&&sqld360_conf_avg_et_percth.th CPU Time';
-DEF tit_07 = 'Average DB Time';
-DEF tit_08 = 'Median DB Time';
-DEF tit_09 = '&&sqld360_conf_avg_et_percth.th DB Time';
-DEF tit_10 = '';
+DEF tit_01 = 'Average Elapsed Time/exec';
+DEF tit_02 = 'Median Elapsed Time/exec';
+DEF tit_03 = '&&sqld360_conf_avg_et_percth.th Elapsed Time/exec';
+DEF tit_04 = 'Average Time on CPU/exec';
+DEF tit_05 = 'Median Time on CPU/exec';
+DEF tit_06 = '&&sqld360_conf_avg_et_percth.th CPU Time/exec';
+DEF tit_07 = 'Average DB Time/exec';
+DEF tit_08 = 'Median DB Time/exec';
+DEF tit_09 = '&&sqld360_conf_avg_et_percth.th DB Time/exec';
+DEF tit_10 = 'Average Elapsed Time/exec Trend';
 DEF tit_11 = '';
 DEF tit_12 = '';
 DEF tit_13 = '';
@@ -1013,7 +1024,7 @@ SELECT b.snap_id snap_id,
        NVL(avg_db_time,0) avg_db_time,
        NVL(med_db_time,0) med_db_time,
        NVL(percth_db_time,0) percth_db_time,
-       0 dummy_10,
+       NVL(AVG(avg_et) OVER (ORDER BY b.snap_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),0) avg_et_trend,
        0 dummy_11,
        0 dummy_12,
        0 dummy_13,
@@ -1073,16 +1084,16 @@ END;
 DEF chartype = 'LineChart';
 DEF stacked = '';
 
-DEF tit_01 = 'Average Elapsed Time';
-DEF tit_02 = 'Median Elapsed Time';
-DEF tit_03 = '&&sqld360_conf_avg_et_percth.th Elapsed Time';
-DEF tit_04 = 'Average Time on CPU';
-DEF tit_05 = 'Median Time on CPU';
-DEF tit_06 = '&&sqld360_conf_avg_et_percth.th CPU Time';
-DEF tit_07 = 'Average DB Time';
-DEF tit_08 = 'Median DB Time';
-DEF tit_09 = '&&sqld360_conf_avg_et_percth.th DB Time';
-DEF tit_10 = '';
+DEF tit_01 = 'Average Elapsed Time/exec';
+DEF tit_02 = 'Median Elapsed Time/exec';
+DEF tit_03 = '&&sqld360_conf_avg_et_percth.th Elapsed Time/exec';
+DEF tit_04 = 'Average Time on CPU/exec';
+DEF tit_05 = 'Median Time on CPU/exec';
+DEF tit_06 = '&&sqld360_conf_avg_et_percth.th CPU Time/exec';
+DEF tit_07 = 'Average DB Time/exec';
+DEF tit_08 = 'Median DB Time/exec';
+DEF tit_09 = '&&sqld360_conf_avg_et_percth.th DB Time/exec';
+DEF tit_10 = 'Average Elapsed Time/exec Trend/exec';
 DEF tit_11 = '';
 DEF tit_12 = '';
 DEF tit_13 = '';

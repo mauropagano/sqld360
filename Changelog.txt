@@ -4,6 +4,13 @@ Changelog
 I suggest to rely on Github for details about code changes, this will only be a macro about "functionalities"
 Was supposed to start on day 1, better late than never no? :-)
 
+v1702
+=====
+1. Added "trend" line to avg X/exec reports (section 4b)
+2. Fixed bug that prevented low/high value translation from being turned off
+3. Fixed bug that caused Top N executions under Plan Details to show data for slaves that never joined execution as "standalone"
+4. Removed Style column from HTML reports
+
 v1701
 =====
 1. Changed a few charts parameter to make it nicer during copy&paste

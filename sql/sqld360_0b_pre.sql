@@ -9,8 +9,8 @@ CL COL;
 COL row_num FOR 9999999 HEA '#' PRI;
 
 -- version
-DEF sqld360_vYYNN = 'v1701';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2016-02-05)';
+DEF sqld360_vYYNN = 'v1702';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2016-02-19)';
 DEF sqld360_prefix = 'sqld360';
 
 -- parameters
@@ -428,6 +428,9 @@ SELECT CASE WHEN '&&sqld360_conf_tcb_sample.' BETWEEN '1' AND '100' THEN 'TRUE' 
 
 COL sqld360_skip_objd NEW_V sqld360_skip_objd;
 SELECT CASE '&&sqld360_conf_incl_obj_dept.' WHEN 'N' THEN '--' END sqld360_skip_objd FROM DUAL;
+
+COL sqld360_skip_lowhigh NEW_V sqld360_skip_lowhigh;
+SELECT CASE '&&sqld360_conf_translate_lowhigh.' WHEN 'N' THEN '--' END sqld360_skip_lowhigh FROM DUAL;
 
 COL sqld360_has_plsql NEW_V sqld360_has_plsql;
 SELECT CASE WHEN SUM(has_plsql) = 0 THEN '--' ELSE NULL END sqld360_has_plsql 

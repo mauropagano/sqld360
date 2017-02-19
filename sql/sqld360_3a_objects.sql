@@ -148,49 +148,49 @@ DEF main_table = 'DBA_TAB_COLS';
 BEGIN
   :sql_text := '
 SELECT /*+ &&top_level_hints. */
-       a.*, 
-       CASE WHEN data_type = ''NUMBER'' THEN to_char(utl_raw.cast_to_number(low_value))
-        WHEN data_type IN (''VARCHAR2'', ''CHAR'') THEN to_char(utl_raw.cast_to_varchar2(low_value))
-        WHEN data_type IN (''NVARCHAR2'',''NCHAR'') THEN to_char(utl_raw.cast_to_nvarchar2(low_value))
-        WHEN data_type = ''BINARY_DOUBLE'' THEN to_char(utl_raw.cast_to_binary_double(low_value))
-        WHEN data_type = ''BINARY_FLOAT'' THEN to_char(utl_raw.cast_to_binary_float(low_value))
-        WHEN data_type = ''DATE'' THEN rtrim(
-                    ltrim(to_char(100*(to_number(substr(low_value,1,2) ,''XX'')-100) + (to_number(substr(low_value,3,2) ,''XX'')-100),''0000''))||''-''||
-                    ltrim(to_char(     to_number(substr(low_value,5,2) ,''XX'')  ,''00''))||''-''||
-                    ltrim(to_char(     to_number(substr(low_value,7,2) ,''XX'')  ,''00''))||''/''||
-                    ltrim(to_char(     to_number(substr(low_value,9,2) ,''XX'')-1,''00''))||'':''||
-                    ltrim(to_char(     to_number(substr(low_value,11,2),''XX'')-1,''00''))||'':''||
-                    ltrim(to_char(     to_number(substr(low_value,13,2),''XX'')-1,''00'')))
-        WHEN data_type LIKE ''TIMESTAMP%'' THEN rtrim(
-                    ltrim(to_char(100*(to_number(substr(low_value,1,2) ,''XX'')-100) + (to_number(substr(low_value,3,2) ,''XX'')-100),''0000''))||''-''||
-                    ltrim(to_char(     to_number(substr(low_value,5,2) ,''XX'')  ,''00''))||''-''||
-                    ltrim(to_char(     to_number(substr(low_value,7,2) ,''XX'')  ,''00''))||''/''||
-                    ltrim(to_char(     to_number(substr(low_value,9,2) ,''XX'')-1,''00''))||'':''||
-                    ltrim(to_char(     to_number(substr(low_value,11,2),''XX'')-1,''00''))||'':''||
-                    ltrim(to_char(     to_number(substr(low_value,13,2),''XX'')-1,''00''))||''.''||
-                    to_number(substr(low_value,15,8),''XXXXXXXX''))
-       END low_value_translated, 
-       CASE WHEN data_type = ''NUMBER'' THEN to_char(utl_raw.cast_to_number(high_value))
-        WHEN data_type IN (''VARCHAR2'', ''CHAR'') THEN to_char(utl_raw.cast_to_varchar2(high_value))
-        WHEN data_type IN (''NVARCHAR2'',''NCHAR'') THEN to_char(utl_raw.cast_to_nvarchar2(high_value))
-        WHEN data_type = ''BINARY_DOUBLE'' THEN to_char(utl_raw.cast_to_binary_double(high_value))
-        WHEN data_type = ''BINARY_FLOAT'' THEN to_char(utl_raw.cast_to_binary_float(high_value))
-        WHEN data_type = ''DATE'' THEN rtrim(
-                    ltrim(to_char(100*(to_number(substr(high_value,1,2) ,''XX'')-100) + (to_number(substr(high_value,3,2) ,''XX'')-100),''0000''))||''-''||
-                    ltrim(to_char(     to_number(substr(high_value,5,2) ,''XX'')  ,''00''))||''-''||
-                    ltrim(to_char(     to_number(substr(high_value,7,2) ,''XX'')  ,''00''))||''/''||
-                    ltrim(to_char(     to_number(substr(high_value,9,2) ,''XX'')-1,''00''))||'':''||
-                    ltrim(to_char(     to_number(substr(high_value,11,2),''XX'')-1,''00''))||'':''||
-                    ltrim(to_char(     to_number(substr(high_value,13,2),''XX'')-1,''00'')))
-        WHEN data_type LIKE ''TIMESTAMP%'' THEN rtrim(
-                    ltrim(to_char(100*(to_number(substr(high_value,1,2) ,''XX'')-100) + (to_number(substr(high_value,3,2) ,''XX'')-100),''0000''))||''-''||
-                    ltrim(to_char(     to_number(substr(high_value,5,2) ,''XX'')  ,''00''))||''-''||
-                    ltrim(to_char(     to_number(substr(high_value,7,2) ,''XX'')  ,''00''))||''/''||
-                    ltrim(to_char(     to_number(substr(high_value,9,2) ,''XX'')-1,''00''))||'':''||
-                    ltrim(to_char(     to_number(substr(high_value,11,2),''XX'')-1,''00''))||'':''||
-                    ltrim(to_char(     to_number(substr(high_value,13,2),''XX'')-1,''00''))||''.''||
-                    to_number(substr(high_value,15,8),''XXXXXXXX'')) 
-        END high_value_translated
+       a.* 
+&&sqld360_skip_lowhigh.      ,CASE WHEN data_type = ''NUMBER'' THEN to_char(utl_raw.cast_to_number(low_value))
+&&sqld360_skip_lowhigh.        WHEN data_type IN (''VARCHAR2'', ''CHAR'') THEN to_char(utl_raw.cast_to_varchar2(low_value))
+&&sqld360_skip_lowhigh.        WHEN data_type IN (''NVARCHAR2'',''NCHAR'') THEN to_char(utl_raw.cast_to_nvarchar2(low_value))
+&&sqld360_skip_lowhigh.        WHEN data_type = ''BINARY_DOUBLE'' THEN to_char(utl_raw.cast_to_binary_double(low_value))
+&&sqld360_skip_lowhigh.        WHEN data_type = ''BINARY_FLOAT'' THEN to_char(utl_raw.cast_to_binary_float(low_value))
+&&sqld360_skip_lowhigh.        WHEN data_type = ''DATE'' THEN rtrim(
+&&sqld360_skip_lowhigh.                    ltrim(to_char(100*(to_number(substr(low_value,1,2) ,''XX'')-100) + (to_number(substr(low_value,3,2) ,''XX'')-100),''0000''))||''-''||
+&&sqld360_skip_lowhigh.                    ltrim(to_char(     to_number(substr(low_value,5,2) ,''XX'')  ,''00''))||''-''||
+&&sqld360_skip_lowhigh.                    ltrim(to_char(     to_number(substr(low_value,7,2) ,''XX'')  ,''00''))||''/''||
+&&sqld360_skip_lowhigh.                    ltrim(to_char(     to_number(substr(low_value,9,2) ,''XX'')-1,''00''))||'':''||
+&&sqld360_skip_lowhigh.                    ltrim(to_char(     to_number(substr(low_value,11,2),''XX'')-1,''00''))||'':''||
+&&sqld360_skip_lowhigh.                    ltrim(to_char(     to_number(substr(low_value,13,2),''XX'')-1,''00'')))
+&&sqld360_skip_lowhigh.        WHEN data_type LIKE ''TIMESTAMP%'' THEN rtrim(
+&&sqld360_skip_lowhigh.                    ltrim(to_char(100*(to_number(substr(low_value,1,2) ,''XX'')-100) + (to_number(substr(low_value,3,2) ,''XX'')-100),''0000''))||''-''||
+&&sqld360_skip_lowhigh.                    ltrim(to_char(     to_number(substr(low_value,5,2) ,''XX'')  ,''00''))||''-''||
+&&sqld360_skip_lowhigh.                    ltrim(to_char(     to_number(substr(low_value,7,2) ,''XX'')  ,''00''))||''/''||
+&&sqld360_skip_lowhigh.                    ltrim(to_char(     to_number(substr(low_value,9,2) ,''XX'')-1,''00''))||'':''||
+&&sqld360_skip_lowhigh.                    ltrim(to_char(     to_number(substr(low_value,11,2),''XX'')-1,''00''))||'':''||
+&&sqld360_skip_lowhigh.                    ltrim(to_char(     to_number(substr(low_value,13,2),''XX'')-1,''00''))||''.''||
+&&sqld360_skip_lowhigh.                    to_number(substr(low_value,15,8),''XXXXXXXX''))
+&&sqld360_skip_lowhigh.       END low_value_translated, 
+&&sqld360_skip_lowhigh.       CASE WHEN data_type = ''NUMBER'' THEN to_char(utl_raw.cast_to_number(high_value))
+&&sqld360_skip_lowhigh.        WHEN data_type IN (''VARCHAR2'', ''CHAR'') THEN to_char(utl_raw.cast_to_varchar2(high_value))
+&&sqld360_skip_lowhigh.        WHEN data_type IN (''NVARCHAR2'',''NCHAR'') THEN to_char(utl_raw.cast_to_nvarchar2(high_value))
+&&sqld360_skip_lowhigh.        WHEN data_type = ''BINARY_DOUBLE'' THEN to_char(utl_raw.cast_to_binary_double(high_value))
+&&sqld360_skip_lowhigh.        WHEN data_type = ''BINARY_FLOAT'' THEN to_char(utl_raw.cast_to_binary_float(high_value))
+&&sqld360_skip_lowhigh.        WHEN data_type = ''DATE'' THEN rtrim(
+&&sqld360_skip_lowhigh.                    ltrim(to_char(100*(to_number(substr(high_value,1,2) ,''XX'')-100) + (to_number(substr(high_value,3,2) ,''XX'')-100),''0000''))||''-''||
+&&sqld360_skip_lowhigh.                    ltrim(to_char(     to_number(substr(high_value,5,2) ,''XX'')  ,''00''))||''-''||
+&&sqld360_skip_lowhigh.                    ltrim(to_char(     to_number(substr(high_value,7,2) ,''XX'')  ,''00''))||''/''||
+&&sqld360_skip_lowhigh.                    ltrim(to_char(     to_number(substr(high_value,9,2) ,''XX'')-1,''00''))||'':''||
+&&sqld360_skip_lowhigh.                    ltrim(to_char(     to_number(substr(high_value,11,2),''XX'')-1,''00''))||'':''||
+&&sqld360_skip_lowhigh.                    ltrim(to_char(     to_number(substr(high_value,13,2),''XX'')-1,''00'')))
+&&sqld360_skip_lowhigh.        WHEN data_type LIKE ''TIMESTAMP%'' THEN rtrim(
+&&sqld360_skip_lowhigh.                    ltrim(to_char(100*(to_number(substr(high_value,1,2) ,''XX'')-100) + (to_number(substr(high_value,3,2) ,''XX'')-100),''0000''))||''-''||
+&&sqld360_skip_lowhigh.                    ltrim(to_char(     to_number(substr(high_value,5,2) ,''XX'')  ,''00''))||''-''||
+&&sqld360_skip_lowhigh.                    ltrim(to_char(     to_number(substr(high_value,7,2) ,''XX'')  ,''00''))||''/''||
+&&sqld360_skip_lowhigh.                    ltrim(to_char(     to_number(substr(high_value,9,2) ,''XX'')-1,''00''))||'':''||
+&&sqld360_skip_lowhigh.                    ltrim(to_char(     to_number(substr(high_value,11,2),''XX'')-1,''00''))||'':''||
+&&sqld360_skip_lowhigh.                    ltrim(to_char(     to_number(substr(high_value,13,2),''XX'')-1,''00''))||''.''||
+&&sqld360_skip_lowhigh.                    to_number(substr(high_value,15,8),''XXXXXXXX'')) 
+&&sqld360_skip_lowhigh.        END high_value_translated
   FROM dba_tab_cols a,
        dba_tables c  -- this is to filter out views
  WHERE (a.owner, a.table_name) IN (SELECT object_owner, object_name FROM plan_table WHERE statement_id = ''LIST_OF_TABLES'' AND remarks = ''&&sqld360_sqlid.'')
