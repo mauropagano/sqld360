@@ -114,25 +114,25 @@ DEF main_table = 'DBA_HIST_ACTIVE_SESS_HISTORY';
 DEF foot = 'Higher number of executions doesn''t imply higher impact if the plan is optimal';
 --DEF slices = '15';
 BEGIN
- :sql_text_backup := '
+ :sql_text_backup := q'[
 SELECT phv,
        num_execs,
        NULL style,
-       phv||'' - Number of execs: ''||num_execs||'' (''||TRUNC(100*RATIO_TO_REPORT(num_execs) OVER (),2)||''%)'' tooltip
+       phv||' - Number of execs: '||num_execs||' ('||TRUNC(100*RATIO_TO_REPORT(num_execs) OVER (),2)||'%)' tooltip
   FROM (SELECT cost phv,
-               COUNT(DISTINCT NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INSTR(partition_stop,'','',1,4)-INSTR(partition_stop,'','',1,3)-1)),position)||''-''|| 
-                              NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,4)+1,INSTR(partition_stop,'','',1,5)-INSTR(partition_stop,'','',1,4)-1)),cpu_cost)||''-''|| 
-                              NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,5)+1,INSTR(partition_stop,'','',1,6)-INSTR(partition_stop,'','',1,5)-1)),io_cost)||''-''||
-                              NVL(partition_id,0)||''-''||NVL(distribution,''x'')
+               COUNT(DISTINCT NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,3)+1,INSTR(partition_stop,',',1,4)-INSTR(partition_stop,',',1,3)-1)),position)||'-'|| 
+                              NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,4)+1,INSTR(partition_stop,',',1,5)-INSTR(partition_stop,',',1,4)-1)),cpu_cost)||'-'|| 
+                              NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,5)+1,INSTR(partition_stop,',',1,6)-INSTR(partition_stop,',',1,5)-1)),io_cost)||'-'||
+                              NVL(partition_id,0)||'-'||NVL(distribution,'x')
                     ) num_execs
           FROM plan_table
-         WHERE remarks = ''&&sqld360_sqlid.'' 
-           AND statement_id LIKE ''SQLD360_ASH_DATA%'' 
+         WHERE remarks = '&&sqld360_sqlid.' 
+           AND statement_id LIKE 'SQLD360_ASH_DATA%' 
            AND position =  @instance_number@
-           AND ''&&diagnostics_pack.'' = ''Y''
+           AND '&&diagnostics_pack.' = 'Y'
          GROUP BY cost)
  ORDER BY num_execs DESC
-';
+]';
 END;
 / 
 
@@ -242,10 +242,10 @@ DEF tit_14 = '&&tit_14_awr.'
 DEF tit_15 = '&&tit_15_awr.'
 
 BEGIN
-  :sql_text_backup := '
+  :sql_text_backup := q'[
 SELECT b.snap_id snap_id,
-       TO_CHAR(b.begin_interval_time, ''YYYY-MM-DD HH24:MI'')  begin_time, 
-       TO_CHAR(b.end_interval_time, ''YYYY-MM-DD HH24:MI'')  end_time,
+       TO_CHAR(b.begin_interval_time, 'YYYY-MM-DD HH24:MI')  begin_time, 
+       TO_CHAR(b.end_interval_time, 'YYYY-MM-DD HH24:MI')  end_time,
        NVL(phv1 ,0) phv1_&&tit_01_awr.  ,
        NVL(phv2 ,0) phv2_&&tit_02_awr.  ,
        NVL(phv3 ,0) phv3_&&tit_03_awr.  ,
@@ -282,8 +282,8 @@ SELECT b.snap_id snap_id,
                        SUM(executions_delta) execs
                   FROM dba_hist_sqlstat
                  WHERE snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.
-                   AND sql_id = ''&&sqld360_sqlid.''
-                   AND ''&&diagnostics_pack.'' = ''Y''
+                   AND sql_id = '&&sqld360_sqlid.'
+                   AND '&&diagnostics_pack.' = 'Y'
                    AND instance_number = @instance_number@
                    AND plan_hash_value IN (&&phv_01_awr.,&&phv_02_awr.,&&phv_03_awr.,&&phv_04_awr.,&&phv_05_awr.,&&phv_06_awr.,
                                            &&phv_07_awr.,&&phv_08_awr.,&&phv_09_awr.,&&phv_10_awr.,&&phv_11_awr.,&&phv_12_awr.,
@@ -294,7 +294,7 @@ SELECT b.snap_id snap_id,
  WHERE awr.snap_id(+) = b.snap_id
    AND b.snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.
  ORDER BY 3
-';
+]';
 END;
 /
 
@@ -390,22 +390,22 @@ DEF main_table = 'V$ACTIVE_SESSION_HISTORY';
 DEF foot = 'Time in seconds. A single exec with a poor plan impacts more than N executions with a good plan, bigger slice means higher impact';
 --DEF slices = '15';
 BEGIN
- :sql_text_backup := '
+ :sql_text_backup := q'[
 SELECT phv,
        num_samples,
        NULL style,
        --TRUNC(100*RATIO_TO_REPORT(num_samples) OVER (),2) percent,
-       phv||'' - 1s-samples: ''||num_samples||'' (''||TRUNC(100*RATIO_TO_REPORT(num_samples) OVER (),2)||''% of DB Time)'' tooltip
+       phv||' - 1s-samples: '||num_samples||' ('||TRUNC(100*RATIO_TO_REPORT(num_samples) OVER (),2)||'% of DB Time)' tooltip
   FROM (SELECT cost phv,
                COUNT(*) num_samples
           FROM plan_table
-         WHERE remarks = ''&&sqld360_sqlid.'' 
-           AND statement_id = ''SQLD360_ASH_DATA_MEM'' 
+         WHERE remarks = '&&sqld360_sqlid.' 
+           AND statement_id = 'SQLD360_ASH_DATA_MEM' 
            AND position =  @instance_number@
-           AND ''&&diagnostics_pack.'' = ''Y''
+           AND '&&diagnostics_pack.' = 'Y'
          GROUP BY cost)
  ORDER BY num_samples DESC
-';
+]';
 END;
 / 
 
@@ -480,22 +480,22 @@ DEF main_table = 'DBA_HIST_ACTIVE_SESS_HISTORY';
 DEF foot = 'Time in seconds. A single exec with a poor plan impacts more than N executions with a good plan, bigger slice means higher impact';
 --DEF slices = '15';
 BEGIN
- :sql_text_backup := '
+ :sql_text_backup := q'[
 SELECT phv,
        num_samples,
        NULL style,
-       phv||'' - 10s-samples: ''||num_samples||'' (''||TRUNC(100*RATIO_TO_REPORT(num_samples) OVER (),2)||''% of DB Time)'' tooltip
+       phv||' - 10s-samples: '||num_samples||' ('||TRUNC(100*RATIO_TO_REPORT(num_samples) OVER (),2)||'% of DB Time)' tooltip
        --TRUNC(100*RATIO_TO_REPORT(num_samples) OVER (),2) percent,
   FROM (SELECT cost phv,
                SUM(10) num_samples
           FROM plan_table
-         WHERE remarks = ''&&sqld360_sqlid.'' 
-           AND statement_id = ''SQLD360_ASH_DATA_HIST'' 
+         WHERE remarks = '&&sqld360_sqlid.' 
+           AND statement_id = 'SQLD360_ASH_DATA_HIST' 
            AND position =  @instance_number@
-           AND ''&&diagnostics_pack.'' = ''Y''
+           AND '&&diagnostics_pack.' = 'Y'
          GROUP BY cost)
  ORDER BY num_samples DESC
-';
+]';
 END;
 / 
 
@@ -604,10 +604,10 @@ DEF tit_14 = '&&tit_14_awr.'
 DEF tit_15 = '&&tit_15_awr.'
 
 BEGIN
-  :sql_text_backup := '
+  :sql_text_backup := q'[
 SELECT b.snap_id snap_id,
-       TO_CHAR(b.begin_interval_time, ''YYYY-MM-DD HH24:MI'')  begin_time, 
-       TO_CHAR(b.end_interval_time, ''YYYY-MM-DD HH24:MI'')  end_time,
+       TO_CHAR(b.begin_interval_time, 'YYYY-MM-DD HH24:MI')  begin_time, 
+       TO_CHAR(b.end_interval_time, 'YYYY-MM-DD HH24:MI')  end_time,
        NVL(phv1 ,0) phv1_&&tit_01_awr.  ,
        NVL(phv2 ,0) phv2_&&tit_02_awr.  ,
        NVL(phv3 ,0) phv3_&&tit_03_awr.  ,
@@ -644,8 +644,8 @@ SELECT b.snap_id snap_id,
                        TRUNC(SUM(elapsed_time_delta)/1e6,3) elapsed_time
                   FROM dba_hist_sqlstat
                  WHERE snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.
-                   AND sql_id = ''&&sqld360_sqlid.''
-                   AND ''&&diagnostics_pack.'' = ''Y''
+                   AND sql_id = '&&sqld360_sqlid.'
+                   AND '&&diagnostics_pack.' = 'Y'
                    AND instance_number = @instance_number@
                    AND plan_hash_value IN (&&phv_01_awr.,&&phv_02_awr.,&&phv_03_awr.,&&phv_04_awr.,&&phv_05_awr.,&&phv_06_awr.,
                                            &&phv_07_awr.,&&phv_08_awr.,&&phv_09_awr.,&&phv_10_awr.,&&phv_11_awr.,&&phv_12_awr.,
@@ -656,7 +656,7 @@ SELECT b.snap_id snap_id,
  WHERE awr.snap_id(+) = b.snap_id
    AND b.snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.
  ORDER BY 3
-';
+]';
 END;
 /
 
@@ -844,10 +844,10 @@ COL phv14_ NOPRI
 COL phv15_ NOPRI
 
 BEGIN
-  :sql_text_backup := '
+  :sql_text_backup := q'[
 SELECT 0 snap_id,
-       TO_CHAR(start_time, ''YYYY-MM-DD HH24:MI'') begin_time, 
-       TO_CHAR(start_time, ''YYYY-MM-DD HH24:MI'') end_time,
+       TO_CHAR(start_time, 'YYYY-MM-DD HH24:MI') begin_time, 
+       TO_CHAR(start_time, 'YYYY-MM-DD HH24:MI') end_time,
        NVL(phv1 ,0) phv1_&&tit_01.  ,
        NVL(phv2 ,0) phv2_&&tit_02.  ,
        NVL(phv3 ,0) phv3_&&tit_03.  ,
@@ -863,7 +863,7 @@ SELECT 0 snap_id,
        NVL(phv13,0) phv13_&&tit_13. ,
        NVL(phv14,0) phv14_&&tit_14. ,
        NVL(phv15,0) phv15_&&tit_15. 
-  FROM (SELECT TO_DATE(start_time,''YYYYMMDDHH24MI'') start_time,
+  FROM (SELECT TO_DATE(start_time,'YYYYMMDDHH24MI') start_time,
                MAX(CASE WHEN phv = &&phv_01. THEN avg_et_per_exec ELSE NULL END) phv1,
                MAX(CASE WHEN phv = &&phv_02. THEN avg_et_per_exec ELSE NULL END) phv2, 
                MAX(CASE WHEN phv = &&phv_03. THEN avg_et_per_exec ELSE NULL END) phv3, 
@@ -885,29 +885,29 @@ SELECT 0 snap_id,
                   FROM (SELECT SUBSTR(distribution,1,12) start_time,
                                cost phv, 
                                1+86400*(MAX(timestamp)-MIN(timestamp)) et,
-                               NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INSTR(partition_stop,'','',1,4)-INSTR(partition_stop,'','',1,3)-1)),position)||''-''|| 
-                                NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,4)+1,INSTR(partition_stop,'','',1,5)-INSTR(partition_stop,'','',1,4)-1)),cpu_cost)||''-''|| 
-                                NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,5)+1,INSTR(partition_stop,'','',1,6)-INSTR(partition_stop,'','',1,5)-1)),io_cost)||''-''||
-                                NVL(partition_id,0)||''-''||NVL(distribution,''x'') uniq_exec
+                               NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,3)+1,INSTR(partition_stop,',',1,4)-INSTR(partition_stop,',',1,3)-1)),position)||'-'|| 
+                                NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,4)+1,INSTR(partition_stop,',',1,5)-INSTR(partition_stop,',',1,4)-1)),cpu_cost)||'-'|| 
+                                NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,5)+1,INSTR(partition_stop,',',1,6)-INSTR(partition_stop,',',1,5)-1)),io_cost)||'-'||
+                                NVL(partition_id,0)||'-'||NVL(distribution,'x') uniq_exec
                           FROM plan_table
-                         WHERE statement_id = ''SQLD360_ASH_DATA_MEM''
+                         WHERE statement_id = 'SQLD360_ASH_DATA_MEM'
                            AND position =  @instance_number@
-                           AND remarks = ''&&sqld360_sqlid.''
-                           AND ''&&diagnostics_pack.'' = ''Y''
+                           AND remarks = '&&sqld360_sqlid.'
+                           AND '&&diagnostics_pack.' = 'Y'
                            AND partition_id IS NOT NULL
                            AND distribution IS NOT NULL
                            AND cost IN (&&phv_01.,&&phv_02.,&&phv_03.,&&phv_04.,&&phv_05.,&&phv_06.,
                                         &&phv_07.,&&phv_08.,&&phv_09.,&&phv_10.,&&phv_11.,&&phv_12.,
                                         &&phv_13.,&&phv_14.,&&phv_15.)
                          GROUP BY SUBSTR(distribution,1,12), cost, 
-                                  NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INSTR(partition_stop,'','',1,4)-INSTR(partition_stop,'','',1,3)-1)),position)||''-''|| 
-                                   NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,4)+1,INSTR(partition_stop,'','',1,5)-INSTR(partition_stop,'','',1,4)-1)),cpu_cost)||''-''|| 
-                                   NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,5)+1,INSTR(partition_stop,'','',1,6)-INSTR(partition_stop,'','',1,5)-1)),io_cost)||''-''||
-                                   NVL(partition_id,0)||''-''||NVL(distribution,''x''))
+                                  NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,3)+1,INSTR(partition_stop,',',1,4)-INSTR(partition_stop,',',1,3)-1)),position)||'-'|| 
+                                   NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,4)+1,INSTR(partition_stop,',',1,5)-INSTR(partition_stop,',',1,4)-1)),cpu_cost)||'-'|| 
+                                   NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,5)+1,INSTR(partition_stop,',',1,6)-INSTR(partition_stop,',',1,5)-1)),io_cost)||'-'||
+                                   NVL(partition_id,0)||'-'||NVL(distribution,'x'))
                  GROUP BY start_time, phv)
-         GROUP BY TO_DATE(start_time,''YYYYMMDDHH24MI''))
+         GROUP BY TO_DATE(start_time,'YYYYMMDDHH24MI'))
  ORDER BY 3
-';
+]';
 END;
 /
 
@@ -1093,10 +1093,10 @@ COL phv14_ NOPRI
 COL phv15_ NOPRI
 
 BEGIN
-  :sql_text_backup := '
+  :sql_text_backup := q'[
 SELECT b.snap_id snap_id,
-       TO_CHAR(b.begin_interval_time, ''YYYY-MM-DD HH24:MI'')  begin_time, 
-       TO_CHAR(b.end_interval_time, ''YYYY-MM-DD HH24:MI'')  end_time,
+       TO_CHAR(b.begin_interval_time, 'YYYY-MM-DD HH24:MI')  begin_time, 
+       TO_CHAR(b.end_interval_time, 'YYYY-MM-DD HH24:MI')  end_time,
        NVL(phv1 ,0) phv1_&&tit_01.  ,
        NVL(phv2 ,0) phv2_&&tit_02.  ,
        NVL(phv3 ,0) phv3_&&tit_03.  ,
@@ -1112,7 +1112,7 @@ SELECT b.snap_id snap_id,
        NVL(phv13,0) phv13_&&tit_13. ,
        NVL(phv14,0) phv14_&&tit_14. ,
        NVL(phv15,0) phv15_&&tit_15. 
-  FROM (SELECT TO_DATE(start_time,''YYYYMMDDHH24'') start_time,
+  FROM (SELECT TO_DATE(start_time,'YYYYMMDDHH24') start_time,
                MIN(starting_snap_id) snap_id,
                MAX(CASE WHEN phv = &&phv_01. THEN avg_et_per_exec ELSE NULL END) phv1,
                MAX(CASE WHEN phv = &&phv_02. THEN avg_et_per_exec ELSE NULL END) phv2, 
@@ -1137,32 +1137,32 @@ SELECT b.snap_id snap_id,
                                cost phv, 
                                MIN(cardinality) starting_snap_id,
                                10+86400*(MAX(timestamp)-MIN(timestamp)) et,
-                               NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INSTR(partition_stop,'','',1,4)-INSTR(partition_stop,'','',1,3)-1)),position)||''-''|| 
-                                NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,4)+1,INSTR(partition_stop,'','',1,5)-INSTR(partition_stop,'','',1,4)-1)),cpu_cost)||''-''|| 
-                                NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,5)+1,INSTR(partition_stop,'','',1,6)-INSTR(partition_stop,'','',1,5)-1)),io_cost)||''-''||
-                                NVL(partition_id,0)||''-''||NVL(distribution,''x'') uniq_exec
+                               NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,3)+1,INSTR(partition_stop,',',1,4)-INSTR(partition_stop,',',1,3)-1)),position)||'-'|| 
+                                NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,4)+1,INSTR(partition_stop,',',1,5)-INSTR(partition_stop,',',1,4)-1)),cpu_cost)||'-'|| 
+                                NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,5)+1,INSTR(partition_stop,',',1,6)-INSTR(partition_stop,',',1,5)-1)),io_cost)||'-'||
+                                NVL(partition_id,0)||'-'||NVL(distribution,'x') uniq_exec
                           FROM plan_table
-                         WHERE statement_id = ''SQLD360_ASH_DATA_HIST''
+                         WHERE statement_id = 'SQLD360_ASH_DATA_HIST'
                            AND position =  @instance_number@
-                           AND remarks = ''&&sqld360_sqlid.''
-                           AND ''&&diagnostics_pack.'' = ''Y''
+                           AND remarks = '&&sqld360_sqlid.'
+                           AND '&&diagnostics_pack.' = 'Y'
                            AND partition_id IS NOT NULL
                            AND distribution IS NOT NULL
                            AND cost IN (&&phv_01.,&&phv_02.,&&phv_03.,&&phv_04.,&&phv_05.,&&phv_06.,
                                         &&phv_07.,&&phv_08.,&&phv_09.,&&phv_10.,&&phv_11.,&&phv_12.,
                                         &&phv_13.,&&phv_14.,&&phv_15.)
                          GROUP BY SUBSTR(distribution,1,10), cost, 
-                                  NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,3)+1,INSTR(partition_stop,'','',1,4)-INSTR(partition_stop,'','',1,3)-1)),position)||''-''|| 
-                                   NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,4)+1,INSTR(partition_stop,'','',1,5)-INSTR(partition_stop,'','',1,4)-1)),cpu_cost)||''-''|| 
-                                   NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'','',1,5)+1,INSTR(partition_stop,'','',1,6)-INSTR(partition_stop,'','',1,5)-1)),io_cost)||''-''||
-                                   NVL(partition_id,0)||''-''||NVL(distribution,''x''))
+                                  NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,3)+1,INSTR(partition_stop,',',1,4)-INSTR(partition_stop,',',1,3)-1)),position)||'-'|| 
+                                   NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,4)+1,INSTR(partition_stop,',',1,5)-INSTR(partition_stop,',',1,4)-1)),cpu_cost)||'-'|| 
+                                   NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,5)+1,INSTR(partition_stop,',',1,6)-INSTR(partition_stop,',',1,5)-1)),io_cost)||'-'||
+                                   NVL(partition_id,0)||'-'||NVL(distribution,'x'))
                  GROUP BY start_time, phv, starting_snap_id)
-         GROUP BY TO_DATE(start_time,''YYYYMMDDHH24'')) ash, 
+         GROUP BY TO_DATE(start_time,'YYYYMMDDHH24')) ash, 
        dba_hist_snapshot b
  WHERE ash.snap_id(+) = b.snap_id
    AND b.snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.
  ORDER BY 3
-';
+]';
 END;
 /
 
@@ -1291,10 +1291,10 @@ DEF tit_14 = '&&tit_14_awr.'
 DEF tit_15 = '&&tit_15_awr.'
 
 BEGIN
-  :sql_text_backup := '
+  :sql_text_backup := q'[
 SELECT b.snap_id snap_id,
-       TO_CHAR(b.begin_interval_time, ''YYYY-MM-DD HH24:MI'')  begin_time, 
-       TO_CHAR(b.end_interval_time, ''YYYY-MM-DD HH24:MI'')  end_time,
+       TO_CHAR(b.begin_interval_time, 'YYYY-MM-DD HH24:MI')  begin_time, 
+       TO_CHAR(b.end_interval_time, 'YYYY-MM-DD HH24:MI')  end_time,
        NVL(phv1 ,0) phv1_&&tit_01.  ,
        NVL(phv2 ,0) phv2_&&tit_02.  ,
        NVL(phv3 ,0) phv3_&&tit_03.  ,
@@ -1331,8 +1331,8 @@ SELECT b.snap_id snap_id,
                        TRUNC(SUM(elapsed_time_total)/SUM(NVL(NULLIF(executions_total,0),1))/1e6,3) avg_et_per_exec
                   FROM dba_hist_sqlstat
                  WHERE snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.
-                   AND sql_id = ''&&sqld360_sqlid.''
-                   AND ''&&diagnostics_pack.'' = ''Y''
+                   AND sql_id = '&&sqld360_sqlid.'
+                   AND '&&diagnostics_pack.' = 'Y'
                    AND instance_number = @instance_number@
                    AND plan_hash_value IN (&&phv_01_awr.,&&phv_02_awr.,&&phv_03_awr.,&&phv_04_awr.,&&phv_05_awr.,&&phv_06_awr.,
                                            &&phv_07_awr.,&&phv_08_awr.,&&phv_09_awr.,&&phv_10_awr.,&&phv_11_awr.,&&phv_12_awr.,
@@ -1343,7 +1343,7 @@ SELECT b.snap_id snap_id,
  WHERE awr.snap_id(+) = b.snap_id
    AND b.snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.
  ORDER BY 3
-';
+]';
 END;
 /
 
@@ -1472,10 +1472,10 @@ DEF tit_14 = '&&tit_14_awr.'
 DEF tit_15 = '&&tit_15_awr.'
 
 BEGIN
-  :sql_text_backup := '
+  :sql_text_backup := q'[
 SELECT b.snap_id snap_id,
-       TO_CHAR(b.begin_interval_time, ''YYYY-MM-DD HH24:MI'')  begin_time, 
-       TO_CHAR(b.end_interval_time, ''YYYY-MM-DD HH24:MI'')  end_time,
+       TO_CHAR(b.begin_interval_time, 'YYYY-MM-DD HH24:MI')  begin_time, 
+       TO_CHAR(b.end_interval_time, 'YYYY-MM-DD HH24:MI')  end_time,
        NVL(phv1 ,0) phv1_&&tit_01.  ,
        NVL(phv2 ,0) phv2_&&tit_02.  ,
        NVL(phv3 ,0) phv3_&&tit_03.  ,
@@ -1513,8 +1513,8 @@ SELECT b.snap_id snap_id,
                        TRUNC(SUM(buffer_gets_total) / SUM(NVL(NULLIF(executions_total,0),1)) / (SUM(NVL(NULLIF(rows_processed_total,0),1))/SUM(NVL(NULLIF(executions_total,0),1))),3) avg_gets_per_row_per_exec
                   FROM dba_hist_sqlstat
                  WHERE snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.
-                   AND sql_id = ''&&sqld360_sqlid.''
-                   AND ''&&diagnostics_pack.'' = ''Y''
+                   AND sql_id = '&&sqld360_sqlid.'
+                   AND '&&diagnostics_pack.' = 'Y'
                    AND instance_number = @instance_number@
                    AND plan_hash_value IN (&&phv_01_awr.,&&phv_02_awr.,&&phv_03_awr.,&&phv_04_awr.,&&phv_05_awr.,&&phv_06_awr.,
                                            &&phv_07_awr.,&&phv_08_awr.,&&phv_09_awr.,&&phv_10_awr.,&&phv_11_awr.,&&phv_12_awr.,
@@ -1525,7 +1525,7 @@ SELECT b.snap_id snap_id,
  WHERE awr.snap_id(+) = b.snap_id
    AND b.snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.
  ORDER BY 3
-';
+]';
 END;
 /
 
@@ -1659,10 +1659,10 @@ DEF tit_14 = '&&tit_14_awr.'
 DEF tit_15 = '&&tit_15_awr.'
 
 BEGIN
-  :sql_text_backup := '
+  :sql_text_backup := q'[
 SELECT b.snap_id snap_id,
-       TO_CHAR(b.begin_interval_time, ''YYYY-MM-DD HH24:MI'')  begin_time, 
-       TO_CHAR(b.end_interval_time, ''YYYY-MM-DD HH24:MI'')  end_time,
+       TO_CHAR(b.begin_interval_time, 'YYYY-MM-DD HH24:MI')  begin_time, 
+       TO_CHAR(b.end_interval_time, 'YYYY-MM-DD HH24:MI')  end_time,
        NVL(phv1 ,0) phv1_&&tit_01.  ,
        NVL(phv2 ,0) phv2_&&tit_02.  ,
        NVL(phv3 ,0) phv3_&&tit_03.  ,
@@ -1699,8 +1699,8 @@ SELECT b.snap_id snap_id,
                        MEDIAN(optimizer_cost) optimizer_cost
                   FROM dba_hist_sqlstat
                  WHERE snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.
-                   AND sql_id = ''&&sqld360_sqlid.''
-                   AND ''&&diagnostics_pack.'' = ''Y''
+                   AND sql_id = '&&sqld360_sqlid.'
+                   AND '&&diagnostics_pack.' = 'Y'
                    AND instance_number = @instance_number@
                    AND plan_hash_value IN (&&phv_01_awr.,&&phv_02_awr.,&&phv_03_awr.,&&phv_04_awr.,&&phv_05_awr.,&&phv_06_awr.,
                                            &&phv_07_awr.,&&phv_08_awr.,&&phv_09_awr.,&&phv_10_awr.,&&phv_11_awr.,&&phv_12_awr.,
@@ -1711,7 +1711,7 @@ SELECT b.snap_id snap_id,
  WHERE awr.snap_id(+) = b.snap_id
    AND b.snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.
  ORDER BY 3
-';
+]';
 END;
 /
 

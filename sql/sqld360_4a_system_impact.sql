@@ -39,10 +39,10 @@ DEF main_table = 'DBA_HIST_SQLSTAT';
 DEF vaxis = 'SQL Execute Elapsed Time in secs';
 DEF vbaseline = '';
 BEGIN
-  :sql_text_backup := '
+  :sql_text_backup := q'[
 SELECT MIN(a.snap_id) snap_id, 
-       TO_CHAR(c.begin_interval_time, ''YYYY-MM-DD HH24:MI'')  begin_time, 
-       TO_CHAR(c.end_interval_time, ''YYYY-MM-DD HH24:MI'')  end_time,
+       TO_CHAR(c.begin_interval_time, 'YYYY-MM-DD HH24:MI')  begin_time, 
+       TO_CHAR(c.end_interval_time, 'YYYY-MM-DD HH24:MI')  end_time,
        SUM(NVL(b.sql_val,0))/1000000 sql_elapsed,
        SUM(a.system_val)/1000000 system_elapsed, 
        TRUNC((SUM(NVL(b.sql_val,0))/SUM(a.system_val))*100,3) sql_impact_percentage,
@@ -60,10 +60,10 @@ SELECT MIN(a.snap_id) snap_id,
        0 dummy_15
   FROM (SELECT snap_id, instance_number, value-LAG(value,1) OVER (PARTITION BY instance_number ORDER BY snap_id ) system_val 
           FROM dba_hist_sys_time_model 
-         WHERE stat_name LIKE ''sql execute%'') a,
+         WHERE stat_name LIKE 'sql execute%') a,
        (SELECT snap_id, instance_number, elapsed_time_delta sql_val
           FROM dba_hist_sqlstat
-         WHERE sql_id = ''&&sqld360_sqlid.'') b,
+         WHERE sql_id = '&&sqld360_sqlid.') b,
        (SELECT snap_id, instance_number, begin_interval_time, end_interval_time
           FROM dba_hist_snapshot
          WHERE snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.) c
@@ -71,16 +71,16 @@ SELECT MIN(a.snap_id) snap_id,
    AND a.instance_number = b.instance_number(+)
    AND a.instance_number = @instance_number@
    AND a.snap_id = c.snap_id
-   AND ''&&diagnostics_pack.'' = ''Y''
+   AND '&&diagnostics_pack.' = 'Y'
    AND a.instance_number = c.instance_number
    AND a.system_val > 0 -- skip the first snapshot where we can''t compute DELTA
                         -- and those where the value would be negative (restart in between)
  GROUP BY
-       TO_CHAR(c.begin_interval_time, ''YYYY-MM-DD HH24:MI''), 
-       TO_CHAR(c.end_interval_time, ''YYYY-MM-DD HH24:MI'')
+       TO_CHAR(c.begin_interval_time, 'YYYY-MM-DD HH24:MI'), 
+       TO_CHAR(c.end_interval_time, 'YYYY-MM-DD HH24:MI')
  ORDER BY
-       TO_CHAR(c.end_interval_time, ''YYYY-MM-DD HH24:MI'')
-';
+       TO_CHAR(c.end_interval_time, 'YYYY-MM-DD HH24:MI')
+]';
 END;
 /
 
@@ -176,10 +176,10 @@ DEF vaxis = 'Active Sessions running the SQL'
 
 
 BEGIN
-  :sql_text_backup := '
+  :sql_text_backup := q'[
 SELECT 0 snap_id,
-       TO_CHAR(end_time, ''YYYY-MM-DD HH24:MI'') begin_time, 
-       TO_CHAR(end_time, ''YYYY-MM-DD HH24:MI'') end_time,
+       TO_CHAR(end_time, 'YYYY-MM-DD HH24:MI') begin_time, 
+       TO_CHAR(end_time, 'YYYY-MM-DD HH24:MI') end_time,
        num_sessions_min,
        num_sessions_oncpu_min,
        0 dummy_03,
@@ -195,21 +195,21 @@ SELECT 0 snap_id,
        0 dummy_13,
        0 dummy_14,
        0 dummy_15
-  FROM (SELECT TRUNC(end_time,''mi'') end_time,
+  FROM (SELECT TRUNC(end_time,'mi') end_time,
                MAX(num_sessions) num_sessions_min,
                MAX(num_sessions_oncpu) num_sessions_oncpu_min
           FROM (SELECT timestamp end_time,
-                       COUNT(position||''-''||cpu_cost||''-''||io_cost) num_sessions, 
-                       COUNT(CASE WHEN object_node = ''ON CPU'' THEN position||''-''||cpu_cost||''-''||io_cost ELSE NULL END) num_sessions_oncpu
+                       COUNT(position||'-'||cpu_cost||'-'||io_cost) num_sessions, 
+                       COUNT(CASE WHEN object_node = 'ON CPU' THEN position||'-'||cpu_cost||'-'||io_cost ELSE NULL END) num_sessions_oncpu
                   FROM plan_table
-                 WHERE statement_id = ''SQLD360_ASH_DATA_MEM''
+                 WHERE statement_id = 'SQLD360_ASH_DATA_MEM'
                    AND position =  @instance_number@
-                   AND remarks = ''&&sqld360_sqlid.''
-                   AND ''&&diagnostics_pack.'' = ''Y''
+                   AND remarks = '&&sqld360_sqlid.'
+                   AND '&&diagnostics_pack.' = 'Y'
                  GROUP BY timestamp)
-         GROUP BY TRUNC(end_time,''mi''))
+         GROUP BY TRUNC(end_time,'mi'))
  ORDER BY 3
-';
+]';
 END;
 /
 
@@ -305,10 +305,10 @@ DEF vaxis = 'Active Sessions running the SQL'
 
 
 BEGIN
-  :sql_text_backup := '
+  :sql_text_backup := q'[
 SELECT b.snap_id snap_id,
-       TO_CHAR(b.begin_interval_time, ''YYYY-MM-DD HH24:MI'')  begin_time, 
-       TO_CHAR(b.end_interval_time, ''YYYY-MM-DD HH24:MI'')  end_time,
+       TO_CHAR(b.begin_interval_time, 'YYYY-MM-DD HH24:MI')  begin_time, 
+       TO_CHAR(b.end_interval_time, 'YYYY-MM-DD HH24:MI')  end_time,
        NVL(num_sessions_hour,0) num_sessions_hour,
        NVL(num_sessions_oncpu_hour,0) num_sessions_oncpu_hour,
        0 dummy_03,
@@ -329,20 +329,20 @@ SELECT b.snap_id snap_id,
                MAX(num_sessions_oncpu) num_sessions_oncpu_hour
           FROM (SELECT cardinality snap_id,
                        timestamp end_time,
-                       COUNT(position||''-''||cpu_cost||''-''||io_cost) num_sessions, 
-                       COUNT(CASE WHEN object_node = ''ON CPU'' THEN position||''-''||cpu_cost||''-''||io_cost ELSE NULL END) num_sessions_oncpu
+                       COUNT(position||'-'||cpu_cost||'-'||io_cost) num_sessions, 
+                       COUNT(CASE WHEN object_node = 'ON CPU' THEN position||'-'||cpu_cost||'-'||io_cost ELSE NULL END) num_sessions_oncpu
                   FROM plan_table
-                 WHERE statement_id = ''SQLD360_ASH_DATA_HIST''
+                 WHERE statement_id = 'SQLD360_ASH_DATA_HIST'
                    AND position =  @instance_number@
-                   AND remarks = ''&&sqld360_sqlid.''
-                   AND ''&&diagnostics_pack.'' = ''Y''
+                   AND remarks = '&&sqld360_sqlid.'
+                   AND '&&diagnostics_pack.' = 'Y'
                  GROUP BY cardinality, timestamp)
          GROUP BY snap_id) ash,
        dba_hist_snapshot b
  WHERE ash.snap_id(+) = b.snap_id
    AND b.snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.
  ORDER BY 3
-';
+]';
 END;
 /
 
@@ -457,10 +457,10 @@ DEF main_table = 'DBA_HIST_SQLSTAT';
 DEF vaxis = 'Buffer gets and disk reads';
 DEF vbaseline = '';
 BEGIN
-  :sql_text_backup := '
+  :sql_text_backup := q'[
 SELECT MIN(a.snap_id) snap_id, 
-       TO_CHAR(a.begin_interval_time, ''YYYY-MM-DD HH24:MI'')  begin_time, 
-       TO_CHAR(a.end_interval_time, ''YYYY-MM-DD HH24:MI'')  end_time,
+       TO_CHAR(a.begin_interval_time, 'YYYY-MM-DD HH24:MI')  begin_time, 
+       TO_CHAR(a.end_interval_time, 'YYYY-MM-DD HH24:MI')  end_time,
        NVL(SUM(b.buffer_gets_delta),0) buffer_gets,
        NVL(SUM(b.disk_reads_delta),0) physical_reads, 
        0 dummy_03,
@@ -478,20 +478,20 @@ SELECT MIN(a.snap_id) snap_id,
        0 dummy_15
   FROM (SELECT snap_id, instance_number, buffer_gets_delta, disk_reads_delta
           FROM dba_hist_sqlstat
-         WHERE sql_id = ''&&sqld360_sqlid.'') b,
+         WHERE sql_id = '&&sqld360_sqlid.') b,
        (SELECT snap_id, instance_number, begin_interval_time, end_interval_time
           FROM dba_hist_snapshot
          WHERE snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.) a
  WHERE a.snap_id = b.snap_id(+)
    AND a.instance_number = b.instance_number(+)
-   AND ''&&diagnostics_pack.'' = ''Y''
+   AND '&&diagnostics_pack.' = 'Y'
    AND a.instance_number = @instance_number@
  GROUP BY
-       TO_CHAR(a.begin_interval_time, ''YYYY-MM-DD HH24:MI''), 
-       TO_CHAR(a.end_interval_time, ''YYYY-MM-DD HH24:MI'')
+       TO_CHAR(a.begin_interval_time, 'YYYY-MM-DD HH24:MI'), 
+       TO_CHAR(a.end_interval_time, 'YYYY-MM-DD HH24:MI')
  ORDER BY
-       TO_CHAR(a.end_interval_time, ''YYYY-MM-DD HH24:MI'')
-';
+       TO_CHAR(a.end_interval_time, 'YYYY-MM-DD HH24:MI')
+]';
 END;
 /
 
@@ -605,10 +605,10 @@ DEF main_table = 'DBA_HIST_SQLSTAT';
 DEF vaxis = 'Rows processed and Fetch calls';
 DEF vbaseline = '';
 BEGIN
-  :sql_text_backup := '
+  :sql_text_backup := q'[
 SELECT MIN(a.snap_id) snap_id, 
-       TO_CHAR(a.begin_interval_time, ''YYYY-MM-DD HH24:MI'')  begin_time, 
-       TO_CHAR(a.end_interval_time, ''YYYY-MM-DD HH24:MI'')  end_time,
+       TO_CHAR(a.begin_interval_time, 'YYYY-MM-DD HH24:MI')  begin_time, 
+       TO_CHAR(a.end_interval_time, 'YYYY-MM-DD HH24:MI')  end_time,
        NVL(SUM(b.rows_processed_delta),0) rows_processed,
        NVL(SUM(b.fetches_delta),0) fetch_calls, 
        0 dummy_03,
@@ -626,20 +626,20 @@ SELECT MIN(a.snap_id) snap_id,
        0 dummy_15
   FROM (SELECT snap_id, instance_number, rows_processed_delta, fetches_delta
           FROM dba_hist_sqlstat
-         WHERE sql_id = ''&&sqld360_sqlid.'') b,
+         WHERE sql_id = '&&sqld360_sqlid.') b,
        (SELECT snap_id, instance_number, begin_interval_time, end_interval_time
           FROM dba_hist_snapshot
          WHERE snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.) a
  WHERE a.snap_id = b.snap_id(+)
    AND a.instance_number = b.instance_number(+)
-   AND ''&&diagnostics_pack.'' = ''Y''
+   AND '&&diagnostics_pack.' = 'Y'
    AND a.instance_number = @instance_number@
  GROUP BY
-       TO_CHAR(a.begin_interval_time, ''YYYY-MM-DD HH24:MI''), 
-       TO_CHAR(a.end_interval_time, ''YYYY-MM-DD HH24:MI'')
+       TO_CHAR(a.begin_interval_time, 'YYYY-MM-DD HH24:MI'), 
+       TO_CHAR(a.end_interval_time, 'YYYY-MM-DD HH24:MI')
  ORDER BY
-       TO_CHAR(a.end_interval_time, ''YYYY-MM-DD HH24:MI'')
-';
+       TO_CHAR(a.end_interval_time, 'YYYY-MM-DD HH24:MI')
+]';
 END;
 /
 
@@ -754,10 +754,10 @@ DEF main_table = 'DBA_HIST_SQLSTAT';
 DEF vaxis = 'Executions and Parse calls';
 DEF vbaseline = '';
 BEGIN
-  :sql_text_backup := '
+  :sql_text_backup := q'[
 SELECT MIN(a.snap_id) snap_id, 
-       TO_CHAR(a.begin_interval_time, ''YYYY-MM-DD HH24:MI'')  begin_time, 
-       TO_CHAR(a.end_interval_time, ''YYYY-MM-DD HH24:MI'')  end_time,
+       TO_CHAR(a.begin_interval_time, 'YYYY-MM-DD HH24:MI')  begin_time, 
+       TO_CHAR(a.end_interval_time, 'YYYY-MM-DD HH24:MI')  end_time,
        NVL(SUM(b.executions_delta),0) executions_delta,
        NVL(SUM(b.parse_calls_delta),0) parse_calls, 
        0 dummy_03,
@@ -775,20 +775,20 @@ SELECT MIN(a.snap_id) snap_id,
        0 dummy_15
   FROM (SELECT snap_id, instance_number, executions_delta, parse_calls_delta
           FROM dba_hist_sqlstat
-         WHERE sql_id = ''&&sqld360_sqlid.'') b,
+         WHERE sql_id = '&&sqld360_sqlid.') b,
        (SELECT snap_id, instance_number, begin_interval_time, end_interval_time
           FROM dba_hist_snapshot
          WHERE snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.) a
  WHERE a.snap_id = b.snap_id(+)
    AND a.instance_number = b.instance_number(+)
-   AND ''&&diagnostics_pack.'' = ''Y''
+   AND '&&diagnostics_pack.' = 'Y'
    AND a.instance_number = @instance_number@
  GROUP BY
-       TO_CHAR(a.begin_interval_time, ''YYYY-MM-DD HH24:MI''), 
-       TO_CHAR(a.end_interval_time, ''YYYY-MM-DD HH24:MI'')
+       TO_CHAR(a.begin_interval_time, 'YYYY-MM-DD HH24:MI'), 
+       TO_CHAR(a.end_interval_time, 'YYYY-MM-DD HH24:MI')
  ORDER BY
-       TO_CHAR(a.end_interval_time, ''YYYY-MM-DD HH24:MI'')
-';
+       TO_CHAR(a.end_interval_time, 'YYYY-MM-DD HH24:MI')
+]';
 END;
 /
 
@@ -899,10 +899,10 @@ DEF main_table = 'DBA_HIST_SQLSTAT';
 DEF vaxis = 'Number of Versions';
 DEF vbaseline = '';
 BEGIN
-  :sql_text_backup := '
+  :sql_text_backup := q'[
 SELECT MIN(a.snap_id) snap_id, 
-       TO_CHAR(a.begin_interval_time, ''YYYY-MM-DD HH24:MI'')  begin_time, 
-       TO_CHAR(a.end_interval_time, ''YYYY-MM-DD HH24:MI'')  end_time,
+       TO_CHAR(a.begin_interval_time, 'YYYY-MM-DD HH24:MI')  begin_time, 
+       TO_CHAR(a.end_interval_time, 'YYYY-MM-DD HH24:MI')  end_time,
        SUM(NVL(b.version_count,0)) version_count,
        0 dummy_02, 
        0 dummy_03,
@@ -920,20 +920,20 @@ SELECT MIN(a.snap_id) snap_id,
        0 dummy_15
   FROM (SELECT snap_id, instance_number, version_count
           FROM dba_hist_sqlstat
-         WHERE sql_id = ''&&sqld360_sqlid.'') b,
+         WHERE sql_id = '&&sqld360_sqlid.') b,
        (SELECT snap_id, instance_number, begin_interval_time, end_interval_time
           FROM dba_hist_snapshot
          WHERE snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.) a
  WHERE a.snap_id = b.snap_id(+)
    AND a.instance_number = b.instance_number(+)
-   AND ''&&diagnostics_pack.'' = ''Y''
+   AND '&&diagnostics_pack.' = 'Y'
    AND a.instance_number = @instance_number@
  GROUP BY
-       TO_CHAR(a.begin_interval_time, ''YYYY-MM-DD HH24:MI''), 
-       TO_CHAR(a.end_interval_time, ''YYYY-MM-DD HH24:MI'')
+       TO_CHAR(a.begin_interval_time, 'YYYY-MM-DD HH24:MI'), 
+       TO_CHAR(a.end_interval_time, 'YYYY-MM-DD HH24:MI')
  ORDER BY
-       TO_CHAR(a.end_interval_time, ''YYYY-MM-DD HH24:MI'')
-';
+       TO_CHAR(a.end_interval_time, 'YYYY-MM-DD HH24:MI')
+]';
 END;
 /
 

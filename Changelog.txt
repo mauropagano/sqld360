@@ -4,6 +4,13 @@ Changelog
 I suggest to rely on Github for details about code changes, this will only be a macro about "functionalities"
 Was supposed to start on day 1, better late than never no? :-)
 
+v1703
+=====
+1. Introduced SUBSTR around low/high_value conversion to avoid SQL*Plus crashing with spurious raw data
+2. Moved most of the SQL to q'[]' notation (internal improvement, no user impact)
+3. Introduced subtree impact on plan tree, will keep both plan trees in place for some time
+4. New standalone script sqld360_create_sql_baseline.sql to help creating baselines from existing plans
+
 v1702
 =====
 1. Added "trend" line to avg X/exec reports (section 4b)
