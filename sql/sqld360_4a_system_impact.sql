@@ -432,6 +432,134 @@ DEF skip_lch = 'Y';
 -------------------------
 -------------------------
 
+DEF main_table = 'DBA_HIST_ACTIVE_SESS_HISTORY';
+DEF abstract = 'Distinct sessions executing this SQL';
+DEF foot = 'Chart represents how many distinct sessions executed this SQL per snap_id'
+DEF vaxis = 'Distinct Sessions running the SQL'
+
+
+BEGIN
+  :sql_text_backup := q'[
+SELECT b.snap_id snap_id,
+       TO_CHAR(b.begin_interval_time, 'YYYY-MM-DD HH24:MI')  begin_time, 
+       TO_CHAR(b.end_interval_time, 'YYYY-MM-DD HH24:MI')  end_time,
+       NVL(unique_sessions,0) unique_sessions,
+       0 dummy_02,
+       0 dummy_03,
+       0 dummy_04,
+       0 dummy_05,
+       0 dummy_06,
+       0 dummy_07,
+       0 dummy_08,
+       0 dummy_09,
+       0 dummy_10,
+       0 dummy_11,
+       0 dummy_12,
+       0 dummy_13,
+       0 dummy_14,
+       0 dummy_15
+  FROM (SELECT cardinality snap_id,
+               COUNT(DISTINCT position||'-'||cpu_cost||'-'||io_cost) unique_sessions
+          FROM plan_table
+         WHERE statement_id = 'SQLD360_ASH_DATA_HIST'
+           AND position =  @instance_number@
+           AND remarks = '&&sqld360_sqlid.'
+           AND '&&diagnostics_pack.' = 'Y'
+         GROUP BY cardinality) ash,
+       dba_hist_snapshot b
+ WHERE ash.snap_id(+) = b.snap_id
+   AND b.snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.
+ ORDER BY 3
+]';
+END;
+/
+
+DEF chartype = 'LineChart';
+DEF stacked = '';
+
+DEF tit_01 = 'Sessions';
+DEF tit_02 = '';
+DEF tit_03 = '';
+DEF tit_04 = '';
+DEF tit_05 = '';
+DEF tit_06 = '';
+DEF tit_07 = '';
+DEF tit_08 = '';
+DEF tit_09 = '';
+DEF tit_10 = '';
+DEF tit_11 = '';
+DEF tit_12 = '';
+DEF tit_13 = '';
+DEF tit_14 = '';
+DEF tit_15 = '';
+
+DEF skip_lch = '';
+DEF skip_all = '&&is_single_instance.';
+DEF title = 'Distinct number of sessions executing for Cluster';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', 'position');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = '';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 1;
+DEF title = 'Distinct number of sessions executing for Instance 1';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '1');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = '';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 2;
+DEF title = 'Distinct number of sessions executing for Instance 2';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '2');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = '';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 3;
+DEF title = 'Distinct number of sessions executing for Instance 3';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '3');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = '';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 4;
+DEF title = 'Distinct number of sessions executing for Instance 4';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '4');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = '';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 5;
+DEF title = 'Distinct number of sessions executing for Instance 5';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '5');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = '';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 6;
+DEF title = 'Distinct number of sessions executing for Instance 6';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '6');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = '';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 7;
+DEF title = 'Distinct number of sessions executing for Instance 7';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '7');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = '';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 8;
+DEF title = 'Distinct number of sessions executing for Instance 8';
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '8');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = 'Y';
+
+-------------------------
+-------------------------
+
 DEF chartype = 'LineChart';
 DEF stacked = '';
 DEF tit_01 = 'Buffer Gets';

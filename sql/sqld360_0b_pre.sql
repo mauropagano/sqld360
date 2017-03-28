@@ -9,8 +9,8 @@ CL COL;
 COL row_num FOR 9999999 HEA '#' PRI;
 
 -- version
-DEF sqld360_vYYNN = 'v1703';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2016-03-06)';
+DEF sqld360_vYYNN = 'v1704';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2016-03-28)';
 DEF sqld360_prefix = 'sqld360';
 
 -- parameters
@@ -497,10 +497,15 @@ DEF wait_class_colors = 'CASE wait_class WHEN ''''''''CPU'''''''' THEN ''''''''3
 DEF wait_class_colors2 = ' WHEN ''''''''Concurrency'''''''' THEN ''''''''871C12'''''''' WHEN ''''''''Application'''''''' THEN ''''''''C42A05'''''''' WHEN ''''''''Commit'''''''' THEN ''''''''EA6A05'''''''' WHEN ''''''''Configuration'''''''' THEN ''''''''594611''''''''  ';
 DEF wait_class_colors3 = ' WHEN ''''''''Administrative'''''''' THEN ''''''''75763E''''''''  WHEN ''''''''Network'''''''' THEN ''''''''989779'''''''' WHEN ''''''''Other'''''''' THEN ''''''''F571A0'''''''' ';
 DEF wait_class_colors4 = ' WHEN ''''''''Cluster'''''''' THEN ''''''''CEC3B5'''''''' WHEN ''''''''Queueing'''''''' THEN ''''''''C6BAA5'''''''' END';
+--DEF wait_class_colors =  "CASE wait_class WHEN 'CPU' THEN '34CF27' WHEN 'Scheduler' THEN '9FFA9D' WHEN 'User I/O' THEN '0252D7' WHEN 'System I/O' THEN '1E96DD' ";
+--DEF wait_class_colors2 = " WHEN 'Concurrency' THEN '871C12' WHEN 'Application' THEN 'C42A05' WHEN 'Commit' THEN 'EA6A05' WHEN 'Configuration' THEN '594611'  ";
+--DEF wait_class_colors3 = " WHEN 'Administrative' THEN '75763E'  WHEN 'Network' THEN '989779' WHEN 'Other' THEN 'F571A0' ";
+--DEF wait_class_colors4 = " WHEN 'Cluster' THEN 'CEC3B5' WHEN 'Queueing' THEN 'C6BAA5' END";
 DEF wait_class_colors_s = 'CASE wait_class WHEN ''''CPU'''' THEN ''''color: ''''''''#34CF27'''''''''''' WHEN ''''Scheduler'''' THEN ''''color: ''''''''#9FFA9D'''''''''''' WHEN ''''User I/O'''' THEN ''''color: ''''''''#0252D7'''''''''''' WHEN ''''System I/O'''' THEN ''''color: ''''''''#1E96DD'''''''''''' ';
 DEF wait_class_colors2_s = ' WHEN ''''Concurrency'''' THEN ''''color: ''''''''#871C12'''''''''''' WHEN ''''Application'''' THEN ''''color: ''''''''#C42A05'''''''''''' WHEN ''''Commit'''' THEN ''''color: ''''''''#EA6A05'''''''''''' WHEN ''''Configuration'''' THEN ''''color: ''''''''#594611''''''''''''  ';
 DEF wait_class_colors3_s = ' WHEN ''''Administrative'''' THEN ''''color: ''''''''#75763E''''''''''''  WHEN ''''Network'''' THEN ''''color: ''''''''#989779'''''''''''' WHEN ''''Other'''' THEN ''''color: ''''''''#F571A0'''''''''''' ';
 DEF wait_class_colors4_s = ' WHEN ''''Cluster'''' THEN ''''color: ''''''''#CEC3B5'''''''''''' WHEN ''''Queueing'''' THEN ''''color: ''''''''#C6BAA5'''''''''''' END';
+
 --
 DEF series_01 = ''
 DEF series_02 = ''

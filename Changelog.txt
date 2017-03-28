@@ -4,6 +4,14 @@ Changelog
 I suggest to rely on Github for details about code changes, this will only be a macro about "functionalities"
 Was supposed to start on day 1, better late than never no? :-)
 
+v1704
+=====
+1. Fixed bug on Plan Details -> IO Bytes from ASH
+2. Fixed bug on Raw ASH for recursive SQLs
+3. Plan Tree collapse now adjust the color of the collpased node to include all its children
+4. New report showing number of distinct sessions executing the SQL, helps in tracking down short-lived sessions / frequent logons
+5. Reduced number of STA run reported 
+
 v1703
 =====
 1. Introduced SUBSTR around low/high_value conversion to avoid SQL*Plus crashing with spurious raw data

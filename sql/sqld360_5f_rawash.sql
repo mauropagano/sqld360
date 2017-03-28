@@ -96,7 +96,7 @@ SELECT /*+ &&top_level_hints. */
  WHERE remarks = '&&sqld360_sqlid.'
    AND statement_id LIKE 'SQLD360_ASH_DATA%'
 &&sqld360_has_plsql.UNION ALL 
-&&sqld360_has_plsql.SELECT 'TOP_LEVEL_ASH_MEM', NULL, NULL, instance_number, sample_id, sample_time, 
+&&sqld360_has_plsql.SELECT 'TOP_LEVEL_ASH_MEM', NULL, NULL, inst_id instance_number, sample_id, TO_CHAR(sample_time, 'YYYY-MM-DD/HH24:MI:SS') sample_time, 
 &&sqld360_has_plsql.        &&skip_10g.sql_exec_id,
 &&sqld360_has_plsql.        &&skip_10g.TO_CHAR(sql_exec_start,'YYYYMMDDHH24MISS'),
 &&sqld360_has_plsql.        session_id, session_serial#, user_id, sql_id, sql_plan_hash_value, 
@@ -133,7 +133,7 @@ SELECT /*+ &&top_level_hints. */
 &&sqld360_has_plsql.   AND top_level_sql_id = '&&sqld360_sqlid.'
 &&sqld360_has_plsql.   AND sample_time BETWEEN TO_TIMESTAMP('&&sqld360_date_from.','&&sqld360_date_format.') AND TO_TIMESTAMP('&&sqld360_date_to.','&&sqld360_date_format.')
 &&sqld360_has_plsql.UNION ALL
-&&sqld360_has_plsql. SELECT 'TOP_LEVEL_ASH_HIST', dbid, snap_id, instance_number, sample_id, sample_time, 
+&&sqld360_has_plsql. SELECT 'TOP_LEVEL_ASH_HIST', dbid, snap_id, instance_number, sample_id, TO_CHAR(sample_time, 'YYYY-MM-DD/HH24:MI:SS') sample_time, 
 &&sqld360_has_plsql.        &&skip_10g.sql_exec_id,
 &&sqld360_has_plsql.        &&skip_10g.TO_CHAR(sql_exec_start,'YYYYMMDDHH24MISS'),
 &&sqld360_has_plsql.        session_id, session_serial#, user_id, sql_id, sql_plan_hash_value, 
@@ -170,7 +170,7 @@ SELECT /*+ &&top_level_hints. */
 &&sqld360_has_plsql.   AND top_level_sql_id = '&&sqld360_sqlid.'
 &&sqld360_has_plsql.   AND sample_time BETWEEN TO_TIMESTAMP('&&sqld360_date_from.','&&sqld360_date_format.') AND TO_TIMESTAMP('&&sqld360_date_to.','&&sqld360_date_format.')         
 &&sqld360_has_plsql.   AND '&&sqld360_conf_incl_ash_hist.' = 'Y'
- ORDER BY timestamp,position
+ ORDER BY sample_time,instance_number
 ]';
 END;
 /

@@ -15,11 +15,12 @@ SET SERVEROUT ON SIZE 1000000;
 SET TERM OFF
 SPO sqld360_sta_&&sqld360_sqlid._driver.sql
 BEGIN
-  FOR i IN (SELECT DISTINCT task_name 
+  FOR i IN (SELECT DISTINCT task_name, execution_name 
               FROM dba_advisor_objects
              WHERE attr1 = '&&sqld360_sqlid.'
-               AND type = 'SQL') LOOP  -- might need to restrict this condition
-    DBMS_OUTPUT.PUT_LINE('SELECT DBMS_SQLTUNE.REPORT_TUNING_TASK('''||i.task_name||''') FROM dual;');
+               AND type = 'SQL'
+               AND task_name NOT LIKE 'ADDM%') LOOP  -- might need to restrict this condition
+    DBMS_OUTPUT.PUT_LINE('SELECT DBMS_SQLTUNE.REPORT_TUNING_TASK('''||i.task_name||''','''||i.execution_name||''') FROM dual;');
     DBMS_OUTPUT.PUT_LINE('------------------------------------------------------------------------'); 
   END LOOP;
 END;
