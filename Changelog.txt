@@ -4,6 +4,12 @@ Changelog
 I suggest to rely on Github for details about code changes, this will only be a macro about "functionalities"
 Was supposed to start on day 1, better late than never no? :-)
 
+v1705
+=====
+1. Fixed bug in Top 15 wait events
+2. Introduced plan with substree to Top N executions
+3. Improved algorithm for node color collapsed / expand
+
 v1704
 =====
 1. Fixed bug on Plan Details -> IO Bytes from ASH
