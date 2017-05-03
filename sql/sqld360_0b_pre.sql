@@ -9,8 +9,8 @@ CL COL;
 COL row_num FOR 9999999 HEA '#' PRI;
 
 -- version
-DEF sqld360_vYYNN = 'v1705';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2016-04-14)';
+DEF sqld360_vYYNN = 'v1706';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2016-05-03)';
 DEF sqld360_prefix = 'sqld360';
 
 -- parameters
@@ -253,7 +253,8 @@ DEF siebel_schema = '';
 DEF siebel_app_ver = '';
 COL siebel_schema NEW_V siebel_schema;
 COL siebel_app_ver NEW_V siebel_app_ver;
-SELECT owner siebel_schema FROM sys.dba_tab_columns WHERE table_name = 'S_REPOSITORY' AND column_name = 'ROW_ID' AND data_type = 'VARCHAR2' AND ROWNUM = 1;
+--SELECT owner siebel_schema FROM sys.dba_tab_columns WHERE table_name = 'S_REPOSITORY' AND column_name = 'ROW_ID' AND data_type = 'VARCHAR2' AND ROWNUM = 1;
+SELECT owner siebel_schema FROM dba_tab_columns WHERE table_name = 'S_REPOSITORY' AND column_name = 'ROW_ID' AND data_type = 'VARCHAR2' AND ROWNUM = 1;
 SELECT app_ver siebel_app_ver FROM &&siebel_schema..s_app_ver WHERE ROWNUM = 1;
 
 -- psft
@@ -261,7 +262,8 @@ DEF psft_schema = '';
 DEF psft_tools_rel = '';
 COL psft_schema NEW_V psft_schema;
 COL psft_tools_rel NEW_V psft_tools_rel;
-SELECT owner psft_schema FROM sys.dba_tab_columns WHERE table_name = 'PSSTATUS' AND column_name = 'TOOLSREL' AND data_type = 'VARCHAR2' AND ROWNUM = 1;
+--SELECT owner psft_schema FROM sys.dba_tab_columns WHERE table_name = 'PSSTATUS' AND column_name = 'TOOLSREL' AND data_type = 'VARCHAR2' AND ROWNUM = 1;
+SELECT owner psft_schema FROM dba_tab_columns WHERE table_name = 'PSSTATUS' AND column_name = 'TOOLSREL' AND data_type = 'VARCHAR2' AND ROWNUM = 1;
 SELECT toolsrel psft_tools_rel FROM &&psft_schema..psstatus WHERE ROWNUM = 1;
 
 -- local or remote exec (local will be --) 
@@ -291,9 +293,9 @@ SELECT TO_CHAR(spid) sqld360_spid FROM v$session s, v$process p WHERE s.sid = SY
 COL sqld360_sqltxt NEW_V sqld360_sqltxt
 -- COMMAND_TYPE = 2 is INSERT, likely to never change (eventually will use X$KEACMDN / WRH$_SQLCOMMAND_NAME)
 COL sqld360_is_insert NEW_V sqld360_is_insert
-SELECT SUBSTR(sql_text,1,50) sqld360_sqltxt FROM v$sqltext_with_newlines WHERE sql_id = '&&sqld360_sqlid.' AND piece = 0 AND rownum = 1;
+SELECT SUBSTR(sql_text,1,100) sqld360_sqltxt FROM v$sqltext_with_newlines WHERE sql_id = '&&sqld360_sqlid.' AND piece = 0 AND rownum = 1;
 SELECT CASE WHEN command_type = 2 THEN 'Y' END sqld360_is_insert FROM v$sql WHERE sql_id = '&&sqld360_sqlid.' AND rownum = 1;
-SELECT SUBSTR(sql_text,1,50) sqld360_sqltxt, CASE WHEN command_type = 2 THEN 'Y' END sqld360_is_insert FROM dba_hist_sqltext WHERE sql_id = '&&sqld360_sqlid.' AND rownum = 1;
+SELECT SUBSTR(sql_text,1,100) sqld360_sqltxt, CASE WHEN command_type = 2 THEN 'Y' END sqld360_is_insert FROM dba_hist_sqltext WHERE sql_id = '&&sqld360_sqlid.' AND rownum = 1;
 
 -- get sql full text
 VAR sqld360_fullsql CLOB;
@@ -435,12 +437,12 @@ SELECT CASE '&&sqld360_conf_translate_lowhigh.' WHEN 'N' THEN '--' END sqld360_s
 COL sqld360_has_plsql NEW_V sqld360_has_plsql;
 SELECT CASE WHEN SUM(has_plsql) = 0 THEN '--' ELSE NULL END sqld360_has_plsql 
   FROM (SELECT COUNT(*) has_plsql
-          FROM gv$sql 
+          FROM gv$sql
          WHERE sql_id = '&&sqld360_sqlid.' 
            AND plsql_exec_time <> 0 
         UNION ALL 
         SELECT COUNT(*) 
-          FROM dba_hist_sqlstat 
+          FROM dba_hist_sqlstat
          WHERE sql_id = '&&sqld360_sqlid.' 
            AND plsexec_time_delta <> 0);
 
@@ -690,7 +692,7 @@ PRO <body>
 PRO <h1><em>&&sqld360_conf_tool_page.SQLd360</a></em> &&sqld360_vYYNN.: SQL 360-degree view &&sqld360_conf_all_pages_logo.</h1>
 PRO
 PRO <pre>
-PRO sqlid:&&sqld360_sqlid. dbname:&&sqld360_dbmod. version:&&db_version. host:&&host_hash. license:&&license_pack. days:&&history_days. today:&&sqld360_time_stamp.
+PRO sqlid:<a title="&&sqld360_sqltxt.">&&sqld360_sqlid.</a> dbname:&&sqld360_dbmod. version:&&db_version. host:&&host_hash. license:&&license_pack. days:&&history_days. today:&&sqld360_time_stamp.
 PRO </pre>
 PRO
 SPO OFF;

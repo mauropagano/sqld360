@@ -4,6 +4,12 @@ Changelog
 I suggest to rely on Github for details about code changes, this will only be a macro about "functionalities"
 Was supposed to start on day 1, better late than never no? :-)
 
+v1706
+=====
+1. Changed color scheme and logo
+2. Fixed bug in Top N execution, IO bytes
+3. Fixed bug on ASH extract expecting ASH.SQL_FULL_PLAN_HASH_VALUE in 12.1.0.1 
+
 v1705
 =====
 1. Fixed bug in Top 15 wait events

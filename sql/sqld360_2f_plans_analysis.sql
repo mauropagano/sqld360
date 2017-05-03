@@ -22,31 +22,63 @@ EXEC :repo_seq := 1;
 -- The following code sucks but it's the only "easy" (aka not spending too much time computing it) workaround for those 
 --  systems where the same SQL ID has hundreds of PHV, we only provide deeper info for the top sqld360_num_plan_details by amount of data
 --  Each row in GV$SQL, DBA_HIST counts 1 towards the total, each row in ASH counts 0.5 (so this approach still favors ASH a bit over GV$SQL / DBA_HIST)
+DELETE plan_table WHERE statement_id = 'SQLD360_PLANS' AND remarks = '&&sqld360_sqlid.';
+INSERT INTO plan_table (statement_id, remarks, cost, cardinality) 
+SELECT 'SQLD360_PLANS', '&&sqld360_sqlid.', plan_hash_value, num_plans
+  FROM (SELECT plan_hash_value, ROWNUM num_plans
+          FROM (SELECT SUM(num_rows) rows_per_phv, plan_hash_value
+                  FROM (SELECT COUNT(*) num_rows, plan_hash_value
+                          FROM gv$sql
+                         WHERE sql_id = '&&sqld360_sqlid.'
+                         GROUP BY plan_hash_value
+                        UNION ALL
+                        SELECT COUNT(*) num_rows, plan_hash_value
+                          FROM dba_hist_sqlstat
+                         WHERE sql_id = '&&sqld360_sqlid.'
+                           AND '&&diagnostics_pack.' = 'Y'
+                         GROUP BY plan_hash_value
+                        UNION ALL
+                        SELECT SUM(0.5) num_rows, cost plan_hash_value
+                          FROM plan_table
+                         WHERE statement_id LIKE 'SQLD360_ASH_DATA%'
+                           AND '&&diagnostics_pack.' = 'Y'
+                           AND remarks = '&&sqld360_sqlid.'
+                         GROUP BY cost) 
+                 GROUP BY plan_hash_value
+                 ORDER BY 1 DESC)
+         WHERE ('&&sqld360_is_insert.' IS NULL AND plan_hash_value <> 0) OR ('&&sqld360_is_insert.' = 'Y'))
+ WHERE num_plans <= &&sqld360_num_plan_details.;
+
 BEGIN
-  FOR i IN (SELECT plan_hash_value
-              FROM (SELECT plan_hash_value, ROWNUM num_plans
-                      FROM (SELECT SUM(num_rows) rows_per_phv, plan_hash_value
-                              FROM (SELECT COUNT(*) num_rows, plan_hash_value
-                                      FROM gv$sql
-                                     WHERE sql_id = '&&sqld360_sqlid.'
-                                     GROUP BY plan_hash_value
-                                    UNION ALL
-                                    SELECT COUNT(*) num_rows, plan_hash_value
-                                      FROM dba_hist_sqlstat
-                                     WHERE sql_id = '&&sqld360_sqlid.'
-                                       AND '&&diagnostics_pack.' = 'Y'
-                                     GROUP BY plan_hash_value
-                                    UNION ALL
-                                    SELECT SUM(0.5) num_rows, cost plan_hash_value
-                                      FROM plan_table
-                                     WHERE statement_id LIKE 'SQLD360_ASH_DATA%'
-                                       AND '&&diagnostics_pack.' = 'Y'
-                                       AND remarks = '&&sqld360_sqlid.'
-                                     GROUP BY cost) 
-                             GROUP BY plan_hash_value
-                             ORDER BY 1 DESC)
-                     WHERE ('&&sqld360_is_insert.' IS NULL AND plan_hash_value <> 0) OR ('&&sqld360_is_insert.' = 'Y'))
-             WHERE num_plans <= &&sqld360_num_plan_details.)
+  FOR i IN (SELECT cost plan_hash_value
+              FROM plan_table
+             WHERE statement_id = 'SQLD360_PLANS'
+               AND remarks = '&&sqld360_sqlid.'
+             ORDER BY cardinality)
+            --SELECT plan_hash_value
+            --  FROM (SELECT plan_hash_value, ROWNUM num_plans
+            --          FROM (SELECT SUM(num_rows) rows_per_phv, plan_hash_value
+            --                  FROM (SELECT COUNT(*) num_rows, plan_hash_value
+            --                          FROM gv$sql
+            --                         WHERE sql_id = '&&sqld360_sqlid.'
+            --                         GROUP BY plan_hash_value
+            --                        UNION ALL
+            --                        SELECT COUNT(*) num_rows, plan_hash_value
+            --                          FROM dba_hist_sqlstat
+            --                         WHERE sql_id = '&&sqld360_sqlid.'
+            --                           AND '&&diagnostics_pack.' = 'Y'
+            --                         GROUP BY plan_hash_value
+            --                        UNION ALL
+            --                        SELECT SUM(0.5) num_rows, cost plan_hash_value
+            --                          FROM plan_table
+            --                         WHERE statement_id LIKE 'SQLD360_ASH_DATA%'
+            --                           AND '&&diagnostics_pack.' = 'Y'
+            --                           AND remarks = '&&sqld360_sqlid.'
+            --                         GROUP BY cost) 
+            --                 GROUP BY plan_hash_value
+            --                 ORDER BY 1 DESC)
+            --         WHERE ('&&sqld360_is_insert.' IS NULL AND plan_hash_value <> 0) OR ('&&sqld360_is_insert.' = 'Y'))
+            -- WHERE num_plans <= &&sqld360_num_plan_details.)
   LOOP
     DBMS_OUTPUT.PUT_LINE('<td class="c">PHV '||i.plan_hash_value||'</td>');
   END LOOP;
@@ -79,30 +111,35 @@ BEGIN
 
 -- this is intentional, showing all the tables including the ones with no histograms
 -- so it's easier to spot the ones with no histograms too
-  FOR i IN (SELECT plan_hash_value
-              FROM (SELECT plan_hash_value, ROWNUM num_plans
-                      FROM (SELECT SUM(num_rows) rows_per_phv, plan_hash_value
-                              FROM (SELECT COUNT(*) num_rows, plan_hash_value
-                                      FROM gv$sql
-                                     WHERE sql_id = '&&sqld360_sqlid.'
-                                     GROUP BY plan_hash_value
-                                    UNION ALL
-                                    SELECT COUNT(*) num_rows, plan_hash_value
-                                      FROM dba_hist_sqlstat
-                                     WHERE sql_id = '&&sqld360_sqlid.'
-                                       AND '&&diagnostics_pack.' = 'Y'
-                                     GROUP BY plan_hash_value
-                                    UNION ALL
-                                    SELECT SUM(0.5) num_rows, cost plan_hash_value
-                                      FROM plan_table
-                                     WHERE statement_id LIKE 'SQLD360_ASH_DATA%'
-                                       AND '&&diagnostics_pack.' = 'Y'
-                                       AND remarks = '&&sqld360_sqlid.'
-                                     GROUP BY cost) 
-                             GROUP BY plan_hash_value
-                             ORDER BY 1 DESC)
-                     WHERE ('&&sqld360_is_insert.' IS NULL AND plan_hash_value <> 0) OR ('&&sqld360_is_insert.' = 'Y'))
-             WHERE num_plans <= &&sqld360_num_plan_details.) 
+  FOR i IN (SELECT cost plan_hash_value
+              FROM plan_table
+             WHERE statement_id = 'SQLD360_PLANS'
+               AND remarks = '&&sqld360_sqlid.'
+             ORDER BY cardinality)
+            --SELECT plan_hash_value
+            --  FROM (SELECT plan_hash_value, ROWNUM num_plans
+            --          FROM (SELECT SUM(num_rows) rows_per_phv, plan_hash_value
+            --                  FROM (SELECT COUNT(*) num_rows, plan_hash_value
+            --                          FROM gv$sql
+            --                         WHERE sql_id = '&&sqld360_sqlid.'
+            --                         GROUP BY plan_hash_value
+            --                        UNION ALL
+            --                        SELECT COUNT(*) num_rows, plan_hash_value
+            --                          FROM dba_hist_sqlstat
+            --                         WHERE sql_id = '&&sqld360_sqlid.'
+            --                           AND '&&diagnostics_pack.' = 'Y'
+            --                         GROUP BY plan_hash_value
+            --                        UNION ALL
+            --                        SELECT SUM(0.5) num_rows, cost plan_hash_value
+            --                          FROM plan_table
+            --                         WHERE statement_id LIKE 'SQLD360_ASH_DATA%'
+            --                           AND '&&diagnostics_pack.' = 'Y'
+            --                           AND remarks = '&&sqld360_sqlid.'
+            --                         GROUP BY cost) 
+            --                 GROUP BY plan_hash_value
+            --                 ORDER BY 1 DESC)
+            --         WHERE ('&&sqld360_is_insert.' IS NULL AND plan_hash_value <> 0) OR ('&&sqld360_is_insert.' = 'Y'))
+            -- WHERE num_plans <= &&sqld360_num_plan_details.) 
   LOOP
     put('SET PAGES 50000');
     put('SPO &&sqld360_main_report..html APP;');
@@ -121,12 +158,12 @@ BEGIN
     -- this is to make the chart a little larger
     put('SELECT NVL2(MAX(id), ''maxValue:''||TO_CHAR(MAX(id)+2)||'','' , '''') bubbleMaxValue ');
     put('  FROM (SELECT MAX(id) id                                                            ');
-    put('          FROM gv$sql_plan                                                           ');
+    put('          FROM gv$sql_plan                                           ');
     put('         WHERE sql_id = ''&&sqld360_sqlid.''                                         ');
     put('           AND plan_hash_value ='||i.plan_hash_value                                  );
     put('        UNION ALL                                                                    ');
     put('        SELECT MAX(id) id                                                            ');
-    put('          FROM dba_hist_sql_plan                                                     ');
+    put('          FROM dba_hist_sql_plan                                          ');
     put('         WHERE sql_id = ''&&sqld360_sqlid.''                                         ');
     put('           AND plan_hash_value ='||i.plan_hash_value                                  );
     put('           AND ''&&diagnostics_pack.'' = ''Y'');                                     ');
@@ -217,7 +254,7 @@ BEGIN
     put(q'[                                  REPLACE(SUBSTR(filter_predicates,1,1500), CHR(39) , CHR(92)||CHR(39)) filter_predicates,                                                           ]');
     put(q'[                                  other_xml,                                                                                                                                         ]');
     put(q'[                                  RANK() OVER (ORDER BY inst_id, child_number) rnk                                                                                                   ]');
-    put(q'[                             FROM gv$sql_plan_statistics_all                                                                                                                         ]');
+    put(q'[                             FROM gv$sql_plan_statistics_all                                                                                                         ]');
     put(q'[                            WHERE sql_id = '&&sqld360_sqlid.'                                                                                                                        ]');            
     put(q'[                              AND plan_hash_value =]'||i.plan_hash_value||q'[)                                                                                                       ]');                                                             
     put(q'[                    WHERE rnk = 1                                                                                                                                                    ]');
@@ -226,11 +263,11 @@ BEGIN
     put(q'[                          REPLACE(access_predicates, CHR(39), CHR(92)||CHR(39)) access_predicates,                                                                                   ]');
     put(q'[                          REPLACE(filter_predicates, CHR(39), CHR(92)||CHR(39)) filter_predicates,                                                                                   ]');
     put(q'[                          other_xml                                                                                                                                                  ]');
-    put(q'[                     FROM dba_hist_sql_plan                                                                                                                                          ]');
+    put(q'[                     FROM dba_hist_sql_plan                                                                                                                               ]');
     put(q'[                    WHERE sql_id = '&&sqld360_sqlid.'                                                                                                                                ]');
     put(q'[                      AND plan_hash_value =]'||i.plan_hash_value                                                                                                                       );
     put(q'[                      AND NOT EXISTS (SELECT 1                                                                                                                                       ]');  
-    put(q'[                                        FROM gv$sql_plan_statistics_all                                                                                                              ]');
+    put(q'[                                        FROM gv$sql_plan_statistics_all                                                                                              ]');
     put(q'[                                       WHERE plan_hash_value =]'||i.plan_hash_value                                                                                                    );
     put(q'[                                         AND sql_id = '&&sqld360_sqlid.'                                                                                                             ]');
     put(q'[                                         AND '&&diagnostics_pack.' = 'Y')),                                                                                                          ]');
@@ -378,7 +415,7 @@ BEGIN
     put(q'[                                  REPLACE(SUBSTR(filter_predicates,1,1500), CHR(39) , CHR(92)||CHR(39)) filter_predicates,                                                           ]');
     put(q'[                                  other_xml,                                                                                                                                         ]');
     put(q'[                                  RANK() OVER (ORDER BY inst_id, child_number) rnk                                                                                                   ]');
-    put(q'[                             FROM gv$sql_plan_statistics_all                                                                                                                         ]');
+    put(q'[                             FROM gv$sql_plan_statistics_all                                                                                                         ]');
     put(q'[                            WHERE sql_id = ''&&sqld360_sqlid.''                                                                                                                      ]');            
     put(q'[                              AND plan_hash_value =]'||i.plan_hash_value||q'[)                                                                                                       ]');                                                             
     put(q'[                    WHERE rnk = 1                                                                                                                                                    ]');
@@ -387,11 +424,11 @@ BEGIN
     put(q'[                          REPLACE(access_predicates, CHR(39), CHR(92)||CHR(39)) access_predicates,                                                                                   ]');
     put(q'[                          REPLACE(filter_predicates, CHR(39), CHR(92)||CHR(39)) filter_predicates,                                                                                   ]');
     put(q'[                          other_xml                                                                                                                                                  ]');
-    put(q'[                     FROM dba_hist_sql_plan                                                                                                                                          ]');
+    put(q'[                     FROM dba_hist_sql_plan                                                                                                                               ]');
     put(q'[                    WHERE sql_id = ''&&sqld360_sqlid.''                                                                                                                              ]');
     put(q'[                      AND plan_hash_value =]'||i.plan_hash_value                                                                                                                       );
     put(q'[                      AND NOT EXISTS (SELECT 1                                                                                                                                       ]');  
-    put(q'[                                        FROM gv$sql_plan_statistics_all                                                                                                              ]');
+    put(q'[                                        FROM gv$sql_plan_statistics_all                                                                                              ]');
     put(q'[                                       WHERE plan_hash_value =]'||i.plan_hash_value                                                                                                    );
     put(q'[                                         AND sql_id = ''&&sqld360_sqlid.''                                                                                                           ]');
     put(q'[                                         AND ''&&diagnostics_pack.'' = ''Y'')),                                                                                                      ]');
@@ -1045,7 +1082,7 @@ BEGIN
     put(q'[                   AND ''&&diagnostics_pack.'' = ''Y''                     ]');
     put(q'[                 GROUP BY cardinality, timestamp)                          ]');
     put(q'[         GROUP BY snap_id) ash,                                            ]');
-    put(q'[      dba_hist_snapshot b                                                  ]');
+    put(q'[      dba_hist_snapshot b                                       ]');
     put(q'[ WHERE ash.snap_id(+) = b.snap_id                                          ]');
     put(q'[   AND b.snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.         ]');
     put(q'[ ORDER BY 3                                                                ]');
@@ -1251,7 +1288,7 @@ BEGIN
     put(q'[                   AND ''&&diagnostics_pack.'' = ''Y''                          ]');
     put(q'[                 GROUP BY cardinality, timestamp)                               ]');
     put(q'[         GROUP BY snap_id) ash,                                                 ]');
-    put(q'[      dba_hist_snapshot b                                                       ]');
+    put(q'[      dba_hist_snapshot b                                            ]');
     put(q'[ WHERE ash.snap_id(+) = b.snap_id                                               ]');
     put(q'[   AND b.snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.              ]');
     put(q'[ ORDER BY 3                                                                     ]');
@@ -2093,7 +2130,7 @@ BEGIN
        put(q'[                                  REPLACE(SUBSTR(filter_predicates,1,1500), CHR(39) , CHR(92)||CHR(39)) filter_predicates,                                                                  ]');
        put(q'[                                  other_xml,                                                                                                                                                ]');
        put(q'[                                  RANK() OVER (ORDER BY inst_id, child_number) rnk                                                                                                          ]');
-       put(q'[                             FROM gv$sql_plan_statistics_all                                                                                                                                ]');
+       put(q'[                             FROM gv$sql_plan_statistics_all                                                                                                                ]');
        put(q'[                            WHERE sql_id = '&&sqld360_sqlid.'                                                                                                                               ]');            
        put(q'[                              AND plan_hash_value =]'||i.plan_hash_value||q'[)                                                                                                              ]');                                                             
        put(q'[                    WHERE rnk = 1                                                                                                                                                           ]');
@@ -2102,11 +2139,11 @@ BEGIN
        put(q'[                          REPLACE(access_predicates, CHR(39), CHR(92)||CHR(39)) access_predicates,                                                                                          ]');
        put(q'[                          REPLACE(filter_predicates, CHR(39), CHR(92)||CHR(39)) filter_predicates,                                                                                          ]');
        put(q'[                          other_xml                                                                                                                                                         ]');
-       put(q'[                     FROM dba_hist_sql_plan                                                                                                                                                 ]');
+       put(q'[                     FROM dba_hist_sql_plan                                                                                                                                      ]');
        put(q'[                    WHERE sql_id = '&&sqld360_sqlid.'                                                                                                                                       ]');
        put(q'[                      AND plan_hash_value =]'||i.plan_hash_value                                                                                                                              );
        put(q'[                      AND NOT EXISTS (SELECT 1                                                                                                                                              ]');  
-       put(q'[                                        FROM gv$sql_plan_statistics_all                                                                                                                     ]');
+       put(q'[                                        FROM gv$sql_plan_statistics_all                                                                                                     ]');
        put(q'[                                       WHERE plan_hash_value =]'||i.plan_hash_value                                                                                                           );
        put(q'[                                         AND sql_id = '&&sqld360_sqlid.'                                                                                                                    ]');
        put(q'[                                         AND '&&diagnostics_pack.' = 'Y')),                                                                                                                 ]');
@@ -2260,7 +2297,7 @@ BEGIN
        put(q'[                                  REPLACE(SUBSTR(filter_predicates,1,1500), CHR(39) , CHR(92)||CHR(39)) filter_predicates,                                                           ]');
        put(q'[                                  other_xml,                                                                                                                                         ]');
        put(q'[                                  RANK() OVER (ORDER BY inst_id, child_number) rnk                                                                                                   ]');
-       put(q'[                             FROM gv$sql_plan_statistics_all                                                                                                                         ]');
+       put(q'[                             FROM gv$sql_plan_statistics_all                                                                                                         ]');
        put(q'[                            WHERE sql_id = ''&&sqld360_sqlid.''                                                                                                                      ]');            
        put(q'[                              AND plan_hash_value =]'||i.plan_hash_value||q'[)                                                                                                       ]');                                                             
        put(q'[                    WHERE rnk = 1                                                                                                                                                    ]');
@@ -2269,11 +2306,11 @@ BEGIN
        put(q'[                          REPLACE(access_predicates, CHR(39), CHR(92)||CHR(39)) access_predicates,                                                                                   ]');
        put(q'[                          REPLACE(filter_predicates, CHR(39), CHR(92)||CHR(39)) filter_predicates,                                                                                   ]');
        put(q'[                          other_xml                                                                                                                                                  ]');
-       put(q'[                     FROM dba_hist_sql_plan                                                                                                                                          ]');
+       put(q'[                     FROM dba_hist_sql_plan                                                                                                                               ]');
        put(q'[                    WHERE sql_id = ''&&sqld360_sqlid.''                                                                                                                              ]');
        put(q'[                      AND plan_hash_value =]'||i.plan_hash_value                                                                                                                       );
        put(q'[                      AND NOT EXISTS (SELECT 1                                                                                                                                       ]');  
-       put(q'[                                        FROM gv$sql_plan_statistics_all                                                                                                              ]');
+       put(q'[                                        FROM gv$sql_plan_statistics_all                                                                                              ]');
        put(q'[                                       WHERE plan_hash_value =]'||i.plan_hash_value                                                                                                    );
        put(q'[                                         AND sql_id = ''&&sqld360_sqlid.''                                                                                                           ]');
        put(q'[                                         AND ''&&diagnostics_pack.'' = ''Y'')),                                                                                                      ]');
@@ -2878,7 +2915,7 @@ BEGIN
        put('                   ROUND(GREATEST(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,13)+1,INSTR(partition_stop,'''','''',1,14)-INSTR(partition_stop,'''','''',1,13)-1))/1e6,1))) read_io_bytes,'); 
        put('               SUM(NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,17)+1,INSTR(partition_stop,'''','''',1,18)-INSTR(partition_stop,'''','''',1,17)-1)),0)/ ');
        put('                   ROUND(GREATEST(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,13)+1,INSTR(partition_stop,'''','''',1,14)-INSTR(partition_stop,'''','''',1,13)-1))/1e6,1))) write_io_bytes,'); 
-       put('               SUM(NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,18)+1)),0)/ ');
+       put('               SUM(NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,18)+1,INSTR(partition_stop,'''','''',1,19)-INSTR(partition_stop,'''','''',1,18)-1)),0)/ ');
        put('                   ROUND(GREATEST(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,13)+1,INSTR(partition_stop,'''','''',1,14)-INSTR(partition_stop,'''','''',1,13)-1))/1e6,1))) interconnect_io_bytes'); 
        put('          FROM plan_table');
        put('         WHERE statement_id = ''''SQLD360_ASH_DATA_MEM''''');
@@ -3119,7 +3156,7 @@ BEGIN
        put(q'[                                  REPLACE(SUBSTR(filter_predicates,1,1500), CHR(39) , CHR(92)||CHR(39)) filter_predicates,                                                                  ]');
        put(q'[                                  other_xml,                                                                                                                                                ]');
        put(q'[                                  RANK() OVER (ORDER BY inst_id, child_number) rnk                                                                                                          ]');
-       put(q'[                             FROM gv$sql_plan_statistics_all                                                                                                                                ]');
+       put(q'[                             FROM gv$sql_plan_statistics_all                                                                                                                ]');
        put(q'[                            WHERE sql_id = '&&sqld360_sqlid.'                                                                                                                               ]');            
        put(q'[                              AND plan_hash_value =]'||i.plan_hash_value||q'[)                                                                                                              ]');                                                             
        put(q'[                    WHERE rnk = 1                                                                                                                                                           ]');
@@ -3128,11 +3165,11 @@ BEGIN
        put(q'[                          REPLACE(access_predicates, CHR(39), CHR(92)||CHR(39)) access_predicates,                                                                                          ]');
        put(q'[                          REPLACE(filter_predicates, CHR(39), CHR(92)||CHR(39)) filter_predicates,                                                                                          ]');
        put(q'[                          other_xml                                                                                                                                                         ]');
-       put(q'[                     FROM dba_hist_sql_plan                                                                                                                                                 ]');
+       put(q'[                     FROM dba_hist_sql_plan                                                                                                                                      ]');
        put(q'[                    WHERE sql_id = '&&sqld360_sqlid.'                                                                                                                                       ]');
        put(q'[                      AND plan_hash_value =]'||i.plan_hash_value                                                                                                                              );
        put(q'[                      AND NOT EXISTS (SELECT 1                                                                                                                                              ]');  
-       put(q'[                                        FROM gv$sql_plan_statistics_all                                                                                                                     ]');
+       put(q'[                                        FROM gv$sql_plan_statistics_all                                                                                                     ]');
        put(q'[                                       WHERE plan_hash_value =]'||i.plan_hash_value                                                                                                           );
        put(q'[                                         AND sql_id = '&&sqld360_sqlid.'                                                                                                                    ]');
        put(q'[                                         AND '&&diagnostics_pack.' = 'Y')),                                                                                                                 ]');
@@ -3286,7 +3323,7 @@ BEGIN
        put(q'[                                  REPLACE(SUBSTR(filter_predicates,1,1500), CHR(39) , CHR(92)||CHR(39)) filter_predicates,                                                           ]');
        put(q'[                                  other_xml,                                                                                                                                         ]');
        put(q'[                                  RANK() OVER (ORDER BY inst_id, child_number) rnk                                                                                                   ]');
-       put(q'[                             FROM gv$sql_plan_statistics_all                                                                                                                         ]');
+       put(q'[                             FROM gv$sql_plan_statistics_all                                                                                                         ]');
        put(q'[                            WHERE sql_id = ''&&sqld360_sqlid.''                                                                                                                      ]');            
        put(q'[                              AND plan_hash_value =]'||i.plan_hash_value||q'[)                                                                                                       ]');                                                             
        put(q'[                    WHERE rnk = 1                                                                                                                                                    ]');
@@ -3295,11 +3332,11 @@ BEGIN
        put(q'[                          REPLACE(access_predicates, CHR(39), CHR(92)||CHR(39)) access_predicates,                                                                                   ]');
        put(q'[                          REPLACE(filter_predicates, CHR(39), CHR(92)||CHR(39)) filter_predicates,                                                                                   ]');
        put(q'[                          other_xml                                                                                                                                                  ]');
-       put(q'[                     FROM dba_hist_sql_plan                                                                                                                                          ]');
+       put(q'[                     FROM dba_hist_sql_plan                                                                                                                               ]');
        put(q'[                    WHERE sql_id = ''&&sqld360_sqlid.''                                                                                                                              ]');
        put(q'[                      AND plan_hash_value =]'||i.plan_hash_value                                                                                                                       );
        put(q'[                      AND NOT EXISTS (SELECT 1                                                                                                                                       ]');  
-       put(q'[                                        FROM gv$sql_plan_statistics_all                                                                                                              ]');
+       put(q'[                                        FROM gv$sql_plan_statistics_all                                                                                              ]');
        put(q'[                                       WHERE plan_hash_value =]'||i.plan_hash_value                                                                                                    );
        put(q'[                                         AND sql_id = ''&&sqld360_sqlid.''                                                                                                           ]');
        put(q'[                                         AND ''&&diagnostics_pack.'' = ''Y'')),                                                                                                      ]');
@@ -3903,7 +3940,7 @@ BEGIN
        put('                   ROUND(GREATEST(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,13)+1,INSTR(partition_stop,'''','''',1,14)-INSTR(partition_stop,'''','''',1,13)-1))/1e6,1))) read_io_bytes,'); 
        put('               SUM(NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,17)+1,INSTR(partition_stop,'''','''',1,18)-INSTR(partition_stop,'''','''',1,17)-1)),0)/ ');
        put('                   ROUND(GREATEST(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,13)+1,INSTR(partition_stop,'''','''',1,14)-INSTR(partition_stop,'''','''',1,13)-1))/1e6,1))) write_io_bytes,'); 
-       put('               SUM(NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,18)+1)),0)/ ');
+       put('               SUM(NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,18)+1,INSTR(partition_stop,'''','''',1,19)-INSTR(partition_stop,'''','''',1,18)-1)),0)/ ');
        put('                   ROUND(GREATEST(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,'''','''',1,13)+1,INSTR(partition_stop,'''','''',1,14)-INSTR(partition_stop,'''','''',1,13)-1))/1e6,1))) interconnect_io_bytes'); 
        put('          FROM plan_table');
        put('         WHERE statement_id = ''''SQLD360_ASH_DATA_HIST''''');

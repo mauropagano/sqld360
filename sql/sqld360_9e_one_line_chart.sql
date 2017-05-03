@@ -172,7 +172,7 @@ PRO        ]);;
 PRO        
 PRO        var options = {&&stacked.
 PRO          chartArea:{left:90, top:75, width:'65%', height:'70%'},
-PRO          backgroundColor: {fill: '#fcfcf0', stroke: '#336699', strokeWidth: 1},
+PRO          backgroundColor: {fill: '#ffffff', stroke: '#336699', strokeWidth: 1},
 PRO          explorer: {actions: ['dragToZoom', 'rightClickToReset'], maxZoomIn: 0.01},
 PRO          title: '&&section_id..&&report_sequence.. &&title.&&title_suffix.',
 PRO          titleTextStyle: {fontSize: 18, bold: false},

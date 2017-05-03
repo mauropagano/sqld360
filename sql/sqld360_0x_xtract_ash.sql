@@ -87,7 +87,7 @@ BEGIN
             ','||&&skip_10g.&&skip_11r1.delta_read_io_bytes||
             ','||&&skip_10g.&&skip_11r1.delta_write_io_bytes||
             ','||&&skip_10g.&&skip_11r1.delta_interconnect_io_bytes||
-            ','&&skip_10g.&&skip_11g.||sql_full_plan_hash_value
+            ','&&skip_10g.&&skip_11g.&&skip_12r101.||sql_full_plan_hash_value
        FROM dba_hist_active_sess_history a,
             (SELECT DISTINCT operation 
                FROM plan_table 
@@ -133,7 +133,7 @@ BEGIN
             ','||&&skip_10g.&&skip_11r1.delta_read_io_bytes||
             ','||&&skip_10g.&&skip_11r1.delta_write_io_bytes||
             ','||&&skip_10g.&&skip_11r1.delta_interconnect_io_bytes||
-            ','&&skip_10g.&&skip_11g.||sql_full_plan_hash_value
+            ','&&skip_10g.&&skip_11g.&&skip_12r101.||sql_full_plan_hash_value
        FROM gv$active_session_history a,
             (SELECT operation 
                FROM plan_table
