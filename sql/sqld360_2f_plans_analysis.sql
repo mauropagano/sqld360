@@ -2357,6 +2357,48 @@ BEGIN
 
        put('----------------------------');
 
+       put(q'[DEF title='Plan with rowsource statistics SQL_EXEC_ID ]'||j.sql_exec_id||' of PHV '||i.plan_hash_value||q'[']');
+       put(q'[DEF main_table = 'GV$SQL_PLAN_MONITOR']');
+       put(q'[DEF abstract = 'Execution plan with rowsource (coming from SQL Monitoring info)']');
+
+       put( 'BEGIN');
+       put(q'[ :sql_text := ' ]');
+
+       put(q'[SELECT plan_line_id,                                                                 ]');
+       put(q'[       LPAD(''.'',MAX(plan_depth),''.'')||plan_operation||'' ''||plan_options||'' ''||MAX(plan_object_owner)||NVL2(MAX(plan_object_name),''.'','''')||MAX(plan_object_name) step, ]');
+       put(q'[       SUM(starts) starts,                                                           ]');
+       put(q'[       MAX(plan_cardinality) e_rows,                                                 ]');
+       put(q'[       SUM(output_rows) a_rows,                                                      ]');
+       put(q'[       MAX(plan_cost) cost,                                                          ]');
+       put(q'[       MAX(plan_bytes) e_bytes,                                                      ]');
+       put(q'[       MAX(plan_time) e_time,                                                        ]');
+       put(q'[       MAX(plan_partition_start) pstart,                                             ]');
+       put(q'[       MAX(plan_partition_stop) pstop,                                               ]');
+       put(q'[       SUM(physical_read_requests) io_read_req,                                      ]');
+       put(q'[       SUM(physical_read_bytes) io_read_bytes,                                       ]');
+       put(q'[       SUM(physical_write_requests) io_write_req,                                    ]');
+       put(q'[       SUM(physical_write_bytes) io_write_bytes,                                     ]');
+       put(q'[       SUM(workarea_mem) workarea_mem,                                               ]');
+       put(q'[       SUM(workarea_max_mem) workarea_max_mem,                                       ]');
+       put(q'[       SUM(workarea_tempseg) workarea_tempseg,                                       ]');
+       put(q'[       SUM(workarea_max_tempseg) workarea_max_tempseg                                ]');
+       put(q'[  FROM gv$sql_plan_monitor                                                           ]');
+       put(q'[ WHERE sql_id = ''&&sqld360_sqlid.''                                                 ]');
+       put(q'[   AND sql_plan_hash_value = ]'|| i.plan_hash_value                                    );
+       -- Cannot use INST and SID because of PX execution
+       --put(q'[   AND inst_id = ]'||j.inst_id                                                         );
+       --put(q'[   AND sid = ]'||j.session_id                                                          );
+       put(q'[   AND sql_exec_id = ]'||j.sql_exec_id                                                 );
+       put(q'[   AND sql_exec_start = TO_DATE('']'||j.sql_exec_start||q'['', ''YYYYMMDDHH24MISS'') ]');
+       put(q'[ GROUP BY plan_line_id, plan_operation, plan_options                                 ]');
+       put(q'[ ORDER BY plan_line_id                                                               ]');
+       put(''';');
+       put('END;');
+       put('/ ');
+       put('@sql/sqld360_9a_pre_one.sql');       
+
+       put('----------------------------');
+
        put('DEF title=''Plan Step IDs timeline for SQL_EXEC_ID '||j.sql_exec_id||' of PHV '||i.plan_hash_value||'''');
        put('DEF main_table = ''GV$ACTIVE_SESSION_HISTORY''');
        put('DEF skip_uch=''''');

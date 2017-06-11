@@ -6,6 +6,7 @@ DEF main_table = 'DBMS_UTILITY';
 VAR myexpandedsql CLOB;
 
 SET SERVEROUT ON SIZE 1000000;
+SET SERVEROUT ON SIZE UNL;
 SET TERM OFF
 SPO sqld360_xpand_&&sqld360_sqlid._driver.sql
 DECLARE

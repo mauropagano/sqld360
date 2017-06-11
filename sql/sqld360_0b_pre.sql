@@ -9,8 +9,8 @@ CL COL;
 COL row_num FOR 9999999 HEA '#' PRI;
 
 -- version
-DEF sqld360_vYYNN = 'v1706';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2016-05-03)';
+DEF sqld360_vYYNN = 'v1707';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2016-06-09)';
 DEF sqld360_prefix = 'sqld360';
 
 -- parameters
@@ -98,7 +98,7 @@ END;
 /
 
 -- suppressing some unnecessary output
-SET TERM OFF;
+--SET TERM OFF;
 
 -- get dbid
 COL sqld360_dbid NEW_V sqld360_dbid;
@@ -423,6 +423,9 @@ SELECT CASE '&&sqld360_conf_incl_stats.' WHEN 'N' THEN '--' END sqld360_skip_sta
 
 COL sqld360_skip_tcb NEW_V sqld360_skip_tcb;
 SELECT CASE '&&sqld360_conf_incl_tcb.' WHEN 'N' THEN '--' END sqld360_skip_tcb FROM DUAL;
+
+COL sqld360_skip_cboenv NEW_V sqld360_skip_cboenv;
+SELECT CASE '&&sqld360_conf_incl_cboenv.' WHEN 'N' THEN '--' END sqld360_skip_cboenv FROM DUAL;
 
 COL sqld360_tcb_exp_data NEW_V sqld360_tcb_exp_data;
 COL sqld360_tcb_exp_sample NEW_V sqld360_tcb_exp_sample;

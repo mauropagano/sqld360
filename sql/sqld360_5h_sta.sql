@@ -12,6 +12,7 @@ DEF main_table = 'DBA_ADVISOR_TASK';
 @@sqld360_0s_pre_nondef
 
 SET SERVEROUT ON SIZE 1000000;
+SET SERVEROUT ON SIZE UNL;
 SET TERM OFF
 SPO sqld360_sta_&&sqld360_sqlid._driver.sql
 BEGIN

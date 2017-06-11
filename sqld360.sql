@@ -18,14 +18,6 @@
 
 *****************************************************************************************/
 
--- The script creates a driver based on the rows inside the plan table and the according flags+days stored in column options 
--- the flags right now are 3 "000" plus 3 chars for the number of days
--- the first "bit" is for diagnostics_pack
--- the second "bit" is for tuning_pack
--- the third "bit" is for TCB
--- the next 3 chars are used for number of days
--- so ie. if customer has no license, wants TCB and 31 days then it would be 001031
-
 PRO If SQLd360 disconnects right after this message it means the user executing it
 PRO owns a table called PLAN_TABLE that is not the Oracle seeded GTT plan table
 PRO owned by SYS (PLAN_TABLE$ table with a PUBLIC synonym PLAN_TABLE).
@@ -48,6 +40,14 @@ BEGIN
 END;
 /
 WHENEVER SQLERROR CONTINUE;
+
+-- The script creates a driver based on the rows inside the plan table and the according flags+days stored in column options 
+-- the flags right now are 3 "000" plus 3 chars for the number of days
+-- the first "bit" is for diagnostics_pack
+-- the second "bit" is for tuning_pack
+-- the third "bit" is for TCB
+-- the next 3 chars are used for number of days
+-- so ie. if customer has no license, wants TCB and 31 days then it would be 001031
 
 SET SERVEROUT ON FEED OFF DEF OFF TERM OFF TIMI OFF
 SPO sqld360_driver.sql

@@ -15,6 +15,7 @@ VAR myreport CLOB
 
 -- text
 SET SERVEROUT ON SIZE 1000000;
+SET SERVEROUT ON SIZE UNL;
 SET TERM OFF
 SPO sqld360_sqlmon_&&sqld360_sqlid._driver_txt.sql
 DECLARE
@@ -72,6 +73,7 @@ SPO OFF;
 
 -- active
 SET SERVEROUT ON SIZE 1000000;
+SET SERVEROUT ON SIZE UNL;
 SPO sqld360_sqlmon_&&sqld360_sqlid._driver_active.sql
 DECLARE
   PROCEDURE put (p_line IN VARCHAR2)
@@ -135,6 +137,7 @@ SPO OFF;
 -- historical, based on elapsed, worst &&sqld360_conf_num_sqlmon_rep.
 -- it errors out in < 12c but the error is not reported to screen/main files
 SET SERVEROUT ON SIZE 1000000;
+SET SERVEROUT ON SIZE UNL;
 SPO sqld360_sqlmon_&&sqld360_sqlid._driver_hist.sql
 DECLARE
   PROCEDURE put (p_line IN VARCHAR2)

@@ -58,6 +58,9 @@ DEF sqld360_conf_incl_tcb = 'N';
 -- include/exclude SQL Tuning Advisor reports (not calling the API, just reporting on already executed tasks)
 DEF sqld360_conf_incl_sta = 'Y';
 
+-- include/exclude GV$SQL_OPTIMIZER_ENV (workaround of bug 22468781)
+DEF sqld360_conf_incl_cboenv = 'Y';
+
 -- TCB data, sampling percentage, 0 means no data, any other value between 1 and 100 is ok (only for standalone execs, always skipped for eDB360 execs) 
 -- THIS OPTION IS INTENTIONALLY INGORED, email me if you'd like to have TCB with data
 DEF sqld360_conf_tcb_sample = '0';

@@ -289,7 +289,7 @@ SELECT /*+ &&top_level_hints. */
 ]';
 END;
 /
-@@sqld360_9a_pre_one.sql
+@@&&sqld360_skip_cboenv.sqld360_9a_pre_one.sql
 
 
 DEF title = 'Non-default Optimizer Environment';
@@ -305,7 +305,7 @@ SELECT /*+ &&top_level_hints. */
 ]';
 END;
 /
-@@sqld360_9a_pre_one.sql
+@@&&sqld360_skip_cboenv.sqld360_9a_pre_one.sql
 
 COL address PRI
 COL hash_value PRI

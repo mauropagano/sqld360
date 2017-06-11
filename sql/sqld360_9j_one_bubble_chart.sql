@@ -39,6 +39,7 @@ PRO         data.addRows([
 
 -- body
 SET SERVEROUT ON SIZE 1000000;
+SET SERVEROUT ON SIZE UNL;
 DECLARE
   cur SYS_REFCURSOR;
   l_end_time VARCHAR2(32);

@@ -798,6 +798,7 @@ DECLARE
       put('  AND sql_text like ''%'||l_unique_id||'%'' AND sql_text NOT LIKE ''%not me%'';');
       put('SPO s'||l_test_id_rp_i||'_driver.sql');
       put('SET SERVEROUT ON SIZE 1000000;');
+      put('SET SERVEROUT ON SIZE UNL;');
       put('PRO SPO &&pathfinder_main_report..html APP;');
       put('PRO PRO ^^html_row.');
       put('PRO SPO OFF;');

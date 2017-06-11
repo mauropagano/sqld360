@@ -4,6 +4,11 @@ Changelog
 I suggest to rely on Github for details about code changes, this will only be a macro about "functionalities"
 Was supposed to start on day 1, better late than never no? :-)
 
+v1707
+=====
+1. Introduced parameter to skip CBO environment
+2. Add plan with rouwsource stats from SQL Monitoring under "Top N" reports
+
 v1706
 =====
 1. Changed color scheme and logo
