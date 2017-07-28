@@ -339,6 +339,21 @@ END;
 @@sqld360_9a_pre_one.sql
 
 
+DEF title = 'LOBs';
+DEF main_table = 'DBA_LOBS';
+BEGIN
+  :sql_text := q'[
+SELECT /*+ &&top_level_hints. */
+       *
+  FROM dba_lobs
+ WHERE (owner, table_name) IN (SELECT /*+ UNNEST */ object_owner, object_name FROM plan_table WHERE statement_id = 'LIST_OF_TABLES' AND remarks = '&&sqld360_sqlid.')
+ ORDER BY owner, table_name
+]';
+END;
+/
+@@sqld360_9a_pre_one.sql
+
+
 DEF title = 'Materialized Views';
 DEF main_table = 'DBA_MVIEWS';
 BEGIN
@@ -418,6 +433,21 @@ END;
 @@sqld360_9a_pre_one.sql
 
 
+DEF title = 'LOB Partitions';
+DEF main_table = 'DBA_LOB_PARTITIONS';
+BEGIN
+  :sql_text := q'[
+SELECT /*+ &&top_level_hints. */
+       *
+  FROM dba_lob_partitions
+ WHERE (table_owner, table_name) IN (SELECT /*+ UNNEST */ object_owner, object_name FROM plan_table WHERE statement_id = 'LIST_OF_TABLES' AND remarks = '&&sqld360_sqlid.')
+ ORDER BY table_owner, table_name, partition_position
+]';
+END;
+/
+@@sqld360_9a_pre_one.sql
+
+
 -- storing the report sequence before forking to a new page
 EXEC :repo_seq_bck := :repo_seq;
 
@@ -474,6 +504,21 @@ SELECT /*+ &&top_level_hints. */
    AND a.index_owner = b.owner
    AND a.index_name = b.index_name
  ORDER BY a.index_owner, a.index_name, a.subpartition_position
+]';
+END;
+/
+@@sqld360_9a_pre_one.sql
+
+
+DEF title = 'LOB Subpartitions';
+DEF main_table = 'DBA_LOB_SUBPARTITIONS';
+BEGIN
+  :sql_text := q'[
+SELECT /*+ &&top_level_hints. */
+       *
+  FROM dba_lob_subpartitions
+ WHERE (table_owner, table_name) IN (SELECT /*+ UNNEST */ object_owner, object_name FROM plan_table WHERE statement_id = 'LIST_OF_TABLES' AND remarks = '&&sqld360_sqlid.')
+ ORDER BY table_owner, table_name, subpartition_position
 ]';
 END;
 /

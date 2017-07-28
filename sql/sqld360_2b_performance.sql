@@ -13,8 +13,8 @@ BEGIN
   :sql_text := q'{
  SELECT /*+ &&top_level_hints. */
        source, plan_hash_value, force_matching_signature, SUM(executions) execs, SUM(end_of_fetch_count) eof_count, ROUND(SUM(buffer_gets)/DECODE(SUM(executions),0,1,SUM(executions))) avg_buffer_gets, 
-       ROUND(SUM(elapsed_time)/1e6/DECODE(SUM(executions),0,1,SUM(executions)),3) avg_elapsed_time_secs, ROUND(SUM(cpu_time)/1e6/DECODE(SUM(executions),0,1,SUM(executions)),3) avg_cpu_time_secs,
-       ROUND(SUM(io_time)/1e6/DECODE(SUM(executions),0,1,SUM(executions)),3) avg_io_time_secs, ROUND(SUM(rows_processed)/DECODE(SUM(executions),0,1,SUM(executions)),3) avg_rows_processed,
+       ROUND(SUM(elapsed_time)/1e6/DECODE(SUM(executions),0,1,SUM(executions)),6) avg_elapsed_time_secs, ROUND(SUM(cpu_time)/1e6/DECODE(SUM(executions),0,1,SUM(executions)),6) avg_cpu_time_secs,
+       ROUND(SUM(io_time)/1e6/DECODE(SUM(executions),0,1,SUM(executions)),6) avg_io_time_secs, ROUND(SUM(rows_processed)/DECODE(SUM(executions),0,1,SUM(executions)),3) avg_rows_processed,
        ROUND(SUM(rows_processed)/DECODE(SUM(fetches),0,1,SUM(fetches)),3) avg_rows_per_fetch,
        sql_profile, 
        &&skip_10g.sql_plan_baseline, sql_patch, 

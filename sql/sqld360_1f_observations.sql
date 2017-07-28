@@ -150,7 +150,7 @@ SELECT scope, message
                        SUM(CASE WHEN event IN ('db file sequential read', 'cell single block physical read') THEN 1 ELSE 0 END) num_single_block_reads
                   FROM ashdata
                  WHERE sql_plan_operation IN ('TABLE ACCESS','INDEX')
-                   AND sql_plan_options LIKE 'FULL%'
+                   AND (sql_plan_options LIKE 'FULL%' OR sql_plan_options LIKE 'STORAGE FULL%')
                    AND wait_class = 'User I/O' 
                  GROUP BY sql_plan_hash_value)
          WHERE TRUNC(num_single_block_reads/num_samples,3) >= 0.02 -- 2%

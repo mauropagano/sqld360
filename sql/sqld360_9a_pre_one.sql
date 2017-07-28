@@ -75,6 +75,7 @@ HOS zip -q &&sqld360_main_filename._&&sqld360_file_time. &&sqld360_main_report..
 @@&&skip_bch.&&sqld360_skip_bar.sqld360_9g_one_bar_chart.sql
 @@&&skip_tch.&&sqld360_skip_tree.sqld360_9h_one_org_chart.sql
 @@&&skip_uch.&&sqld360_skip_bubble.sqld360_9j_one_bubble_chart.sql
+@@&&skip_sch.&&sqld360_skip_scatt.sqld360_9k_one_scatter_chart.sql
 HOS zip -q &&sqld360_main_filename._&&sqld360_file_time. &&sqld360_log2..txt
 EXEC :sql_text := NULL;
 COL row_num FOR 9999999 HEA '#' PRI;
@@ -93,6 +94,7 @@ DEF skip_pch = 'Y';
 DEF skip_bch = 'Y';
 DEF skip_tch = 'Y';
 DEF skip_uch = 'Y';
+DEF skip_sch = 'Y';
 DEF title_suffix = '';
 DEF haxis = '&&db_version. &&cores_threads_hosts.';
 

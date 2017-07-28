@@ -22,20 +22,21 @@ SPO &&one_spool_filename..sql
 
 PRO -- Standalone script to run the SQL, just copy and paste in SQL*Plus
 PRO -- or copy file &&one_spool_filename..sql from &&sqld360_main_filename._&&sqld360_file_time..zip
-PRO
--- right now it only picks up the info from memory, can be extended to AWR if needed
-SELECT 'VAR '||
-       CASE WHEN REGEXP_INSTR(SUBSTR(name,1,2),'[[:digit:]]') > 0 THEN 'b'||SUBSTR(name,2) ELSE SUBSTR(name,2) END||' '||
-       CASE WHEN datatype_string = 'DATE' OR datatype_string LIKE 'TIMESTAMP%' THEN 'VARCHAR2(50)' ELSE datatype_string END 
-  FROM gv$sql_bind_capture
- WHERE sql_id = '&&sqld360_sqlid.'
-   AND child_number||' '||inst_id = (SELECT MAX(child_number||' '||inst_id)
-                                       FROM gv$sql
-                                      WHERE sql_id = '&&sqld360_sqlid.')
- ORDER BY position; 
+-- the DISTINCT is to avoid printint several times the same bind used in multiple places in the SQL
+SELECT DISTINCT b
+  FROM (SELECT 'VAR '||
+                CASE WHEN REGEXP_INSTR(SUBSTR(name,1,2),'[[:digit:]]') > 0 THEN 'b'||SUBSTR(name,2) ELSE SUBSTR(name,2) END||' '||
+                CASE WHEN datatype_string = 'DATE' OR datatype_string LIKE 'TIMESTAMP%' THEN 'VARCHAR2(50)' ELSE datatype_string END b
+           FROM gv$sql_bind_capture
+          WHERE sql_id = '&&sqld360_sqlid.'
+            AND child_number||' '||inst_id = (SELECT MAX(child_number||' '||inst_id)
+                                                FROM gv$sql
+                                               WHERE sql_id = '&&sqld360_sqlid.')
+          ORDER BY position); 
 
 -- if there is no info available in memory then try AWR
-SELECT 'VAR '||
+-- the DISTINCT is to avoid printint several times the same bind used in multiple places in the SQL
+SELECT DISTINCT 'VAR '||
        CASE WHEN REGEXP_INSTR(SUBSTR(name,1,2),'[[:digit:]]') > 0 THEN 'b'||SUBSTR(name,2) ELSE SUBSTR(name,2) END||' '||
        CASE WHEN datatype_string = 'DATE' OR datatype_string LIKE 'TIMESTAMP%' THEN 'VARCHAR2(50)' ELSE datatype_string END
   FROM dba_hist_sql_bind_metadata
@@ -71,29 +72,31 @@ SELECT
                                                                                     FROM gv$sql
                                                                                    WHERE sql_id = '&&sqld360_sqlid.')
                                                 AND other_xml IS NOT NULL)) d
+         WHERE TRIM(EXTRACTVALUE(VALUE(d), '/bind')) IS NOT NULL
         )
  ORDER BY 1;
 
 -- if there is no plan in memory then extract info from AWR
-SELECT  
-   'EXEC '||
-   CASE WHEN REGEXP_INSTR(SUBSTR(b.name,1,2),'[[:digit:]]') > 0 THEN ':b'||SUBSTR(b.name,2) ELSE b.name END||
-   ' := ' ||
-   CASE WHEN b.datatype = 2 THEN NULL ELSE '''' END||
-   a.value_string||
-   CASE WHEN b.datatype = 2 THEN NULL ELSE '''' END||
-   ';' 
-  FROM TABLE(SELECT DBMS_SQLTUNE.EXTRACT_BINDS(bind_data) 
-               FROM dba_hist_sqlstat
-              WHERE sql_id = '&&sqld360_sqlid.'  
-                AND rownum < 2
-                AND bind_data IS NOT NULL) a,
-       dba_hist_sql_bind_metadata b
- WHERE a.position = b.position
-   AND :binds_from_mem = 0
-   AND b.sql_id = '&&sqld360_sqlid.'
-   AND '&&diagnostics_pack.' = 'Y'
- ORDER BY b.position;
+-- could benefit from a DISTINCT but would need the whole SQL to be wrapped into an inline view (not a biggie for now, 20170727)
+SELECT DISTINCT b
+  FROM (SELECT 'EXEC '||
+               CASE WHEN REGEXP_INSTR(SUBSTR(b.name,1,2),'[[:digit:]]') > 0 THEN ':b'||SUBSTR(b.name,2) ELSE b.name END||
+               ' := ' ||
+               CASE WHEN b.datatype = 2 THEN NULL ELSE '''' END||
+               a.value_string||
+               CASE WHEN b.datatype = 2 THEN NULL ELSE '''' END||
+               ';' b
+              FROM TABLE(SELECT DBMS_SQLTUNE.EXTRACT_BINDS(bind_data) 
+                           FROM dba_hist_sqlstat
+                          WHERE sql_id = '&&sqld360_sqlid.'  
+                            AND rownum < 2
+                            AND bind_data IS NOT NULL) a,
+                   dba_hist_sql_bind_metadata b
+             WHERE a.position = b.position
+               AND :binds_from_mem = 0
+               AND b.sql_id = '&&sqld360_sqlid.'
+               AND '&&diagnostics_pack.' = 'Y'
+             ORDER BY b.position);
 
 
 PRO
@@ -148,7 +151,7 @@ SPO &&sqld360_main_report..html APP;
 PRO <li title="&&main_table.">&&title.
 PRO <a href="&&one_spool_filename..sql">sql</a>
 PRO </li>
-PRO </ol>
+--PRO </ol>  <= not needed anymore since moved inside 2a
 SPO OFF;
 
 -- this SQL is because the previous 2 steps don't use the standard formula to increase the seq#

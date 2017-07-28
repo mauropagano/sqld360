@@ -15,21 +15,22 @@ PRO
 PRO &&hh_mm_ss.
 PRO Extracting ASH data
 
-DECLARE
-  data_already_loaded VARCHAR2(1);
+----DECLARE
+----  data_already_loaded VARCHAR2(1);
 BEGIN
 
-  SELECT CASE WHEN count(*) > 0 THEN 'Y' ELSE 'N' END
-    INTO data_already_loaded
-    FROM plan_table
-   WHERE statement_id = 'SQLD360_ASH_LOAD'
-     &&from_edb360.AND EXISTS (SELECT 1 FROM plan_table WHERE statement_id = 'SQLD360_ASH_LOAD' AND operation = 'Loaded' AND options = '&&sqld360_sqlid.') 
-     AND operation = 'Loaded';
+-- v1708 - each SQL loads its own data, this is needed to handle execs in PDB called from CDB
+----  SELECT CASE WHEN COUNT(*) > 0 THEN 'Y' ELSE 'N' END
+----    INTO data_already_loaded
+----    FROM plan_table
+----   WHERE statement_id = 'SQLD360_ASH_LOAD'
+----     &&from_edb360.AND EXISTS (SELECT 1 FROM plan_table WHERE statement_id = 'SQLD360_ASH_LOAD' AND operation = 'Loaded' AND options = '&&sqld360_sqlid.') 
+----     AND operation = 'Loaded';
      
   -- it means this is the first execution and so the first SQL loads data for everybody
-  IF data_already_loaded = 'N' THEN
+----  IF data_already_loaded = 'N' THEN
 
-    DELETE plan_table WHERE statement_id LIKE 'SQLD360_ASH_DATA%';
+    DELETE plan_table WHERE statement_id LIKE 'SQLD360_ASH_DATA%' AND remarks = '&&sqld360_sqlid.';
   
     -- data has two different tags depending where it comes from since they have different sampling frequency  
     INSERT INTO plan_table (statement_id,timestamp,remarks,                -- 'SQLD360_ASH_DATA', sample_time, sql_id
@@ -88,13 +89,14 @@ BEGIN
             ','||&&skip_10g.&&skip_11r1.delta_write_io_bytes||
             ','||&&skip_10g.&&skip_11r1.delta_interconnect_io_bytes||
             ','&&skip_10g.&&skip_11g.&&skip_12r101.||sql_full_plan_hash_value
-       FROM dba_hist_active_sess_history a,
-            (SELECT DISTINCT operation 
-               FROM plan_table 
-              WHERE SUBSTR(options,1,1) = '1'  -- load data only for those SQL IDs that have diagnostics enabled
-                &&from_edb360.AND operation = '&&sqld360_sqlid.'
-                AND statement_id = 'SQLD360_SQLID') b
-      WHERE a.sql_id = b.operation -- plan table has the SQL ID to load
+       FROM dba_hist_active_sess_history a
+            ----,
+            ----(SELECT DISTINCT operation 
+            ----   FROM plan_table 
+            ----  WHERE SUBSTR(options,1,1) = '1'  -- load data only for those SQL IDs that have diagnostics enabled
+            ----    &&from_edb360.AND operation = '&&sqld360_sqlid.'
+            ----    AND statement_id = 'SQLD360_SQLID') b
+      WHERE a.sql_id = '&&sqld360_sqlid.' ----  b.operation -- plan table has the SQL ID to load
         AND a.sample_time BETWEEN TO_TIMESTAMP('&&sqld360_date_from.','&&sqld360_date_format.') AND TO_TIMESTAMP('&&sqld360_date_to.','&&sqld360_date_format.')  -- extract only data of interest        
         AND '&&sqld360_conf_incl_ash_hist.' = 'Y'
      UNION ALL
@@ -134,13 +136,14 @@ BEGIN
             ','||&&skip_10g.&&skip_11r1.delta_write_io_bytes||
             ','||&&skip_10g.&&skip_11r1.delta_interconnect_io_bytes||
             ','&&skip_10g.&&skip_11g.&&skip_12r101.||sql_full_plan_hash_value
-       FROM gv$active_session_history a,
-            (SELECT operation 
-               FROM plan_table
-              WHERE SUBSTR(options,1,1) = '1'  -- load data only for those SQL IDs that have diagnostics enabled
-                &&from_edb360.AND operation = '&&sqld360_sqlid.'
-                AND statement_id = 'SQLD360_SQLID') b
-      WHERE a.sql_id = b.operation -- plan table has the SQL ID to load
+       FROM gv$active_session_history a
+            ----,
+            ----(SELECT operation 
+            ----   FROM plan_table
+            ----  WHERE SUBSTR(options,1,1) = '1'  -- load data only for those SQL IDs that have diagnostics enabled
+            ----    &&from_edb360.AND operation = '&&sqld360_sqlid.'
+            ----    AND statement_id = 'SQLD360_SQLID') b
+      WHERE a.sql_id = '&&sqld360_sqlid.'  ---- b.operation -- plan table has the SQL ID to load
         AND a.sample_time BETWEEN TO_TIMESTAMP('&&sqld360_date_from.','&&sqld360_date_format.') AND TO_TIMESTAMP('&&sqld360_date_to.','&&sqld360_date_format.')
      ;   
      
@@ -152,7 +155,7 @@ BEGIN
                          &&from_edb360.,'&&sqld360_sqlid.'
                          );
 
-  END IF;
+  ----END IF;
   
 END;
 /

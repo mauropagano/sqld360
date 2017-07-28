@@ -20,6 +20,20 @@ END;
 /
 @@sqld360_9a_pre_one.sql
 
+DEF title = 'In-Memory FastStart Area';
+DEF main_table = 'GV$INMEMORY_FASTSTART_AREA';
+BEGIN
+  :sql_text := q'[
+SELECT /*+ &&top_level_hints. */
+       *
+  FROM gv$inmemory_faststart_area
+ ORDER BY inst_id, tablespace_name 
+]';
+END;
+/
+@@&&skip_10g.&&skip_11g.&&skip_12r1.sqld360_9a_pre_one.sql
+
+
 
 DEF title = 'In-Memory Segments';
 DEF main_table = 'GV$IM_SEGMENTS';

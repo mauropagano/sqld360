@@ -53,7 +53,7 @@ SELECT /*+ &&top_level_hints. */
        bytes            user_id,
        remarks          sql_id,
        cost             plan_hash_value,
-       &&skip_10g.&&skip_11g.TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,19)+1)) sql_full_plan_hash_value,
+       &&skip_10g.&&skip_11g.&&skip_12r101.TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,19)+1)) sql_full_plan_hash_value,
        &&skip_10g.id               sql_plan_line_id,
        &&skip_10g.operation        sql_plan_operation,  
        &&skip_10g.options          sql_plan_options,  

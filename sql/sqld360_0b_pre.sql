@@ -9,8 +9,8 @@ CL COL;
 COL row_num FOR 9999999 HEA '#' PRI;
 
 -- version
-DEF sqld360_vYYNN = 'v1707';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2016-06-09)';
+DEF sqld360_vYYNN = 'v1708';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2016-07-29)';
 DEF sqld360_prefix = 'sqld360';
 
 -- parameters
@@ -50,7 +50,9 @@ END;
 BEGIN  
   -- if standalone execution then need to insert metadata   
   IF '&&from_edb360.' = '' THEN
-    -- no need to clean, it's a GTT
+    -- no need to clean, it's a GTT 
+       -- false, user might execute twice in a row in the same session
+    DELETE plan_table WHERE remarks = '&&sqld360_sqlid.' AND statement_id IN ('SQLD360_SQLID', 'SQLD360_ASH_LOAD');
     -- column options set to 1 is safe here, if no diagnostics then ASH is not extracted at all anyway
     INSERT INTO plan_table (statement_id, timestamp, operation, options) VALUES ('SQLD360_SQLID',sysdate,'&&sqld360_sqlid.','1');
     --INSERT INTO plan_table (statement_id, timestamp, operation) VALUES ('SQLD360_ASH_LOAD',sysdate, NULL);
@@ -241,6 +243,17 @@ COL maximum_snap_id NEW_V maximum_snap_id;
 SELECT NVL(TO_CHAR(MAX(snap_id)), '&&minimum_snap_id.') maximum_snap_id FROM dba_hist_snapshot WHERE '&&diagnostics_pack.' = 'Y' AND dbid = &&sqld360_dbid. AND end_interval_time < TO_DATE('&&sqld360_date_to.', '&&sqld360_date_format.');
 SELECT '-1' maximum_snap_id FROM DUAL WHERE TRIM('&&maximum_snap_id.') IS NULL;
 
+-- Next two parameters are used for ASH calculations
+COL sqld360_ashdiskfilter NEW_V sqld360_ashdiskfilter
+SELECT 10 sqld360_ashdiskfilter FROM dual;
+SELECT VALUE sqld360_ashdiskfilter FROM v$parameter2 WHERE name = '_ash_disk_filter_ratio';
+COL sqld360_ashsample NEW_V sqld360_ashsample
+SELECT 1000 sqld360_ashsample FROM dual;
+SELECT VALUE sqld360_ashsample FROM v$parameter2 WHERE name = '_ash_sampling_interval';
+-- Formula is really simple, adjust the _ash_sampling_interval to seconds and multiply by _ash_disk_filter_ratio
+COL sqld360_ashtimevalue NEW_V sqld360_ashtimevalue
+SELECT TO_NUMBER(TRUNC((&&sqld360_ashsample./1000)*&&sqld360_ashdiskfilter.,3)) sqld360_ashtimevalue FROM DUAL;
+
 -- ebs
 DEF ebs_release = '';
 DEF ebs_system_name = '';
@@ -333,7 +346,6 @@ BEGIN
      AND rownum = 1;
 
 EXCEPTION WHEN NO_DATA_FOUND THEN
-
   -- pick up one user that executed the SQL
   -- might give strange results for SQLs that run in
   -- different schemas where underlying objects are different
@@ -349,6 +361,17 @@ COL xplan_user NEW_V xplan_user
 COL current_user NEW_V current_user
 SELECT :xplan_user xplan_user FROM DUAL;
 SELECT SYS_CONTEXT('USERENV', 'CURRENT_SCHEMA') current_user FROM DUAL;
+
+-- getting EXPLAIN PLAN FOR hoping to capture "warmer" dependencies
+COL xplan_sql NEW_V xplan_sql
+SELECT :sqld360_fullsql xplan_sql FROM DUAL;
+ALTER SESSION SET CURRENT_SCHEMA = &&xplan_user.;
+EXPLAIN PLAN FOR &&xplan_sql.
+/
+COL sqld360_xplan_sqlid NEW_V sqld360_xplan_sqlid
+SELECT '' sqld360_xplan_sqlid FROM DUAL;
+SELECT prev_sql_id sqld360_xplan_sqlid FROM v$session WHERE sid = USERENV('sid');
+ALTER SESSION SET CURRENT_SCHEMA = &&current_user.;
 
 
 -- get exact_matching_signature, force_matching_signature
@@ -371,15 +394,16 @@ SELECT CASE WHEN '&&exact_matching_signature.' = '&&force_matching_signature.' T
 /
 
 -- inclusion config determine skip flags
-COL sqld360_skip_html NEW_V sqld360_skip_html;
-COL sqld360_skip_xml  NEW_V sqld360_skip_xml;
-COL sqld360_skip_text NEW_V sqld360_skip_text;
-COL sqld360_skip_csv  NEW_V sqld360_skip_csv;
-COL sqld360_skip_line NEW_V sqld360_skip_line;
-COL sqld360_skip_pie  NEW_V sqld360_skip_pie;
-COL sqld360_skip_bar  NEW_V sqld360_skip_bar;
-COL sqld360_skip_tree NEW_V sqld360_skip_tree;
+COL sqld360_skip_html   NEW_V sqld360_skip_html;
+COL sqld360_skip_xml    NEW_V sqld360_skip_xml;
+COL sqld360_skip_text   NEW_V sqld360_skip_text;
+COL sqld360_skip_csv    NEW_V sqld360_skip_csv;
+COL sqld360_skip_line   NEW_V sqld360_skip_line;
+COL sqld360_skip_pie    NEW_V sqld360_skip_pie;
+COL sqld360_skip_bar    NEW_V sqld360_skip_bar;
+COL sqld360_skip_tree   NEW_V sqld360_skip_tree;
 COL sqld360_skip_bubble NEW_V sqld360_skip_bubble;
+COL sqld360_skip_scatt  NEW_V sqld360_skip_scatt;
 
 SELECT CASE '&&sqld360_conf_incl_html.'   WHEN 'N' THEN '--' END sqld360_skip_html   FROM DUAL;
 SELECT CASE '&&sqld360_conf_incl_xml.'    WHEN 'N' THEN '--' END sqld360_skip_xml    FROM DUAL;
@@ -390,6 +414,7 @@ SELECT CASE '&&sqld360_conf_incl_pie.'    WHEN 'N' THEN '--' END sqld360_skip_pi
 SELECT CASE '&&sqld360_conf_incl_bar.'    WHEN 'N' THEN '--' END sqld360_skip_bar    FROM DUAL;
 SELECT CASE '&&sqld360_conf_incl_tree.'   WHEN 'N' THEN '--' END sqld360_skip_tree   FROM DUAL;
 SELECT CASE '&&sqld360_conf_incl_bubble.' WHEN 'N' THEN '--' END sqld360_skip_bubble FROM DUAL;
+SELECT CASE '&&sqld360_conf_incl_scatt.'  WHEN 'N' THEN '--' END sqld360_skip_scatt  FROM DUAL;
 
 COL sqld360_skip_awrrpt NEW_V sqld360_skip_awrrpt;
 SELECT CASE '&&sqld360_conf_incl_awrrpt.' WHEN 'N' THEN '--' END sqld360_skip_awrrpt FROM DUAL;
@@ -433,6 +458,9 @@ SELECT CASE WHEN '&&sqld360_conf_tcb_sample.' BETWEEN '1' AND '100' THEN 'TRUE' 
 
 COL sqld360_skip_objd NEW_V sqld360_skip_objd;
 SELECT CASE '&&sqld360_conf_incl_obj_dept.' WHEN 'N' THEN '--' END sqld360_skip_objd FROM DUAL;
+
+COL sqld360_skip_obj_ashbased NEW_V sqld360_skip_obj_ashbased;
+SELECT CASE '&&sqld360_conf_incl_obj_ashbased.' WHEN 'N' THEN '--' END sqld360_skip_obj_ashbased FROM DUAL;
 
 COL sqld360_skip_lowhigh NEW_V sqld360_skip_lowhigh;
 SELECT CASE '&&sqld360_conf_translate_lowhigh.' WHEN 'N' THEN '--' END sqld360_skip_lowhigh FROM DUAL;
@@ -490,13 +518,6 @@ DEF ash_awr = 'Y';
 DEF ash_max_reports = '12';
 --DEF skip_tcb = '';
 --DEF skip_ash_rpt = '--';
-DEF skip_html = '';
-DEF skip_xml = '';
-DEF skip_text = '';
-DEF skip_csv = '';
-DEF skip_lch = 'Y';
-DEF skip_pch = 'Y';
-DEF skip_bch = 'Y';
 -- I really don't like this, I would rather insert some metadata into the plan table and join back (keep an eye on it, 2016/09/27)
 DEF wait_class_colors = 'CASE wait_class WHEN ''''''''CPU'''''''' THEN ''''''''34CF27'''''''' WHEN ''''''''Scheduler'''''''' THEN ''''''''9FFA9D'''''''' WHEN ''''''''User I/O'''''''' THEN ''''''''0252D7'''''''' WHEN ''''''''System I/O'''''''' THEN ''''''''1E96DD'''''''' ';
 DEF wait_class_colors2 = ' WHEN ''''''''Concurrency'''''''' THEN ''''''''871C12'''''''' WHEN ''''''''Application'''''''' THEN ''''''''C42A05'''''''' WHEN ''''''''Commit'''''''' THEN ''''''''EA6A05'''''''' WHEN ''''''''Configuration'''''''' THEN ''''''''594611''''''''  ';
@@ -528,9 +549,18 @@ DEF series_13 = ''
 DEF series_14 = ''
 DEF series_15 = ''
 ---
+DEF skip_html = '';
+DEF skip_xml = '';
+DEF skip_text = '';
+DEF skip_csv = '';
+DEF skip_lch = 'Y';
+DEF skip_pch = 'Y';
+DEF skip_bch = 'Y';
 DEF skip_tch = 'Y';
 DEF skip_uch = 'Y';
+DEF skip_sch = 'Y';
 DEF skip_all = '';
+
 DEF abstract = '';
 DEF abstract2 = '';
 DEF foot = '';
@@ -704,5 +734,9 @@ SPO OFF;
 HOS zip -jq &&sqld360_main_filename._&&sqld360_file_time. js/sorttable.js
 HOS zip -jq &&sqld360_main_filename._&&sqld360_file_time. js/SQLd360_img.jpg
 HOS zip -jq &&sqld360_main_filename._&&sqld360_file_time. js/SQLd360_favicon.ico
+HOS zip -jq &&sqld360_main_filename._&&sqld360_file_time. js/sql-formatter.js
+HOS zip -jq &&sqld360_main_filename._&&sqld360_file_time. js/googlecode.css
+HOS zip -jq &&sqld360_main_filename._&&sqld360_file_time. js/vs.css
+HOS zip -jq &&sqld360_main_filename._&&sqld360_file_time. js/highlight.pack.js
 
 --WHENEVER SQLERROR CONTINUE;

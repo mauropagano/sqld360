@@ -199,6 +199,7 @@ PRO &&abstract.
 PRO &&abstract2.
 
 SET TERM OFF 
+-- first two lines below are redundant since we do the same in 0b_pre too
 COL xplan_sql NEW_V xplan_sql
 SELECT :sqld360_fullsql xplan_sql FROM DUAL;
 ALTER SESSION SET CURRENT_SCHEMA = &&xplan_user.;

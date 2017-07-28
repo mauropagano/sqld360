@@ -12,11 +12,11 @@ DEF main_table = 'GV$SQL_BIND_CAPTURE';
 BEGIN
   :sql_text := q'[
 SELECT /*+ &&top_level_hints. */
-       inst_id, child_number, position, datatype_string, MIN(value_string) min_value, MAX(value_string) max_value, COUNT(DISTINCT value_string) distinct_combinations
+       inst_id, child_number, name, position, datatype_string, MIN(value_string) min_value, MAX(value_string) max_value, COUNT(DISTINCT value_string) distinct_combinations
   FROM gv$sql_bind_capture 
  WHERE sql_id = '&&sqld360_sqlid.'
- GROUP BY inst_id, child_number, position, datatype_string
- ORDER BY inst_id, child_number, position, datatype_string
+ GROUP BY inst_id, child_number, name, position, datatype_string
+ ORDER BY inst_id, child_number, name, position, datatype_string
 ]';
 END;
 /
@@ -47,13 +47,13 @@ DEF main_table = 'DBA_HIST_SQLBIND';
 BEGIN
   :sql_text := q'[
 SELECT /*+ &&top_level_hints. */
-       instance_number, position, datatype_string, MIN(value_string) min_value, MAX(value_string) max_value, COUNT(DISTINCT value_string) distinct_combinations
+       instance_number, name, position, datatype_string, MIN(value_string) min_value, MAX(value_string) max_value, COUNT(DISTINCT value_string) distinct_combinations
   FROM dba_hist_sqlbind
  WHERE sql_id = '&&sqld360_sqlid.'
    AND snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id. 
    AND '&&diagnostics_pack.' = 'Y'
- GROUP BY instance_number, position, datatype_string
- ORDER BY instance_number, position, datatype_string
+ GROUP BY instance_number, name, position, datatype_string
+ ORDER BY instance_number, name, position, datatype_string
 ]';
 END;
 /
@@ -75,6 +75,48 @@ SELECT /*+ &&top_level_hints. */
 END;
 /
 @@sqld360_9a_pre_one.sql
+
+
+
+
+
+-- find if there are histograms 
+COL num_binds NEW_V num_binds
+SELECT TRIM(TO_CHAR(COUNT(name))) num_binds 
+  FROM (SELECT name
+          FROM gv$sql_bind_capture
+         WHERE sql_id = '&&sqld360_sqlid.'
+        UNION
+        SELECT name
+          FROM dba_hist_sqlbind
+         WHERE sql_id = '&&sqld360_sqlid.'
+           AND snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id. 
+           AND '&&diagnostics_pack.' = 'Y');
+DEF title= 'Captured Binds Details'
+DEF main_table = 'GV$SQL_BIND_CAPTURE'
+
+-- storing the report sequence before forking to a new page
+EXEC :repo_seq_bck := :repo_seq;
+
+--this one initiated a new file name, need it in the next anchor
+@@sqld360_0s_pre_nondef
+SET TERM OFF ECHO OFF 
+-- need to fix the file name for the partitions
+SPO &&sqld360_main_report..html APP;
+PRO <li>Captured Binds Details  
+PRO <a href="&&one_spool_filename..html">page</a> <small><em>(&&num_binds.)</em></small>
+PRO </li>
+SPO OFF;
+@@sqld360_2i_captured_binds.sql
+
+-- storing the report sequence before forking to a new page
+EXEC :repo_seq := :repo_seq_bck+1;
+
+
+
+
+
+
 
 
 DEF title = 'Binds with unstable datatype';

@@ -37,8 +37,9 @@ PRO
 SPO OFF;
 
 @@sqld360_2a_identification.sql
-@@&&skip_10g.&&skip_11r1.sqld360_2a_xpand.sql
-@@sqld360_2a_standalone.sql
+-- @@&&skip_10g.&&skip_11r1.sqld360_2a_xpand.sql  <= MOVED INSIDE 2a_identification
+--@@sqld360_2a_formatted.sql   <= MOVED INSIDE 2a_identification
+--@@sqld360_2a_standalone.sql  <= MOVED INSIDE 2a_identification
 @@sqld360_2b_performance.sql
 @@&&from_edb360.&&skip_force_match.&&sqld360_skip_fmatch.sqld360_2c_performance_fm.sql
 @@sqld360_2d_plans.sql

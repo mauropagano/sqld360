@@ -55,7 +55,7 @@ UNDEF 1 2 3 4 5 6
 HOS zip -mq &&sqld360_main_filename._&&sqld360_file_time. 99999_sqld360_&&sqld360_sqlid._drivers*
 HOS zip -mq &&sqld360_main_filename._&&sqld360_file_time. &&common_sqld360_prefix._query.sql
 HOS zip -dq &&sqld360_main_filename._&&sqld360_file_time. &&common_sqld360_prefix._query.sql
-HOS zip -mq &&sqld360_main_filename._&&sqld360_file_time. 00005_&&common_sqld360_prefix._alert_*.log
+--HOS zip -mq &&sqld360_main_filename._&&sqld360_file_time. 00005_&&common_sqld360_prefix._alert_*.log
 HOS zip -mq &&sqld360_main_filename._&&sqld360_file_time. &&sqld360_log2..txt
 HOS zip -mq &&sqld360_main_filename._&&sqld360_file_time. &&sqld360_tkprof._sort.txt
 HOS zip -mq &&sqld360_main_filename._&&sqld360_file_time. &&sqld360_log..txt
@@ -63,7 +63,18 @@ HOS zip -mq &&sqld360_main_filename._&&sqld360_file_time. &&sqld360_main_report.
 HOS zip -mq &&sqld360_main_filename._&&sqld360_file_time. 00000_readme_first.txt 
 --HOS unzip -l &&sqld360_main_filename._&&sqld360_file_time.
 
+
+-- This commit is to end the transaction we initiated in this execution
+-- The main goal is to avoid ORA-65023 when switching to another PDB
+COMMIT;
+
+-- here we need to switch back to caller CONTAINER (CDB/PDB)
+-- It will error out in versions before 12c, safe to ignore
+ALTER SESSION SET CONTAINER=&&sqld360_container.;
+
+
 --update plan table with zip file for eDB360 to pull
 UPDATE plan_table SET remarks = '&&sqld360_main_filename._&&sqld360_file_time..zip'  WHERE statement_id = 'SQLD360_SQLID' and operation = '&&sqld360_sqlid.';
+COMMIT;
 
 SET TERM ON;

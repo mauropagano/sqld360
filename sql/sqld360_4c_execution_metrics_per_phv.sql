@@ -487,7 +487,7 @@ SELECT phv,
        phv||' - 10s-samples: '||num_samples||' ('||TRUNC(100*RATIO_TO_REPORT(num_samples) OVER (),2)||'% of DB Time)' tooltip
        --TRUNC(100*RATIO_TO_REPORT(num_samples) OVER (),2) percent,
   FROM (SELECT cost phv,
-               SUM(10) num_samples
+               SUM(&&sqld360_ashtimevalue.) num_samples
           FROM plan_table
          WHERE remarks = '&&sqld360_sqlid.' 
            AND statement_id = 'SQLD360_ASH_DATA_HIST' 
@@ -641,7 +641,7 @@ SELECT b.snap_id snap_id,
                MAX(CASE WHEN phv = &&phv_15_awr. THEN elapsed_time ELSE NULL END) phv15 
           FROM (SELECT snap_id,
                        plan_hash_value phv, 
-                       TRUNC(SUM(elapsed_time_delta)/1e6,3) elapsed_time
+                       ROUND(SUM(elapsed_time_delta)/1e6,6) elapsed_time
                   FROM dba_hist_sqlstat
                  WHERE snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.
                    AND sql_id = '&&sqld360_sqlid.'
@@ -1136,7 +1136,7 @@ SELECT b.snap_id snap_id,
                   FROM (SELECT SUBSTR(distribution,1,10) start_time,
                                cost phv, 
                                MIN(cardinality) starting_snap_id,
-                               10+86400*(MAX(timestamp)-MIN(timestamp)) et,
+                               &&sqld360_ashtimevalue.+86400*(MAX(timestamp)-MIN(timestamp)) et,
                                NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,3)+1,INSTR(partition_stop,',',1,4)-INSTR(partition_stop,',',1,3)-1)),position)||'-'|| 
                                 NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,4)+1,INSTR(partition_stop,',',1,5)-INSTR(partition_stop,',',1,4)-1)),cpu_cost)||'-'|| 
                                 NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,5)+1,INSTR(partition_stop,',',1,6)-INSTR(partition_stop,',',1,5)-1)),io_cost)||'-'||
@@ -1328,7 +1328,7 @@ SELECT b.snap_id snap_id,
                MAX(CASE WHEN phv = &&phv_15_awr. THEN avg_et_per_exec ELSE NULL END) phv15 
           FROM (SELECT snap_id,
                        plan_hash_value phv, 
-                       TRUNC(SUM(elapsed_time_total)/SUM(NVL(NULLIF(executions_total,0),1))/1e6,3) avg_et_per_exec
+                       ROUND(SUM(elapsed_time_total)/SUM(NVL(NULLIF(executions_total,0),1))/1e6,6) avg_et_per_exec
                   FROM dba_hist_sqlstat
                  WHERE snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.
                    AND sql_id = '&&sqld360_sqlid.'

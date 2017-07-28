@@ -50,19 +50,19 @@ BEGIN
 SELECT MIN(a.snap_id) snap_id, 
        TO_CHAR(a.begin_interval_time, 'YYYY-MM-DD HH24:MI')  begin_time, 
        TO_CHAR(a.end_interval_time, 'YYYY-MM-DD HH24:MI')  end_time,
-       TRUNC(SUM(NVL(b.elapsed_time_delta,0))/1e6,3) elapsed_time,
-       TRUNC(SUM(NVL(b.cpu_time_delta,0))/1e6,3) cpu_time, 
-       TRUNC(SUM(NVL(b.iowait_delta,0))/1e6,3) io_time,
-       TRUNC(SUM(NVL(b.clwait_delta,0))/1e6,3) cluster_time,
-       TRUNC(SUM(NVL(b.apwait_delta,0))/1e6,3) application_time,
-       TRUNC(SUM(NVL(b.ccwait_delta,0))/1e6,3) concurrency_time,
-       TRUNC((SUM(NVL(b.elapsed_time_delta,0)) - 
+       ROUND(SUM(NVL(b.elapsed_time_delta,0))/1e6,6) elapsed_time,
+       ROUND(SUM(NVL(b.cpu_time_delta,0))/1e6,6) cpu_time, 
+       ROUND(SUM(NVL(b.iowait_delta,0))/1e6,6) io_time,
+       ROUND(SUM(NVL(b.clwait_delta,0))/1e6,6) cluster_time,
+       ROUND(SUM(NVL(b.apwait_delta,0))/1e6,6) application_time,
+       ROUND(SUM(NVL(b.ccwait_delta,0))/1e6,6) concurrency_time,
+       ROUND((SUM(NVL(b.elapsed_time_delta,0)) - 
          (SUM(NVL(b.cpu_time_delta,0)) +
           SUM(NVL(b.iowait_delta,0))   +
           SUM(NVL(b.clwait_delta,0))   +
           SUM(NVL(b.apwait_delta,0))   +
           SUM(NVL(b.ccwait_delta,0)))
-       ) / 1e6,3) unaccounted_time,
+       ) / 1e6,6) unaccounted_time,
        0 dummy_08,
        0 dummy_09,
        0 dummy_10,
@@ -313,9 +313,9 @@ SELECT NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,3)+1,INSTR
        TO_CHAR(MAX(timestamp), 'YYYY-MM-DD HH24:MI:SS')  end_time,
        MIN(cost) plan_hash_value,
        --LEAST(10+86400*(MAX(timestamp)-MIN(timestamp)),SUM(10)) elapsed_time, 
-       10+86400*(MAX(timestamp)-MIN(timestamp)) elapsed_time,
-       SUM(CASE WHEN object_node = 'ON CPU' THEN 10 ELSE 0 END) cpu_time,
-       SUM(10) db_time,
+       &&sqld360_ashtimevalue.+86400*(MAX(timestamp)-MIN(timestamp)) elapsed_time,
+       SUM(CASE WHEN object_node = 'ON CPU' THEN &&sqld360_ashtimevalue. ELSE 0 END) cpu_time,
+       SUM(&&sqld360_ashtimevalue.) db_time,
        COUNT(DISTINCT position||'-'||cpu_cost||'-'||io_cost) num_processes_ash,
        MAX(TRUNC(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,10)+1,INSTR(partition_stop,',',1,11)-INSTR(partition_stop,',',1,10)-1)) / 2097152)) max_px_degree_ash,
        MAX(px_servers_requested) px_servers_requested_sqlmon, 
@@ -750,12 +750,12 @@ SELECT snap_id snap_id,
   FROM (SELECT a.snap_id, 
                MIN(begin_interval_time) begin_interval_time, 
                MIN(end_interval_time) end_interval_time,
-               TRUNC(SUM(elapsed_time_total)/SUM(NVL(NULLIF(executions_total,0),1))/1e6,3) elapsed_time, 
-               TRUNC(SUM(cpu_time_total)/SUM(NVL(NULLIF(executions_total,0),1))/1e6,3) cpu_time, 
-               TRUNC(SUM(iowait_total)/SUM(NVL(NULLIF(executions_total,0),1))/1e6,3) iowait, 
-               TRUNC(SUM(clwait_total)/SUM(NVL(NULLIF(executions_total,0),1))/1e6,3) clwait, 
-               TRUNC(SUM(apwait_total)/SUM(NVL(NULLIF(executions_total,0),1))/1e6,3) apwait, 
-               TRUNC(SUM(ccwait_total)/SUM(NVL(NULLIF(executions_total,0),1))/1e6,3) ccwait
+               ROUND(SUM(elapsed_time_total)/SUM(NVL(NULLIF(executions_total,0),1))/1e6,6) elapsed_time, 
+               ROUND(SUM(cpu_time_total)/SUM(NVL(NULLIF(executions_total,0),1))/1e6,6) cpu_time, 
+               ROUND(SUM(iowait_total)/SUM(NVL(NULLIF(executions_total,0),1))/1e6,6) iowait, 
+               ROUND(SUM(clwait_total)/SUM(NVL(NULLIF(executions_total,0),1))/1e6,6) clwait, 
+               ROUND(SUM(apwait_total)/SUM(NVL(NULLIF(executions_total,0),1))/1e6,6) apwait, 
+               ROUND(SUM(ccwait_total)/SUM(NVL(NULLIF(executions_total,0),1))/1e6,6) ccwait
           FROM (SELECT snap_id, instance_number, begin_interval_time, end_interval_time
                   FROM dba_hist_snapshot
                  WHERE snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.) a,
@@ -1057,9 +1057,9 @@ SELECT b.snap_id snap_id,
                                 NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,5)+1,INSTR(partition_stop,',',1,6)-INSTR(partition_stop,',',1,5)-1)),io_cost)||'-'||
                                 NVL(partition_id,0)||'-'||NVL(distribution,'x') uniq_exec, 
                                MIN(cardinality) start_snap_id,
-                               10+86400*(MAX(timestamp)-MIN(timestamp)) et, 
-                               SUM(CASE WHEN object_node = 'ON CPU' THEN 10 ELSE 0 END) cpu_time,
-                               SUM(10) db_time
+                               &&sqld360_ashtimevalue.+86400*(MAX(timestamp)-MIN(timestamp)) et, 
+                               SUM(CASE WHEN object_node = 'ON CPU' THEN &&sqld360_ashtimevalue. ELSE 0 END) cpu_time,
+                               SUM(&&sqld360_ashtimevalue.) db_time
                           FROM plan_table
                          WHERE statement_id = 'SQLD360_ASH_DATA_HIST'
                            AND partition_id IS NOT NULL
@@ -1264,7 +1264,7 @@ SELECT inst_id, session_id, session_serial#, COUNT(DISTINCT event) num_events, M
   FROM (SELECT inst_id, session_id, session_serial#, sample_time, event, nvl(start_of_streak, 
                MAX(start_of_streak) OVER (PARTITION BY inst_id, session_id, session_serial# ORDER BY sample_time ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING)) start_of_streak
           FROM (SELECT inst_id, session_id, session_serial#, sample_time, event,
-                       CASE WHEN diff_in_sample IS NULL OR diff_in_sample > 10 THEN sample_time ELSE NULL END start_of_streak
+                       CASE WHEN diff_in_sample IS NULL OR diff_in_sample > &&sqld360_ashtimevalue. THEN sample_time ELSE NULL END start_of_streak
                   FROM (SELECT position inst_id, cpu_cost session_id, io_cost session_serial#, timestamp sample_time, object_node event,
                                TRUNC((timestamp-LAG(timestamp) OVER (PARTITION BY position, cpu_cost, io_cost ORDER BY timestamp))*86400) diff_in_sample
                           FROM plan_table

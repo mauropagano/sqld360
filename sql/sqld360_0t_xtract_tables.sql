@@ -41,16 +41,16 @@ BEGIN
            AND sql_id = '&&sqld360_sqlid.'
            AND object_owner IS NOT NULL
            AND object_name IS NOT NULL
-         UNION
-        SELECT o.owner, o.object_name name
-          FROM plan_table pt,
-               dba_objects o
-         WHERE '&&diagnostics_pack.' = 'Y'
-           AND pt.statement_id LIKE 'SQLD360_ASH_DATA%'
-           AND pt.remarks = '&&sqld360_sqlid.'
-           AND pt.object_instance > 0
-           AND o.object_id = pt.object_instance
-           AND pt.other_tag IN ('Application', 'Cluster', 'Concurrency', 'User I/O') 
+&&sqld360_skip_obj_ashbased.         UNION
+&&sqld360_skip_obj_ashbased.        SELECT o.owner, o.object_name name
+&&sqld360_skip_obj_ashbased.          FROM plan_table pt,
+&&sqld360_skip_obj_ashbased.               dba_objects o
+&&sqld360_skip_obj_ashbased.         WHERE '&&diagnostics_pack.' = 'Y'
+&&sqld360_skip_obj_ashbased.           AND pt.statement_id LIKE 'SQLD360_ASH_DATA%'
+&&sqld360_skip_obj_ashbased.           AND pt.remarks = '&&sqld360_sqlid.'
+&&sqld360_skip_obj_ashbased.           AND pt.object_instance > 0
+&&sqld360_skip_obj_ashbased.           AND o.object_id = pt.object_instance
+&&sqld360_skip_obj_ashbased.           AND pt.other_tag IN ('Application', 'Cluster', 'Concurrency', 'User I/O') 
 &&skip_10g.&&skip_11r1.&&sqld360_skip_objd.   UNION 
 &&skip_10g.&&skip_11r1.&&sqld360_skip_objd.   SELECT SUBSTR(owner,1,30) object_owner, SUBSTR(name,1,30) object_name
 &&skip_10g.&&skip_11r1.&&sqld360_skip_objd.     FROM v$db_object_cache  -- it's intentional here to use V$ instead of GV$ to keep the plan easy 
@@ -59,7 +59,7 @@ BEGIN
 &&skip_10g.&&skip_11r1.&&sqld360_skip_objd.                           FROM v$object_dependency 
 &&skip_10g.&&skip_11r1.&&sqld360_skip_objd.                          WHERE from_hash IN (SELECT hash_value
 &&skip_10g.&&skip_11r1.&&sqld360_skip_objd.                                                FROM v$sqlarea  
-&&skip_10g.&&skip_11r1.&&sqld360_skip_objd.                                               WHERE sql_id = '&&sqld360_sqlid.'))
+&&skip_10g.&&skip_11r1.&&sqld360_skip_objd.                                               WHERE sql_id IN ('&&sqld360_sqlid.', '&&sqld360_xplan_sqlid.')))
         )
         SELECT 'TABLE', o.owner, o.name table_name
           FROM dba_tables t,   

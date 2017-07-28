@@ -21,6 +21,7 @@ DEF sqld360_conf_incl_pie    = 'Y';
 DEF sqld360_conf_incl_bar    = 'Y';
 DEF sqld360_conf_incl_tree   = 'Y';
 DEF sqld360_conf_incl_bubble = 'Y';
+DEF sqld360_conf_incl_scatt  = 'Y';
 
 -- include/exclude SQL Monitor reports
 DEF sqld360_conf_incl_sqlmon = 'Y';
@@ -88,7 +89,10 @@ DEF sqld360_conf_num_sqlmon_rep = '12';
 DEF sqld360_conf_avg_et_percth = '90';
 
 -- include/exclude v$object_dependency (tends to pollute the report, but brings more views)
-DEF sqld360_conf_incl_obj_dept = 'N';
+DEF sqld360_conf_incl_obj_dept = 'Y';
+
+-- include/exclude object rediscovery based on ASH (tends to pollute the report)
+DEF sqld360_conf_incl_obj_ashbased = 'N';
 
 -- enable / disable SQLd360 tracing itself (0 => OFF, everything else is ON)
 DEF sqld360_sqltrace_level = '0';

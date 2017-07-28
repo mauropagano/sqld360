@@ -6,6 +6,13 @@ PRO <h2>&&section_id.. &&section_name.</h2>
 PRO <ol start="&&report_sequence.">
 SPO OFF;
 
+@@sqld360_2a_formatted.sql 
+@@sqld360_2a_standalone.sql
+@@&&skip_10g.&&skip_11r1.sqld360_2a_xpand.sql
+
+-- to clean environment after 3 standalone scripts
+SET HEAD ON PAGES &&def_max_rows.; 
+
 COL address NOPRI
 COL hash_value NOPRI
 COL sql_id NOPRI
@@ -41,3 +48,7 @@ SELECT /*+ &&top_level_hints. */
 END;
 /
 @@sqld360_9a_pre_one.sql
+
+SPO &&sqld360_main_report..html APP;
+PRO </ol>
+SPO OFF;

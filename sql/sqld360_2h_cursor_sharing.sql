@@ -30,7 +30,7 @@ SELECT /*+ &&top_level_hints. */
        * 
   FROM gv$sql_cs_histogram 
  WHERE sql_id = '&&sqld360_sqlid.'
- ORDER BY inst_id, child_number
+ ORDER BY inst_id, child_number, bucket_id
 ]';
 END;
 /
@@ -60,7 +60,7 @@ SELECT /*+ &&top_level_hints. */
        * 
   FROM gv$sql_cs_selectivity 
  WHERE sql_id = '&&sqld360_sqlid.'
- ORDER BY inst_id, child_number
+ ORDER BY inst_id, child_number, range_id, predicate
 ]';
 END;
 /

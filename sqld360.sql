@@ -55,6 +55,7 @@ DECLARE
   num_sqlids NUMBER;
   license    VARCHAR2(1);
   num_days   NUMBER;
+  container  VARCHAR2(128);
   PROCEDURE put (p_line IN VARCHAR2)
   IS
   BEGIN
@@ -70,9 +71,20 @@ BEGIN
    WHERE statement_id = 'SQLD360_SQLID'
      AND remarks IS NULL;
 
+  -- 1708 - Extracting calling container (only in 12c)
+  BEGIN
+    SELECT SYS_CONTEXT('USERENV','CON_NAME') 
+      INTO container
+      FROM v$instance 
+     WHERE version LIKE '12%';
+  EXCEPTION 
+     WHEN NO_DATA_FOUND THEN container := ''; -- not in 12c
+  END;
+
   IF num_sqlids = 0 THEN
     -- this is a standalone execution, just proceed without values
     -- for standalone execution leave the variable for TCB alone
+    put('DEF sqld360_container='''||container||'''');
     put('DEF skip_tcb=''''');
     put('DEF from_edb360=''''');
     put('DEF sqld360_fromedb360_days=''''');
@@ -90,10 +102,11 @@ BEGIN
      * Even though the variable were defined, it wasn't possible to overwrite their value, so used plan_table to count down time
      */
     put('INSERT INTO plan_table (statement_id, cost, cardinality) VALUES (''EDB360_SECS2GO'', &&edb360_secs2go., &&edb360_secs2go.);');
+    put('COMMIT;');
 
     -- this execution is from edb360, call SQLd360 several times passing the appropriare flag
     --  the DISTINCT here is to make sure we run SQLd360 once even though the SQL is top in multiple categories (e.g. signature and dbtime)
-    FOR i IN (SELECT operation, options 
+    FOR i IN (SELECT operation, options, object_node 
                 FROM plan_table 
                WHERE statement_id = 'SQLD360_SQLID' 
                ORDER BY id) LOOP
@@ -128,6 +141,14 @@ BEGIN
        put('  FROM plan_table ');
        put(' WHERE statement_id = ''EDB360_SECS2GO'';');
 
+       -- plan_table.object_node is used to store the PDB
+       IF i.object_node IS NOT NULL THEN
+           put('ALTER SESSION SET CONTAINER='||i.object_node||';');
+       END IF;
+       -- v1708 - variable to keep track of the PDB/CDB we are in so that later 
+       --  the code can switch back to CDB to update the right plan table with the file name
+       put('DEF sqld360_container='''||container||'''');
+
        put('@@&&skip_sqld360.sql/sqld360_0a_main.sql '||i.operation||' '||license);
        put('HOS unzip -l &&sqld360_main_filename._&&sqld360_file_time.');
 
@@ -137,6 +158,8 @@ BEGIN
        put('   SET cardinality = cardinality - ((sysdate - TO_DATE(''@@secs2go_starttime.'', ''YYYYMMDDHH24MISS''))*86400) ');
        put(' WHERE statement_id = ''EDB360_SECS2GO'' ');
        put('   AND cardinality > 0;');
+       -- This COMMIT is to avoid ORA-65023 when called from eDB360 in CDB
+       put('COMMIT;');
        put('SET DEF &');
 
     END LOOP;

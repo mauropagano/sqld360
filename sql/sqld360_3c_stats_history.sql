@@ -73,7 +73,7 @@ END;
 
 
 DEF title = 'Columns Statistics History';
-DEF main_table = 'WRI$_OPTSTAT_IND_HISTORY';
+DEF main_table = 'WRI$_OPTSTAT_HISTHEAD_HISTORY';
 BEGIN
   :sql_text := q'[
 SELECT /*+ &&top_level_hints. */
@@ -102,7 +102,7 @@ END;
 
 
 DEF title = 'Partitions Statistics History';
-DEF main_table = 'WRI$_OPTSTAT_IND_HISTORY';
+DEF main_table = 'WRI$_OPTSTAT_TAB_HISTORY';
 BEGIN
   :sql_text := q'[
 SELECT /*+ &&top_level_hints. */

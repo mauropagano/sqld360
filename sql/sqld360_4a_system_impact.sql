@@ -61,19 +61,20 @@ SELECT MIN(a.snap_id) snap_id,
   FROM (SELECT snap_id, instance_number, value-LAG(value,1) OVER (PARTITION BY instance_number ORDER BY snap_id ) system_val 
           FROM dba_hist_sys_time_model 
          WHERE stat_name LIKE 'sql execute%') a,
-       (SELECT snap_id, instance_number, elapsed_time_delta sql_val
+       (SELECT snap_id, instance_number, SUM(elapsed_time_delta) sql_val
           FROM dba_hist_sqlstat
-         WHERE sql_id = '&&sqld360_sqlid.') b,
+         WHERE sql_id = '&&sqld360_sqlid.'
+         GROUP BY snap_id, instance_number) b,
        (SELECT snap_id, instance_number, begin_interval_time, end_interval_time
           FROM dba_hist_snapshot
          WHERE snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.) c
- WHERE a.snap_id = b.snap_id(+)
-   AND a.instance_number = b.instance_number(+)
+ WHERE c.snap_id = b.snap_id(+)
+   AND c.instance_number = b.instance_number(+)
    AND a.instance_number = @instance_number@
-   AND a.snap_id = c.snap_id
+   AND a.snap_id(+) = c.snap_id
    AND '&&diagnostics_pack.' = 'Y'
-   AND a.instance_number = c.instance_number
-   AND a.system_val > 0 -- skip the first snapshot where we can''t compute DELTA
+   AND a.instance_number(+) = c.instance_number
+   AND a.system_val(+) > 0 -- skip the first snapshot where we can''t compute DELTA
                         -- and those where the value would be negative (restart in between)
  GROUP BY
        TO_CHAR(c.begin_interval_time, 'YYYY-MM-DD HH24:MI'), 
@@ -433,7 +434,7 @@ DEF skip_lch = 'Y';
 -------------------------
 
 DEF main_table = 'DBA_HIST_ACTIVE_SESS_HISTORY';
-DEF abstract = 'Distinct sessions executing this SQL';
+DEF abstract = 'Distinct sessions executing this SQL (including PX slaves)';
 DEF foot = 'Chart represents how many distinct sessions executed this SQL per snap_id'
 DEF vaxis = 'Distinct Sessions running the SQL'
 
