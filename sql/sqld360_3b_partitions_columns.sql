@@ -192,7 +192,7 @@ BEGIN
       put(' WHERE a.owner = '''||j.table_owner||''''); 
       put('   AND a.table_name = '''||j.table_name||'''');
       put('   AND a.partition_name = '''||j.partition_name||'''');
-      put('   AND a.owner = a.owner');
+      put('   AND a.owner = b.owner');
       put('   AND a.table_name = b.table_name');
       put('   AND a.column_name = b.column_name');
       put(' ORDER BY a.owner, a.table_name, a.partition_name, b.column_id');

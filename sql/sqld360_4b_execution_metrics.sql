@@ -192,16 +192,16 @@ BEGIN
 SELECT NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,3)+1,INSTR(partition_stop,',',1,4)-INSTR(partition_stop,',',1,3)-1)),position) instance_id,
        NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,4)+1,INSTR(partition_stop,',',1,5)-INSTR(partition_stop,',',1,4)-1)),cpu_cost) session_id,
        NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,5)+1,INSTR(partition_stop,',',1,6)-INSTR(partition_stop,',',1,5)-1)),io_cost) session_serial#,
-       bytes user_id, 
+       TO_NUMBER(SUBSTR(partition_start,INSTR(partition_start,',',1,13)+1)) user_id, 
        partition_id sql_exec_id,
        TO_CHAR(TO_DATE(distribution, 'YYYYMMDDHH24MISS'), 'YYYY-MM-DD HH24:MI:SS') sql_exec_start,
        TO_CHAR(MIN(timestamp), 'YYYY-MM-DD HH24:MI:SS')  start_time,
        TO_CHAR(MAX(timestamp), 'YYYY-MM-DD HH24:MI:SS')  end_time,
-       MIN(cost) plan_hash_value,
+       bytes plan_hash_value,
        --LEAST(1+86400*(MAX(timestamp)-MIN(timestamp)),COUNT(*)) elapsed_time,
-       1+86400*(MAX(timestamp)-MIN(timestamp)) elapsed_time,
-       SUM(CASE WHEN object_node = 'ON CPU' THEN 1 ELSE 0 END) cpu_time,
-       COUNT(*) db_time,
+       &&sqld360_ashsample.+86400*(MAX(timestamp)-MIN(timestamp)) elapsed_time,
+       SUM(CASE WHEN object_node = 'ON CPU' THEN &&sqld360_ashsample. ELSE 0 END) cpu_time,
+       SUM(&&sqld360_ashsample.) db_time,
        COUNT(DISTINCT position||'-'||cpu_cost||'-'||io_cost) num_processes_ash,
        MAX(TRUNC(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,10)+1,INSTR(partition_stop,',',1,11)-INSTR(partition_stop,',',1,10)-1)) / 2097152)) max_px_degree_ash,
        MAX(px_servers_requested) px_servers_requested_sqlmon, 
@@ -228,11 +228,12 @@ SELECT NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,3)+1,INSTR
    AND b.session_serial#(+) = NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,5)+1,INSTR(partition_stop,',',1,6)-INSTR(partition_stop,',',1,5)-1)),io_cost)
    AND b.sql_exec_start(+) = TO_DATE(distribution, 'YYYYMMDDHH24MISS')
  GROUP BY partition_id, 
+       bytes,
        TO_CHAR(TO_DATE(distribution, 'YYYYMMDDHH24MISS'), 'YYYY-MM-DD HH24:MI:SS'),
        NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,3)+1,INSTR(partition_stop,',',1,4)-INSTR(partition_stop,',',1,3)-1)),position),
        NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,4)+1,INSTR(partition_stop,',',1,5)-INSTR(partition_stop,',',1,4)-1)),cpu_cost),
        NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,5)+1,INSTR(partition_stop,',',1,6)-INSTR(partition_stop,',',1,5)-1)),io_cost),
-       bytes 
+       TO_NUMBER(SUBSTR(partition_start,INSTR(partition_start,',',1,13)+1)) 
  ORDER BY
        TO_CHAR(MIN(timestamp), 'YYYY-MM-DD HH24:MI:SS'),
        partition_id
@@ -306,12 +307,12 @@ BEGIN
 SELECT NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,3)+1,INSTR(partition_stop,',',1,4)-INSTR(partition_stop,',',1,3)-1)),position) instance_id,
        NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,4)+1,INSTR(partition_stop,',',1,5)-INSTR(partition_stop,',',1,4)-1)),cpu_cost) session_id,
        NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,5)+1,INSTR(partition_stop,',',1,6)-INSTR(partition_stop,',',1,5)-1)),io_cost) session_serial#,
-       bytes user_id, 
+       TO_NUMBER(SUBSTR(partition_start,INSTR(partition_start,',',1,13)+1)) user_id, 
        partition_id sql_exec_id,
        TO_CHAR(TO_DATE(distribution, 'YYYYMMDDHH24MISS'), 'YYYY-MM-DD HH24:MI:SS') sql_exec_start,
        TO_CHAR(MIN(timestamp), 'YYYY-MM-DD HH24:MI:SS')  start_time,
        TO_CHAR(MAX(timestamp), 'YYYY-MM-DD HH24:MI:SS')  end_time,
-       MIN(cost) plan_hash_value,
+       bytes plan_hash_value,
        --LEAST(10+86400*(MAX(timestamp)-MIN(timestamp)),SUM(10)) elapsed_time, 
        &&sqld360_ashtimevalue.+86400*(MAX(timestamp)-MIN(timestamp)) elapsed_time,
        SUM(CASE WHEN object_node = 'ON CPU' THEN &&sqld360_ashtimevalue. ELSE 0 END) cpu_time,
@@ -342,11 +343,12 @@ SELECT NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,3)+1,INSTR
    AND b.session_serial#(+) = NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,5)+1,INSTR(partition_stop,',',1,6)-INSTR(partition_stop,',',1,5)-1)),io_cost)
    AND b.sql_exec_start(+) = TO_DATE(distribution, 'YYYYMMDDHH24MISS')
  GROUP BY partition_id, 
+       bytes,
        TO_CHAR(TO_DATE(distribution, 'YYYYMMDDHH24MISS'), 'YYYY-MM-DD HH24:MI:SS'),
        NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,3)+1,INSTR(partition_stop,',',1,4)-INSTR(partition_stop,',',1,3)-1)),position),
        NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,4)+1,INSTR(partition_stop,',',1,5)-INSTR(partition_stop,',',1,4)-1)),cpu_cost),
        NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,5)+1,INSTR(partition_stop,',',1,6)-INSTR(partition_stop,',',1,5)-1)),io_cost),
-       bytes 
+       TO_NUMBER(SUBSTR(partition_start,INSTR(partition_start,',',1,13)+1)) 
  ORDER BY
        TO_CHAR(MIN(timestamp), 'YYYY-MM-DD HH24:MI:SS'),
        partition_id
@@ -899,9 +901,9 @@ SELECT 0 snap_id,
                         NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,4)+1,INSTR(partition_stop,',',1,5)-INSTR(partition_stop,',',1,4)-1)),cpu_cost)||'-'|| 
                         NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,5)+1,INSTR(partition_stop,',',1,6)-INSTR(partition_stop,',',1,5)-1)),io_cost)||'-'||
                         NVL(partition_id,0)||'-'||NVL(distribution,'x') uniq_exec, 
-                       1+86400*(MAX(timestamp)-MIN(timestamp)) et, 
-                       SUM(CASE WHEN object_node = 'ON CPU' THEN 1 ELSE 0 END) cpu_time,
-                       COUNT(*) db_time
+                       &&sqld360_ashsample.+86400*(MAX(timestamp)-MIN(timestamp)) et, 
+                       SUM(CASE WHEN object_node = 'ON CPU' THEN &&sqld360_ashsample. ELSE 0 END) cpu_time,
+                       SUM(&&sqld360_ashsample.) db_time
                   FROM plan_table
                  WHERE statement_id = 'SQLD360_ASH_DATA_MEM'
                    AND position =  @instance_number@

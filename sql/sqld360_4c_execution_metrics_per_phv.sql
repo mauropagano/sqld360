@@ -103,9 +103,6 @@ COL db_unique_name FOR A30;
 COL platform_name FOR A101;
 COL version FOR A17;
 
---COL elapsed_time FOR 999999990;
---COL cpu_time FOR 999999990;
-
 ------------------------------
 ------------------------------
 
@@ -119,7 +116,7 @@ SELECT phv,
        num_execs,
        NULL style,
        phv||' - Number of execs: '||num_execs||' ('||TRUNC(100*RATIO_TO_REPORT(num_execs) OVER (),2)||'%)' tooltip
-  FROM (SELECT cost phv,
+  FROM (SELECT bytes phv,
                COUNT(DISTINCT NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,3)+1,INSTR(partition_stop,',',1,4)-INSTR(partition_stop,',',1,3)-1)),position)||'-'|| 
                               NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,4)+1,INSTR(partition_stop,',',1,5)-INSTR(partition_stop,',',1,4)-1)),cpu_cost)||'-'|| 
                               NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,5)+1,INSTR(partition_stop,',',1,6)-INSTR(partition_stop,',',1,5)-1)),io_cost)||'-'||
@@ -130,7 +127,7 @@ SELECT phv,
            AND statement_id LIKE 'SQLD360_ASH_DATA%' 
            AND position =  @instance_number@
            AND '&&diagnostics_pack.' = 'Y'
-         GROUP BY cost)
+         GROUP BY bytes)
  ORDER BY num_execs DESC
 ]';
 END;
@@ -396,14 +393,14 @@ SELECT phv,
        NULL style,
        --TRUNC(100*RATIO_TO_REPORT(num_samples) OVER (),2) percent,
        phv||' - 1s-samples: '||num_samples||' ('||TRUNC(100*RATIO_TO_REPORT(num_samples) OVER (),2)||'% of DB Time)' tooltip
-  FROM (SELECT cost phv,
+  FROM (SELECT bytes phv,
                COUNT(*) num_samples
           FROM plan_table
          WHERE remarks = '&&sqld360_sqlid.' 
            AND statement_id = 'SQLD360_ASH_DATA_MEM' 
            AND position =  @instance_number@
            AND '&&diagnostics_pack.' = 'Y'
-         GROUP BY cost)
+         GROUP BY bytes)
  ORDER BY num_samples DESC
 ]';
 END;
@@ -486,14 +483,14 @@ SELECT phv,
        NULL style,
        phv||' - 10s-samples: '||num_samples||' ('||TRUNC(100*RATIO_TO_REPORT(num_samples) OVER (),2)||'% of DB Time)' tooltip
        --TRUNC(100*RATIO_TO_REPORT(num_samples) OVER (),2) percent,
-  FROM (SELECT cost phv,
+  FROM (SELECT bytes phv,
                SUM(&&sqld360_ashtimevalue.) num_samples
           FROM plan_table
          WHERE remarks = '&&sqld360_sqlid.' 
            AND statement_id = 'SQLD360_ASH_DATA_HIST' 
            AND position =  @instance_number@
            AND '&&diagnostics_pack.' = 'Y'
-         GROUP BY cost)
+         GROUP BY bytes)
  ORDER BY num_samples DESC
 ]';
 END;
@@ -815,12 +812,12 @@ SELECT MAX(CASE WHEN ranking = 1  THEN TO_CHAR(phv) ELSE '' END) tit_01,
        MAX(CASE WHEN ranking = 15 THEN phv ELSE -1 END) phv_15   
   FROM (SELECT 1 fake, phv, ranking  
           FROM (SELECT phv, COUNT(*) OVER (ORDER BY avg_et) num_plans, ROW_NUMBER() OVER (ORDER BY avg_et) ranking 
-                  FROM (SELECT cost phv, COUNT(*)/COUNT(DISTINCT partition_id) avg_et 
+                  FROM (SELECT bytes phv, COUNT(*)/COUNT(DISTINCT partition_id) avg_et 
                           FROM plan_table 
                          WHERE statement_id = 'SQLD360_ASH_DATA_MEM'
                            AND remarks = '&&sqld360_sqlid.'
                            AND partition_id IS NOT NULL -- to discard samples we can't attribute to any exec (likely parse)
-                         GROUP BY cost)) 
+                         GROUP BY bytes)) 
          WHERE (ranking BETWEEN 1 AND 5 -- top 5 best performing plans
              OR ranking BETWEEN num_plans-10 AND num_plans)) ash, -- top 10 worse plans
        (SELECT 1 fake FROM dual) b -- this is in case there is no row in ASH
@@ -883,8 +880,8 @@ SELECT 0 snap_id,
                        phv,
                        AVG(et) avg_et_per_exec
                   FROM (SELECT SUBSTR(distribution,1,12) start_time,
-                               cost phv, 
-                               1+86400*(MAX(timestamp)-MIN(timestamp)) et,
+                               bytes phv, 
+                               &&sqld360_ashsample.+86400*(MAX(timestamp)-MIN(timestamp)) et,
                                NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,3)+1,INSTR(partition_stop,',',1,4)-INSTR(partition_stop,',',1,3)-1)),position)||'-'|| 
                                 NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,4)+1,INSTR(partition_stop,',',1,5)-INSTR(partition_stop,',',1,4)-1)),cpu_cost)||'-'|| 
                                 NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,5)+1,INSTR(partition_stop,',',1,6)-INSTR(partition_stop,',',1,5)-1)),io_cost)||'-'||
@@ -896,10 +893,10 @@ SELECT 0 snap_id,
                            AND '&&diagnostics_pack.' = 'Y'
                            AND partition_id IS NOT NULL
                            AND distribution IS NOT NULL
-                           AND cost IN (&&phv_01.,&&phv_02.,&&phv_03.,&&phv_04.,&&phv_05.,&&phv_06.,
+                           AND bytes IN (&&phv_01.,&&phv_02.,&&phv_03.,&&phv_04.,&&phv_05.,&&phv_06.,
                                         &&phv_07.,&&phv_08.,&&phv_09.,&&phv_10.,&&phv_11.,&&phv_12.,
                                         &&phv_13.,&&phv_14.,&&phv_15.)
-                         GROUP BY SUBSTR(distribution,1,12), cost, 
+                         GROUP BY SUBSTR(distribution,1,12), bytes, 
                                   NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,3)+1,INSTR(partition_stop,',',1,4)-INSTR(partition_stop,',',1,3)-1)),position)||'-'|| 
                                    NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,4)+1,INSTR(partition_stop,',',1,5)-INSTR(partition_stop,',',1,4)-1)),cpu_cost)||'-'|| 
                                    NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,5)+1,INSTR(partition_stop,',',1,6)-INSTR(partition_stop,',',1,5)-1)),io_cost)||'-'||
@@ -1064,12 +1061,12 @@ SELECT MAX(CASE WHEN ranking = 1  THEN TO_CHAR(phv) ELSE '' END) tit_01,
        MAX(CASE WHEN ranking = 15 THEN phv ELSE -1 END) phv_15   
   FROM (SELECT 1 fake, phv, ranking  
           FROM (SELECT phv, COUNT(*) OVER (ORDER BY avg_et) num_plans, ROW_NUMBER() OVER (ORDER BY avg_et) ranking 
-                  FROM (SELECT cost phv, COUNT(*)/COUNT(DISTINCT partition_id) avg_et 
+                  FROM (SELECT /*cost*/ bytes phv, COUNT(*)/COUNT(DISTINCT partition_id) avg_et 
                           FROM plan_table 
                          WHERE statement_id = 'SQLD360_ASH_DATA_HIST'
                            AND remarks = '&&sqld360_sqlid.'
                            AND partition_id IS NOT NULL -- to discard samples we can't attribute to any exec (likely parse)
-                         GROUP BY cost)) 
+                         GROUP BY /*cost*/ bytes)) 
          WHERE (ranking BETWEEN 1 AND 5 -- top 5 best performing plans
              OR ranking BETWEEN num_plans-10 AND num_plans)) ash, -- top 10 worse plans
        (SELECT 1 fake FROM dual) b  -- this is in case there is no row in ASH
@@ -1134,7 +1131,7 @@ SELECT b.snap_id snap_id,
                        starting_snap_id,
                        AVG(et) avg_et_per_exec
                   FROM (SELECT SUBSTR(distribution,1,10) start_time,
-                               cost phv, 
+                               /*cost*/ bytes phv, 
                                MIN(cardinality) starting_snap_id,
                                &&sqld360_ashtimevalue.+86400*(MAX(timestamp)-MIN(timestamp)) et,
                                NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,3)+1,INSTR(partition_stop,',',1,4)-INSTR(partition_stop,',',1,3)-1)),position)||'-'|| 
@@ -1148,10 +1145,10 @@ SELECT b.snap_id snap_id,
                            AND '&&diagnostics_pack.' = 'Y'
                            AND partition_id IS NOT NULL
                            AND distribution IS NOT NULL
-                           AND cost IN (&&phv_01.,&&phv_02.,&&phv_03.,&&phv_04.,&&phv_05.,&&phv_06.,
+                           AND /*cost*/ bytes IN (&&phv_01.,&&phv_02.,&&phv_03.,&&phv_04.,&&phv_05.,&&phv_06.,
                                         &&phv_07.,&&phv_08.,&&phv_09.,&&phv_10.,&&phv_11.,&&phv_12.,
                                         &&phv_13.,&&phv_14.,&&phv_15.)
-                         GROUP BY SUBSTR(distribution,1,10), cost, 
+                         GROUP BY SUBSTR(distribution,1,10), /*cost*/ bytes, 
                                   NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,3)+1,INSTR(partition_stop,',',1,4)-INSTR(partition_stop,',',1,3)-1)),position)||'-'|| 
                                    NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,4)+1,INSTR(partition_stop,',',1,5)-INSTR(partition_stop,',',1,4)-1)),cpu_cost)||'-'|| 
                                    NVL(TO_NUMBER(SUBSTR(partition_stop,INSTR(partition_stop,',',1,5)+1,INSTR(partition_stop,',',1,6)-INSTR(partition_stop,',',1,5)-1)),io_cost)||'-'||
@@ -1611,12 +1608,6 @@ COL phv14_ PRI
 COL phv15_ PRI
 
 DEF skip_lch = 'Y';
-
-
-
-
-
-
 
 -----------------------------
 -----------------------------

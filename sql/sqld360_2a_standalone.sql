@@ -32,7 +32,8 @@ SELECT DISTINCT b
             AND child_number||' '||inst_id = (SELECT MAX(child_number||' '||inst_id)
                                                 FROM gv$sql
                                                WHERE sql_id = '&&sqld360_sqlid.')
-          ORDER BY position); 
+          ORDER BY position)
+ ORDER BY 1; 
 
 -- if there is no info available in memory then try AWR
 -- the DISTINCT is to avoid printint several times the same bind used in multiple places in the SQL
@@ -42,7 +43,8 @@ SELECT DISTINCT 'VAR '||
   FROM dba_hist_sql_bind_metadata
  WHERE :binds_from_mem = 0
    AND sql_id = '&&sqld360_sqlid.'
-   AND '&&diagnostics_pack.' = 'Y';
+   AND '&&diagnostics_pack.' = 'Y'
+ ORDER BY 1;
    
 PRO
 -- values come from V$SQL_PLAN for the peeked binds
@@ -96,7 +98,8 @@ SELECT DISTINCT b
                AND :binds_from_mem = 0
                AND b.sql_id = '&&sqld360_sqlid.'
                AND '&&diagnostics_pack.' = 'Y'
-             ORDER BY b.position);
+             ORDER BY b.position)
+ ORDER BY 1;
 
 
 PRO

@@ -16,12 +16,12 @@ SET SERVEROUT ON SIZE 1000000;
 SET SERVEROUT ON SIZE UNL;
 
 BEGIN
-  FOR i IN (SELECT name
+  FOR i IN (SELECT name, datatype_string
               FROM gv$sql_bind_capture
              WHERE sql_id = '&&sqld360_sqlid.'
             --   AND (datatype_string LIKE 'NUMBER%' OR datatype_string = 'DATE')
             UNION
-            SELECT name
+            SELECT name, datatype_string
               FROM dba_hist_sqlbind
              WHERE sql_id = '&&sqld360_sqlid.'
              --  AND (datatype_string LIKE 'NUMBER%' OR datatype_string = 'DATE')
@@ -29,7 +29,7 @@ BEGIN
                AND '&&diagnostics_pack.' = 'Y'
              ORDER BY name) 
   LOOP
-    DBMS_OUTPUT.PUT_LINE('<td class="c">'||REPLACE(i.name,':','')||'</td>');
+    DBMS_OUTPUT.PUT_LINE('<td class="c">'||REPLACE(i.name,':','')||' ('||i.datatype_string||')</td>');
   END LOOP;
 END;
 /

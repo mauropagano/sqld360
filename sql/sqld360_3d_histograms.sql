@@ -94,7 +94,7 @@ BEGIN
         put('               END ');
         put('       END approximate_value, '); 
         put('       round((a.endpoint_number - lag(a.endpoint_number,1,0) over (order by a.endpoint_number)) / '||j.sample_size||' * '||(i.num_rows-j.num_nulls)||') rows_per_bucket,  ');
-        put('       trunc((a.endpoint_number - lag(a.endpoint_number,1,0) over (order by a.endpoint_number)) / '||j.sample_size||',5) selectivity, ');
+        put('       trunc((a.endpoint_number - lag(a.endpoint_number,1,0) over (order by a.endpoint_number)) / '||j.sample_size||',6) selectivity, ');
         put('       ''''ApproxValue: ''''||CASE WHEN endpoint_actual_value IS NOT NULL THEN REPLACE(endpoint_actual_value, '''''''''''''''', '''''''') ');
         put('            WHEN endpoint_actual_value IS NULL THEN ');
         put('               CASE WHEN '''''||j.data_type||''''' = ''''DATE'''' or '''''||j.data_type||''''' LIKE ''''TIMESTAMP%'''' THEN ');
@@ -104,7 +104,7 @@ BEGIN
         put('                    ELSE ');
         put('                      UTL_RAW.CAST_TO_VARCHAR2(SUBSTR(LPAD(TO_CHAR(endpoint_value,''''fmxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx''''),30,''''0''''),1,12)) ');  
         put('               END ');
-        put('       END||'''' NumRows: ''''||round((a.endpoint_number - lag(a.endpoint_number,1,0) over (order by a.endpoint_number)) / '||j.sample_size||' * '||(i.num_rows-j.num_nulls)||')||'''' Sel: ''''||trunc((a.endpoint_number - lag(a.endpoint_number,1,0) over (order by a.endpoint_number)) / '||j.sample_size||' , 5) chart_text ');      
+        put('       END||'''' NumRows: ''''||round((a.endpoint_number - lag(a.endpoint_number,1,0) over (order by a.endpoint_number)) / '||j.sample_size||' * '||(i.num_rows-j.num_nulls)||')||'''' Sel: ''''||trunc((a.endpoint_number - lag(a.endpoint_number,1,0) over (order by a.endpoint_number)) / '||j.sample_size||' , 6) chart_text ');      
         put('  FROM dba_tab_histograms a');
         put(' WHERE a.owner = '''''||j.owner||''''''); 
         put('   AND a.table_name = '''''||j.table_name||'''''');
@@ -132,7 +132,7 @@ BEGIN
         put('               END ');
         put('       END approximate_value, '); 
         put('       round((a.endpoint_number - lag(a.endpoint_number,1,0) over (order by a.endpoint_number)) / '||j.num_buckets||' * '||(i.num_rows-j.num_nulls)||') rows_per_bucket,  ');
-        put('       trunc((a.endpoint_number - lag(a.endpoint_number,1,0) over (order by a.endpoint_number)) / '||j.num_buckets||',5) selectivity, ');
+        put('       trunc((a.endpoint_number - lag(a.endpoint_number,1,0) over (order by a.endpoint_number)) / '||j.num_buckets||',6) selectivity, ');
         put('       ''''ApproxValue: ''''||CASE WHEN endpoint_actual_value IS NOT NULL THEN REPLACE(endpoint_actual_value, '''''''''''''''', '''''''') ');
         put('            WHEN endpoint_actual_value IS NULL THEN ');
         put('               CASE WHEN '''''||j.data_type||''''' = ''''DATE'''' or '''''||j.data_type||''''' LIKE ''''TIMESTAMP%'''' THEN ');
@@ -142,7 +142,7 @@ BEGIN
         put('                    ELSE ');
         put('                      UTL_RAW.CAST_TO_VARCHAR2(SUBSTR(LPAD(TO_CHAR(endpoint_value,''''fmxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx''''),30,''''0''''),1,12)) ');  
         put('               END ');
-        put('       END||'''' NumRows: ''''||round((a.endpoint_number - lag(a.endpoint_number,1,0) over (order by a.endpoint_number)) / '||j.num_buckets||' * '||(i.num_rows-j.num_nulls)||')||'''' Sel: ''''||trunc((a.endpoint_number - lag(a.endpoint_number,1,0) over (order by a.endpoint_number)) / '||j.num_buckets||' , 5) chart_text ');      
+        put('       END||'''' NumRows: ''''||round((a.endpoint_number - lag(a.endpoint_number,1,0) over (order by a.endpoint_number)) / '||j.num_buckets||' * '||(i.num_rows-j.num_nulls)||')||'''' Sel: ''''||trunc((a.endpoint_number - lag(a.endpoint_number,1,0) over (order by a.endpoint_number)) / '||j.num_buckets||' , 6) chart_text ');      
         put('  FROM dba_tab_histograms a');
         put(' WHERE a.owner = '''''||j.owner||''''''); 
         put('   AND a.table_name = '''''||j.table_name||'''''');
@@ -170,7 +170,7 @@ BEGIN
         put('               END ');
         put('       END approximate_value, ');                                                                                                                
         put('       round(endpoint_repeat_count / '||j.sample_size||' * '||(i.num_rows-j.num_nulls)||') rows_per_bucket,  ');
-        put('       trunc(endpoint_repeat_count / '||j.sample_size||',5) selectivity, ');
+        put('       trunc(endpoint_repeat_count / '||j.sample_size||',6) selectivity, ');
         put('       ''''ApproxValue: ''''||CASE WHEN endpoint_actual_value IS NOT NULL THEN REPLACE(endpoint_actual_value, '''''''''''''''', '''''''') ');
         put('            WHEN endpoint_actual_value IS NULL THEN ');
         put('               CASE WHEN '''''||j.data_type||''''' = ''''DATE'''' or '''''||j.data_type||''''' LIKE ''''TIMESTAMP%'''' THEN ');
@@ -180,7 +180,7 @@ BEGIN
         put('                    ELSE ');
         put('                      UTL_RAW.CAST_TO_VARCHAR2(SUBSTR(LPAD(TO_CHAR(endpoint_value,''''fmxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx''''),30,''''0''''),1,12)) ');  
         put('               END ');
-        put('       END||'''' NumRows: ''''||round(endpoint_repeat_count / '||j.sample_size||' * '||(i.num_rows-j.num_nulls)||')||'''' Sel: ''''||trunc(endpoint_repeat_count / '||j.sample_size||',5) chart_text ');      
+        put('       END||'''' NumRows: ''''||round(endpoint_repeat_count / '||j.sample_size||' * '||(i.num_rows-j.num_nulls)||')||'''' Sel: ''''||trunc(endpoint_repeat_count / '||j.sample_size||',6) chart_text ');      
         put('  FROM dba_tab_histograms a');
         put(' WHERE a.owner = '''''||j.owner||''''''); 
         put('   AND a.table_name = '''''||j.table_name||'''''');

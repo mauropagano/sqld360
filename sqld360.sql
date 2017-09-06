@@ -48,9 +48,11 @@ WHENEVER SQLERROR CONTINUE;
 -- the third "bit" is for TCB
 -- the next 3 chars are used for number of days
 -- so ie. if customer has no license, wants TCB and 31 days then it would be 001031
-
-SET SERVEROUT ON FEED OFF DEF OFF TERM OFF TIMI OFF
-SPO sqld360_driver.sql
+SET TERM OFF
+COL driver_time NEW_V driver_time
+SELECT TO_CHAR(SYSDATE, 'HH24MISS') driver_time FROM DUAL;
+SPO sqld360_driver_&&driver_time..sql
+SET SERVEROUT ON FEED OFF DEF OFF TIMI OFF
 DECLARE 
   num_sqlids NUMBER;
   license    VARCHAR2(1);
@@ -170,5 +172,5 @@ END;
 /
 SPO OFF 
 SET DEF ON TERM ON
-@sqld360_driver.sql
-HOS rm sqld360_driver.sql
+@sqld360_driver_&&driver_time..sql
+HOS rm sqld360_driver_&&driver_time..sql

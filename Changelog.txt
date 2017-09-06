@@ -4,6 +4,14 @@ Changelog
 I suggest to rely on Github for details about code changes, this will only be a macro about "functionalities"
 Was supposed to start on day 1, better late than never no? :-)
 
+v1709
+=====
+1. Remove limit of 15 on Top N reports, now they report the whole set
+2. Slightly changed SQLs on DBA_OBJECTS and DBA_SEGMENTS to include LOBs too
+3. Fixed bug on Bind List from Memory
+4. Changed logic in reports Elapsed Time for ... Executions to better handle "dirty" ASH data (PHV 0)
+5. Fixed bug on plan reporting duplicate lines in case of obsolete cursors not cleaned up 
+
 v1708
 =====
 1. Rounded number to 6th decimal digit instead of truncate to 3rd
@@ -15,6 +23,7 @@ v1708
 7. Added detail page on captured bind, both over time (NUMBER and DATE only) and aggregated (all datatypes)
 8. Fixed bug on report SQL Execute Time (wrongly accounting overall system time in some cases)
 9. Adjusted algorithm to compute object dependencies (trying to miss less objects)
+10. Added info about LOBs
 
 v1707
 =====

@@ -18,12 +18,12 @@ SELECT TRIM(LEAST((COUNT(plan_hash_value)), TO_NUMBER('&&sqld360_num_plan_detail
          WHERE sql_id = '&&sqld360_sqlid.'
            AND '&&diagnostics_pack.' = 'Y'
         UNION
-        SELECT cost plan_hash_value
+        SELECT /*cost*/ bytes plan_hash_value
           FROM plan_table
          WHERE statement_id LIKE 'SQLD360_ASH_DATA%'
            AND '&&diagnostics_pack.' = 'Y'
            AND remarks = '&&sqld360_sqlid.')
- WHERE ('&&sqld360_is_insert.' IS NULL AND plan_hash_value <> 0) OR ('&&sqld360_is_insert.' = 'Y')
+ --WHERE ('&&sqld360_is_insert.' IS NULL AND plan_hash_value <> 0) OR ('&&sqld360_is_insert.' = 'Y')
 /
 
 DEF title= 'Plan Details'
@@ -63,31 +63,33 @@ SET PAGES 0;
 
 WITH v AS (
 SELECT /*+ MATERIALIZE */
-       DISTINCT sql_id, inst_id, child_number
+       DISTINCT sql_id, inst_id, child_number, child_address 
   FROM gv$sql
  WHERE sql_id = '&&sqld360_sqlid.'
    AND loaded_versions > 0
+   AND is_obsolete = 'N'
  ORDER BY 1, 2, 3 )
 SELECT /*+ ORDERED USE_NL(t) */
        RPAD('Inst: '||v.inst_id, 9)||' '||RPAD('Child: '||v.child_number, 11) inst_child, 
        t.plan_table_output
   FROM v, TABLE(DBMS_XPLAN.DISPLAY('gv$sql_plan_statistics_all', NULL, 'ADVANCED ALLSTATS LAST', 
-       'inst_id = '||v.inst_id||' AND sql_id = '''||v.sql_id||''' AND child_number = '||v.child_number)) t
+       'inst_id='||v.inst_id||' AND sql_id='''||v.sql_id||''' AND child_number='||v.child_number||' AND child_address='''||v.child_address||'''')) t
 /
 
 WITH v AS (
 SELECT /*+ MATERIALIZE */
-       DISTINCT sql_id, inst_id, child_number
+       DISTINCT sql_id, inst_id, child_number, child_address
   FROM gv$sql
  WHERE sql_id = '&&sqld360_sqlid.'
    AND loaded_versions > 0
+   AND is_obsolete = 'N'
    AND '&&skip_10g' IS NULL AND '&&skip_10g' IS NULL
  ORDER BY 1, 2, 3 )
 SELECT /*+ ORDERED USE_NL(t) */
        RPAD('Inst: '||v.inst_id, 9)||' '||RPAD('Child: '||v.child_number, 11) inst_child, 
        t.plan_table_output
   FROM v, TABLE(DBMS_XPLAN.DISPLAY('gv$sql_plan_statistics_all', NULL, 'ADVANCED ALLSTATS LAST ADAPTIVE', 
-       'inst_id = '||v.inst_id||' AND sql_id = '''||v.sql_id||''' AND child_number = '||v.child_number)) t
+       'inst_id='||v.inst_id||' AND sql_id='''||v.sql_id||''' AND child_number='||v.child_number||' AND child_address='''||v.child_address||'''')) t
 /
 
 SET TERM ON

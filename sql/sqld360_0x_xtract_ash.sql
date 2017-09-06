@@ -38,14 +38,15 @@ BEGIN
                             &&skip_10g.operation,                          -- sql_plan_operation
                             &&skip_10g.options,                            -- sql_plan_options
                             object_instance, object_node, position, cost,  -- current_obj#, event, instance_number, PHV
+                            bytes,                                          -- adjusted PHV for adaptive (replace with 0 with decent PHV)
                             other_tag,                                     -- wait_class
                             &&skip_10g.id,                                 -- sql_plan_line_id
                             &&skip_10g.partition_id,                       -- sql_exec_id
                             &&skip_10g.distribution,                       -- sql_exec_start
-                            cpu_cost, io_cost, bytes,                      -- session_id, session_serial#, user_id
+                            cpu_cost, io_cost,                             -- session_id, session_serial#, 
                             parent_id,                                     -- sample_id
                             partition_start,                               -- seq#,p1text,p1,p2text,p2,p3text,p3,current_file#,current_block#, --current_row#, --tm_delta_time, 
-                                                                           -- --tm_delta_cpu_time, --tm_delta_db_time
+                                                                           -- --tm_delta_cpu_time, --tm_delta_db_time, --user_id
                             partition_stop                                 -- --in_parse, --in_hard_parse, --in_sql_execution, qc_instance_id, qc_session_id, --qc_session_serial#, 
                                                                            -- blocking_session_status, blocking_session, blocking_session_serial#, --blocking_inst_id (11gR1 also), 
                                                                            -- --px_flags (11gR201 also), --pga_allocated (11gR1 also), --temp_space_allocated (11gR1 also)
@@ -58,17 +59,19 @@ BEGIN
             &&skip_10g.sql_plan_operation, 
             &&skip_10g.sql_plan_options, 
             current_obj#, NVL(event,'ON CPU'), instance_number, sql_plan_hash_value, 
+            NVL(FIRST_VALUE(NULLIF(sql_plan_hash_value,0) IGNORE NULLS) OVER (PARTITION BY sql_exec_id, sql_exec_start ORDER BY sample_time ROWS BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING),0),
             NVL(wait_class,'CPU'),
             &&skip_10g.sql_plan_line_id, 
             &&skip_10g.sql_exec_id,
             &&skip_10g.TO_CHAR(sql_exec_start,'YYYYMMDDHH24MISS'),
-            session_id, session_serial#, user_id,
+            session_id, session_serial#, 
             sample_id,
             seq#||','||p1text||','||p1||','||p2text||','||p2||','||p3text||','||p3||','||current_file#||','||current_block#||
             ','||&&skip_10g.current_row#||
             ','||&&skip_10g.&&skip_11r1.tm_delta_time||
             ','||&&skip_10g.&&skip_11r1.tm_delta_cpu_time||
-            ','&&skip_10g.&&skip_11r1.||tm_delta_db_time
+            ','||&&skip_10g.&&skip_11r1.tm_delta_db_time||
+            ','||user_id
             ,
             &&skip_10g.in_parse||
             ','||
@@ -105,17 +108,20 @@ BEGIN
             &&skip_10g.sql_plan_operation, 
             &&skip_10g.sql_plan_options,
             current_obj#, nvl(event,'ON CPU'), inst_id, sql_plan_hash_value, 
+            NVL(FIRST_VALUE(NULLIF(sql_plan_hash_value,0) IGNORE NULLS) OVER (PARTITION BY sql_exec_id, sql_exec_start ORDER BY sample_time ROWS BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING),0),
             NVL(wait_class,'CPU'),
             &&skip_10g.sql_plan_line_id, 
             &&skip_10g.sql_exec_id,
             &&skip_10g.TO_CHAR(sql_exec_start,'YYYYMMDDHH24MISS'),
-            session_id, session_serial#, user_id,
+            session_id, session_serial#, 
+            --user_id,
             sample_id,
             seq#||','||p1text||','||p1||','||p2text||','||p2||','||p3text||','||p3||','||current_file#||','||current_block#||
             ','||&&skip_10g.current_row#||
             ','||&&skip_10g.&&skip_11r1.tm_delta_time||
             ','||&&skip_10g.&&skip_11r1.tm_delta_cpu_time||
-            ','&&skip_10g.&&skip_11r1.||tm_delta_db_time
+            ','||&&skip_10g.&&skip_11r1.tm_delta_db_time||
+            ','||user_id
             ,
             &&skip_10g.in_parse||
             ','||

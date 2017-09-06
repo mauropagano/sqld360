@@ -35,6 +35,7 @@ SELECT /*+ &&top_level_hints. */
  WHERE sbc.sql_id = '&&sqld360_sqlid.'
    AND sbc.inst_id = s.inst_id
    AND sbc.child_number = s.child_number
+   AND sbc.sql_id = s.sql_id
  ORDER BY sbc.inst_id, sbc.child_number, sbc.position
 ]';
 END;

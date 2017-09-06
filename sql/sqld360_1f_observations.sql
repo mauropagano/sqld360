@@ -92,7 +92,8 @@ WITH vsql           AS (SELECT /*+ MATERIALIZE */ DISTINCT plan_hash_value, opti
                                partition_id sql_exec_id,
                                TO_NUMBER(SUBSTR(partition_start,INSTR(partition_start,',',1,2)+1,INSTR(partition_start,',',1,3)-INSTR(partition_start,',',1,2)-1)) p1,
                                TO_NUMBER(SUBSTR(partition_start,INSTR(partition_start,',',1,4)+1,INSTR(partition_start,',',1,5)-INSTR(partition_start,',',1,4)-1)) p2,
-                               TO_NUMBER(SUBSTR(partition_start,INSTR(partition_start,',',1,6)+1,INSTR(partition_start,',',1,7)-INSTR(partition_start,',',1,6)-1)) p3 
+                               TO_NUMBER(SUBSTR(partition_start,INSTR(partition_start,',',1,6)+1,INSTR(partition_start,',',1,7)-INSTR(partition_start,',',1,6)-1)) p3,
+                               object_instance obj# 
                           FROM plan_table 
                          WHERE statement_id 
                           LIKE 'SQLD360_ASH_DATA%' 
@@ -192,6 +193,23 @@ SELECT scope, message
                   FROM ashdata
                  GROUP BY sql_plan_hash_value)
          WHERE potential_parse_time >= 0.1
+         UNION ALL
+        SELECT 'POTENTIAL_HWM_DESYNC', 'Object#: '||obj#||' block class#: '||p3||' sampled '||COUNT(*)||' times'
+          FROM ashdata,
+               (SELECT name 
+                  FROM v$event_name
+                 WHERE parameter3 = 'class#' 
+                    OR (name LIKE '%-way' AND parameter3 IS NULL) --parameter3 not named even though it is populated
+               ) e
+         WHERE e.name = ashdata.event
+           AND p3 IN (8,9,10,11,12)
+         GROUP BY obj#, p3
+         UNION ALL
+        SELECT 'LARGE_PERC_PHV0', 'Large number of ASH samples ('||perc_0||'%) have PHV 0 with a valid SQL_EXEC_ID, very likely unresolved adaptive plan (some info based on ASH could be misleading)'
+          FROM (SELECT TRUNC(SUM(CASE WHEN sql_plan_hash_value = 0 AND sql_exec_id IS NOT NULL THEN 1 ELSE 0 END)/COUNT(*),3)*100 perc_0
+                  FROM ashdata
+                 WHERE '&&sqld360_is_insert.' <> 'Y')
+         WHERE perc_0 >= 2
         )
  ORDER BY scope, message
 ]';
