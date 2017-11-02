@@ -25,30 +25,9 @@ PRO &&hh_mm_ss. &&title.&&title_suffix.
 PRINT sql_text;
 
 SET TERM OFF;
---PRO &&hh_mm_ss. col:&&column_number.of&&max_col_number.. Computing COUNT(*)...
 PRO &&hh_mm_ss. col:&&column_number.of&&max_col_number..
---EXEC :row_count := -1;
 EXEC :sql_text_display := TRIM(CHR(10) FROM :sql_text)||';';
---SET TIMI ON;
---SET SERVEROUT ON;
---BEGIN
---  --:sql_text_display := TRIM(CHR(10) FROM :sql_text)||';';
---  BEGIN
---    --EXECUTE IMMEDIATE 'SELECT COUNT(*) FROM ('||CHR(10)||TRIM(CHR(10) FROM :sql_text)||CHR(10)||')' INTO :row_count;
---    EXECUTE IMMEDIATE 'SELECT COUNT(*) FROM ('||CHR(10)||TRIM(CHR(10) FROM DBMS_LOB.SUBSTR(:sql_text, 32700, 1))||CHR(10)||')' INTO :row_count;
---  EXCEPTION
---    WHEN OTHERS THEN
---      DBMS_OUTPUT.PUT_LINE(DBMS_LOB.SUBSTR(SQLERRM));
---  END;
---  DBMS_OUTPUT.PUT_LINE(TRIM(TO_CHAR(:row_count))||' rows selected.'||CHR(10));
---END;
---/
---SET TIMI OFF;
---SET SERVEROUT OFF;
 PRO
---SET TERM OFF;
---COL row_count NEW_V row_count NOPRI;
---SELECT TRIM(TO_CHAR(:row_count)) row_count FROM DUAL;
 SPO OFF;
 HOS zip -q &&sqld360_main_filename._&&sqld360_file_time. &&sqld360_log..txt
 
@@ -96,13 +75,12 @@ DEF skip_tch = 'Y';
 DEF skip_uch = 'Y';
 DEF skip_sch = 'Y';
 DEF title_suffix = '';
-DEF haxis = '&&db_version. &&cores_threads_hosts.';
+DEF haxis = '&&sqld360_sqlid. &&db_version. &&cores_threads_hosts.';
 
 -- report sequence
 EXEC :repo_seq := :repo_seq + 1;
 SELECT TO_CHAR(:repo_seq) report_sequence FROM DUAL;
 
--- needed reset after eventual sqlmon above
 SET TERM OFF; 
 SET HEA ON; 
 SET LIN 32767; 

@@ -414,10 +414,10 @@ EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '8');
 
 DEF chartype = 'LineChart';
 DEF stacked = '';
-DEF tit_01 = 'Avg Buffer Gets/exec';
-DEF tit_02 = 'Avg Buffer Gets/exec Trend';
-DEF tit_03 = '';
-DEF tit_04 = '';
+DEF tit_01 = 'Avg Buffer Gets/exec (total)';
+DEF tit_02 = 'Avg Buffer Gets/exec (total) Trend';
+DEF tit_03 = 'Avg Buffer Gets/exec (delta)';
+DEF tit_04 = 'Avg Buffer Gets/exec (delta) Trend';
 DEF tit_05 = '';
 DEF tit_06 = '';
 DEF tit_07 = '';
@@ -438,10 +438,10 @@ BEGIN
 SELECT snap_id snap_id, 
        TO_CHAR(begin_interval_time, 'YYYY-MM-DD HH24:MI')  begin_time, 
        TO_CHAR(end_interval_time, 'YYYY-MM-DD HH24:MI')  end_time,
-       NVL(buffer_gets, 0) buffer_gets,
-       NVL(AVG(buffer_gets) OVER (ORDER BY snap_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW), 0) buffer_gets_trend,
-       0 dummy_03,
-       0 dummy_04,
+       NVL(buffer_gets_tot, 0) buffer_gets_tot,
+       NVL(AVG(buffer_gets_tot) OVER (ORDER BY snap_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW), 0) buffer_gets_trend_tot,
+       NVL(buffer_gets_del, 0) buffer_gets_del,
+       NVL(AVG(buffer_gets_del) OVER (ORDER BY snap_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW), 0) buffer_gets_trend_del,
        0 dummy_05,
        0 dummy_06,
        0 dummy_07,
@@ -456,11 +456,12 @@ SELECT snap_id snap_id,
   FROM (SELECT a.snap_id, 
                MIN(begin_interval_time) begin_interval_time, 
                MIN(end_interval_time) end_interval_time,
-               TRUNC(SUM(b.buffer_gets_total)/SUM(NVL(NULLIF(executions_total,0),1)),3) buffer_gets
+               TRUNC(SUM(b.buffer_gets_total)/SUM(NVL(NULLIF(executions_total,0),1)),3) buffer_gets_tot,
+               TRUNC(SUM(b.buffer_gets_delta)/SUM(NVL(NULLIF(executions_delta,0),1)),3) buffer_gets_del
           FROM (SELECT snap_id, instance_number, begin_interval_time, end_interval_time
                   FROM dba_hist_snapshot
                  WHERE snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.) a,
-               (SELECT snap_id, instance_number, buffer_gets_total, executions_total
+               (SELECT snap_id, instance_number, buffer_gets_total, executions_total, buffer_gets_delta, executions_delta
                   FROM dba_hist_sqlstat
                  WHERE sql_id = '&&sqld360_sqlid.') b
           WHERE a.snap_id = b.snap_id(+)
@@ -562,10 +563,10 @@ DEF skip_lch = 'Y';
 
 DEF chartype = 'LineChart';
 DEF stacked = '';
-DEF tit_01 = 'Avg Rows Processed/exec';
-DEF tit_02 = 'Avg Rows Processed/exec Trend';
-DEF tit_03 = '';
-DEF tit_04 = '';
+DEF tit_01 = 'Avg Rows Processed/exec (total) ';
+DEF tit_02 = 'Avg Rows Processed/exec (total) Trend';
+DEF tit_03 = 'Avg Rows Processed/exec (delta) ';
+DEF tit_04 = 'Avg Rows Processed/exec (delta) Trend';
 DEF tit_05 = '';
 DEF tit_06 = '';
 DEF tit_07 = '';
@@ -586,10 +587,10 @@ BEGIN
 SELECT snap_id snap_id, 
        TO_CHAR(begin_interval_time, 'YYYY-MM-DD HH24:MI')  begin_time, 
        TO_CHAR(end_interval_time, 'YYYY-MM-DD HH24:MI')  end_time,
-       NVL(rows_processed,0) rows_processed,
-       NVL(AVG(rows_processed) OVER (ORDER BY snap_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW), 0) rows_processed_trend,
-       0 dummy_03,
-       0 dummy_04,
+       NVL(rows_processed_tot,0) rows_processed_tot,
+       NVL(AVG(rows_processed_tot) OVER (ORDER BY snap_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW), 0) rows_processed_trend_tot,
+       NVL(rows_processed_del,0) rows_processed_del,
+       NVL(AVG(rows_processed_del) OVER (ORDER BY snap_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW), 0) rows_processed_trend_del,
        0 dummy_05,
        0 dummy_06,
        0 dummy_07,
@@ -604,11 +605,12 @@ SELECT snap_id snap_id,
   FROM (SELECT a.snap_id,
                MIN(begin_interval_time) begin_interval_time, 
                MIN(end_interval_time) end_interval_time,
-               TRUNC(SUM(b.rows_processed_total)/SUM(NVL(NULLIF(executions_total,0),1)),3) rows_processed
+               TRUNC(SUM(b.rows_processed_total)/SUM(NVL(NULLIF(executions_total,0),1)),3) rows_processed_tot,
+               TRUNC(SUM(b.rows_processed_delta)/SUM(NVL(NULLIF(executions_delta,0),1)),3) rows_processed_del
           FROM (SELECT snap_id, instance_number, begin_interval_time, end_interval_time
                   FROM dba_hist_snapshot
                  WHERE snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.) a,
-               (SELECT snap_id, instance_number, rows_processed_total, executions_total
+               (SELECT snap_id, instance_number, rows_processed_total, executions_total, rows_processed_delta, executions_delta 
                   FROM dba_hist_sqlstat
                  WHERE sql_id = '&&sqld360_sqlid.') b
          WHERE a.snap_id = b.snap_id(+)
@@ -778,7 +780,7 @@ END;
 
 DEF skip_lch = '';
 DEF skip_all = '&&is_single_instance.';
-DEF title = 'Avg Elapsed Time/Execution for Cluster';
+DEF title = 'Avg Elapsed Time/Execution (total) for Cluster';
 DEF abstract = 'Avg Elapsed Time/Execution for Cluster over time from AWR'
 DEF foot = 'Low number of executions or long executing SQL make values less accurate'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', 'a.instance_number');
@@ -787,7 +789,7 @@ EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', 'a.instance_num
 DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 1;
-DEF title = 'Avg Elapsed Time/Execution for Instance 1';
+DEF title = 'Avg Elapsed Time/Execution (total) for Instance 1';
 DEF abstract = 'Avg Elapsed Time/Execution for Instance 1 over time from AWR'
 DEF foot = 'Low number of executions or long executing SQL make values less accurate'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '1');
@@ -796,7 +798,7 @@ EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '1');
 DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 2;
-DEF title = 'Avg Elapsed Time/Execution for Instance 2';
+DEF title = 'Avg Elapsed Time/Execution (total) for Instance 2';
 DEF abstract = 'Avg Elapsed Time/Execution for Instance 2 over time from AWR'
 DEF foot = 'Low number of executions or long executing SQL make values less accurate'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '2');
@@ -805,7 +807,7 @@ EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '2');
 DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 3;
-DEF title = 'Avg Elapsed Time/Execution for Instance 3';
+DEF title = 'Avg Elapsed Time/Execution (total) for Instance 3';
 DEF abstract = 'Avg Elapsed Time/Execution for Instance 3 over time from AWR'
 DEF foot = 'Low number of executions or long executing SQL make values less accurate'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '3');
@@ -814,7 +816,7 @@ EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '3');
 DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 4;
-DEF title = 'Avg Elapsed Time/Execution for Instance 4';
+DEF title = 'Avg Elapsed Time/Execution (total) for Instance 4';
 DEF abstract = 'Avg Elapsed Time/Execution for Instance 4 over time from AWR'
 DEF foot = 'Low number of executions or long executing SQL make values less accurate'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '4');
@@ -823,7 +825,7 @@ EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '4');
 DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 5;
-DEF title = 'Avg Elapsed Time/Execution for Instance 5';
+DEF title = 'Avg Elapsed Time/Execution (total) for Instance 5';
 DEF abstract = 'Avg Elapsed Time/Execution for Instance 5 over time from AWR'
 DEF foot = 'Low number of executions or long executing SQL make values less accurate'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '5');
@@ -832,7 +834,7 @@ EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '5');
 DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 6;
-DEF title = 'Avg Elapsed Time/Execution for Instance 6';
+DEF title = 'Avg Elapsed Time/Execution (total) for Instance 6';
 DEF abstract = 'Avg Elapsed Time/Execution for Instance 6 over time from AWR'
 DEF foot = 'Low number of executions or long executing SQL make values less accurate'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '6');
@@ -841,7 +843,7 @@ EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '6');
 DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 7;
-DEF title = 'Avg Elapsed Time/Execution for Instance 7';
+DEF title = 'Avg Elapsed Time/Execution (total) for Instance 7';
 DEF abstract = 'Avg Elapsed Time/Execution for Instance 7 over time from AWR'
 DEF foot = 'Low number of executions or long executing SQL make values less accurate'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '7');
@@ -850,7 +852,321 @@ EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '7');
 DEF skip_lch = '';
 DEF skip_all = 'Y';
 SELECT NULL skip_all FROM gv$instance WHERE instance_number = 8;
-DEF title = 'Avg Elapsed Time/Execution for Instance 8';
+DEF title = 'Avg Elapsed Time/Execution (total) for Instance 8';
+DEF abstract = 'Avg Elapsed Time/Execution for Instance 8 over time from AWR'
+DEF foot = 'Low number of executions or long executing SQL make values less accurate'
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '8');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = 'Y';
+
+------------------------
+------------------------
+
+DEF chartype = 'LineChart';
+DEF stacked = '';
+DEF tit_01 = 'Avg Elapsed Time/exec';
+DEF tit_02 = 'Avg CPU Time/exec';
+DEF tit_03 = 'Avg IO Time/exec';
+DEF tit_04 = 'Avg Cluster Time/exec';
+DEF tit_05 = 'Avg Application Time/exec';
+DEF tit_06 = 'Avg Concurrency Time/exec';
+DEF tit_07 = 'Avg Elapsed Time/exec Trend';
+DEF tit_08 = '';
+DEF tit_09 = '';
+DEF tit_10 = '';
+DEF tit_11 = '';
+DEF tit_12 = '';
+DEF tit_13 = '';
+DEF tit_14 = '';
+DEF tit_15 = '';
+
+DEF main_table = 'DBA_HIST_SQLSTAT';
+DEF vaxis = 'Avg Elapsed Time per Execution in secs';
+DEF vbaseline = '';
+BEGIN
+  :sql_text_backup := q'[
+SELECT snap_id snap_id, 
+       TO_CHAR(begin_interval_time, 'YYYY-MM-DD HH24:MI')  begin_time, 
+       TO_CHAR(end_interval_time, 'YYYY-MM-DD HH24:MI')  end_time,
+       NVL(elapsed_time,0) elapsed_time,
+       NVL(cpu_time,0) cpu_time, 
+       NVL(iowait,0) iowait,
+       NVL(clwait,0) clwait,
+       NVL(apwait,0) apwait,
+       NVL(ccwait,0) ccwait,
+       NVL(AVG(elapsed_time) OVER (ORDER BY snap_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW),0) elapsed_time_trend,
+       0 dummy_08,
+       0 dummy_09,
+       0 dummy_10,
+       0 dummy_11,
+       0 dummy_12,
+       0 dummy_13,
+       0 dummy_14,
+       0 dummy_15
+  FROM (SELECT a.snap_id, 
+               MIN(begin_interval_time) begin_interval_time, 
+               MIN(end_interval_time) end_interval_time,
+               ROUND(SUM(elapsed_time_delta)/SUM(NVL(NULLIF(executions_delta,0),1))/1e6,6) elapsed_time, 
+               ROUND(SUM(cpu_time_delta)/SUM(NVL(NULLIF(executions_delta,0),1))/1e6,6) cpu_time, 
+               ROUND(SUM(iowait_delta)/SUM(NVL(NULLIF(executions_delta,0),1))/1e6,6) iowait, 
+               ROUND(SUM(clwait_delta)/SUM(NVL(NULLIF(executions_delta,0),1))/1e6,6) clwait, 
+               ROUND(SUM(apwait_delta)/SUM(NVL(NULLIF(executions_delta,0),1))/1e6,6) apwait, 
+               ROUND(SUM(ccwait_delta)/SUM(NVL(NULLIF(executions_delta,0),1))/1e6,6) ccwait
+          FROM (SELECT snap_id, instance_number, begin_interval_time, end_interval_time
+                  FROM dba_hist_snapshot
+                 WHERE snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.) a,
+               (SELECT snap_id, instance_number,  elapsed_time_delta, cpu_time_delta, 
+                       iowait_delta, clwait_delta, apwait_delta, ccwait_delta, executions_delta
+                  FROM dba_hist_sqlstat
+                 WHERE sql_id = '&&sqld360_sqlid.') b
+         WHERE a.snap_id = b.snap_id(+)
+           AND a.instance_number = b.instance_number(+)
+           AND '&&diagnostics_pack.' = 'Y'
+           AND a.instance_number = @instance_number@
+         GROUP BY a.snap_id)
+ ORDER BY
+       TO_CHAR(end_interval_time, 'YYYY-MM-DD HH24:MI')
+]';
+END;
+/
+
+DEF skip_lch = '';
+DEF skip_all = '&&is_single_instance.';
+DEF title = 'Avg Elapsed Time/Execution (delta) for Cluster';
+DEF abstract = 'Avg Elapsed Time/Execution for Cluster over time from AWR'
+DEF foot = 'Low number of executions or long executing SQL make values less accurate'
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', 'a.instance_number');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = '';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 1;
+DEF title = 'Avg Elapsed Time/Execution (delta) for Instance 1';
+DEF abstract = 'Avg Elapsed Time/Execution for Instance 1 over time from AWR'
+DEF foot = 'Low number of executions or long executing SQL make values less accurate'
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '1');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = '';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 2;
+DEF title = 'Avg Elapsed Time/Execution (delta) for Instance 2';
+DEF abstract = 'Avg Elapsed Time/Execution for Instance 2 over time from AWR'
+DEF foot = 'Low number of executions or long executing SQL make values less accurate'
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '2');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = '';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 3;
+DEF title = 'Avg Elapsed Time/Execution (delta) for Instance 3';
+DEF abstract = 'Avg Elapsed Time/Execution for Instance 3 over time from AWR'
+DEF foot = 'Low number of executions or long executing SQL make values less accurate'
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '3');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = '';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 4;
+DEF title = 'Avg Elapsed Time/Execution (delta) for Instance 4';
+DEF abstract = 'Avg Elapsed Time/Execution for Instance 4 over time from AWR'
+DEF foot = 'Low number of executions or long executing SQL make values less accurate'
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '4');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = '';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 5;
+DEF title = 'Avg Elapsed Time/Execution (delta) for Instance 5';
+DEF abstract = 'Avg Elapsed Time/Execution for Instance 5 over time from AWR'
+DEF foot = 'Low number of executions or long executing SQL make values less accurate'
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '5');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = '';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 6;
+DEF title = 'Avg Elapsed Time/Execution (delta) for Instance 6';
+DEF abstract = 'Avg Elapsed Time/Execution for Instance 6 over time from AWR'
+DEF foot = 'Low number of executions or long executing SQL make values less accurate'
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '6');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = '';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 7;
+DEF title = 'Avg Elapsed Time/Execution (delta) for Instance 7';
+DEF abstract = 'Avg Elapsed Time/Execution for Instance 7 over time from AWR'
+DEF foot = 'Low number of executions or long executing SQL make values less accurate'
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '7');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = '';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 8;
+DEF title = 'Avg Elapsed Time/Execution (delta) for Instance 8';
+DEF abstract = 'Avg Elapsed Time/Execution for Instance 8 over time from AWR'
+DEF foot = 'Low number of executions or long executing SQL make values less accurate'
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '8');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = 'Y';
+
+
+------------------------
+------------------------
+
+DEF chartype = 'LineChart';
+DEF stacked = '';
+DEF tit_01 = 'Avg Elapsed Time/exec';
+DEF tit_02 = 'Avg CPU Time/exec';
+DEF tit_03 = 'Avg IO Time/exec';
+DEF tit_04 = 'Avg Cluster Time/exec';
+DEF tit_05 = 'Avg Application Time/exec';
+DEF tit_06 = 'Avg Concurrency Time/exec';
+DEF tit_07 = 'Avg Elapsed Time/exec Trend';
+DEF tit_08 = '';
+DEF tit_09 = '';
+DEF tit_10 = '';
+DEF tit_11 = '';
+DEF tit_12 = '';
+DEF tit_13 = '';
+DEF tit_14 = '';
+DEF tit_15 = '';
+
+DEF main_table = 'DBA_HIST_SQLSTAT';
+DEF vaxis = 'Avg Elapsed Time per Execution in secs';
+DEF vbaseline = '';
+BEGIN
+  :sql_text_backup := q'[
+SELECT snap_id snap_id, 
+       TO_CHAR(begin_interval_time, 'YYYY-MM-DD HH24:MI')  begin_time, 
+       TO_CHAR(end_interval_time, 'YYYY-MM-DD HH24:MI')  end_time,
+       NVL(ROUND(SUM(elapsed_time_per_snap) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW)
+            /NVL(NULLIF(SUM(execs_per_snap) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/1e6,6),0) elapsed_time,
+       NVL(ROUND(SUM(cpu_time_per_snap) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW)
+            /NVL(NULLIF(SUM(execs_per_snap) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/1e6,6),0) cpu_time,
+       NVL(ROUND(SUM(iowait_per_snap) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW)
+            /NVL(NULLIF(SUM(execs_per_snap) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/1e6,6),0) iowait,
+       NVL(ROUND(SUM(clwait_per_snap) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW)
+            /NVL(NULLIF(SUM(execs_per_snap) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/1e6,6),0) clwait,
+       NVL(ROUND(SUM(apwait_per_snap) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW)
+            /NVL(NULLIF(SUM(execs_per_snap) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/1e6,6),0) apwait,
+       NVL(ROUND(SUM(ccwait_per_snap) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW)
+            /NVL(NULLIF(SUM(execs_per_snap) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/1e6,6),0) ccwait,
+       0 dummy_07,
+       0 dummy_08,
+       0 dummy_09,
+       0 dummy_10,
+       0 dummy_11,
+       0 dummy_12,
+       0 dummy_13,
+       0 dummy_14,
+       0 dummy_15
+  FROM (SELECT a.snap_id, 
+               MIN(begin_interval_time) begin_interval_time, 
+               MIN(end_interval_time) end_interval_time,
+               SUM(elapsed_time_delta) elapsed_time_per_snap,
+               SUM(cpu_time_delta) cpu_time_per_snap,
+               SUM(iowait_delta) iowait_per_snap,
+               SUM(clwait_delta) clwait_per_snap,
+               SUM(apwait_delta) apwait_per_snap,
+               SUM(ccwait_delta) ccwait_per_snap,
+               SUM(executions_delta) execs_per_snap
+          FROM (SELECT snap_id, instance_number, begin_interval_time, end_interval_time
+                  FROM dba_hist_snapshot
+                 WHERE snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.) a,
+               (SELECT snap_id, instance_number,  elapsed_time_delta, cpu_time_delta, 
+                       iowait_delta, clwait_delta, apwait_delta, ccwait_delta, executions_delta
+                  FROM dba_hist_sqlstat
+                 WHERE sql_id = '&&sqld360_sqlid.') b
+         WHERE a.snap_id = b.snap_id(+)
+           AND a.instance_number = b.instance_number(+)
+           AND '&&diagnostics_pack.' = 'Y'
+           AND a.instance_number = @instance_number@
+         GROUP BY a.snap_id)
+ ORDER BY
+       TO_CHAR(end_interval_time, 'YYYY-MM-DD HH24:MI')
+]';
+END;
+/
+
+DEF skip_lch = '';
+DEF skip_all = '&&is_single_instance.';
+DEF title = 'Avg Elapsed Time/Execution (moving 1d) for Cluster';
+DEF abstract = 'Avg Elapsed Time/Execution for Cluster over time from AWR'
+DEF foot = 'Low number of executions or long executing SQL make values less accurate'
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', 'a.instance_number');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = '';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 1;
+DEF title = 'Avg Elapsed Time/Execution (moving 1d) for Instance 1';
+DEF abstract = 'Avg Elapsed Time/Execution for Instance 1 over time from AWR'
+DEF foot = 'Low number of executions or long executing SQL make values less accurate'
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '1');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = '';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 2;
+DEF title = 'Avg Elapsed Time/Execution (moving 1d) for Instance 2';
+DEF abstract = 'Avg Elapsed Time/Execution for Instance 2 over time from AWR'
+DEF foot = 'Low number of executions or long executing SQL make values less accurate'
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '2');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = '';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 3;
+DEF title = 'Avg Elapsed Time/Execution (moving 1d) for Instance 3';
+DEF abstract = 'Avg Elapsed Time/Execution for Instance 3 over time from AWR'
+DEF foot = 'Low number of executions or long executing SQL make values less accurate'
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '3');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = '';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 4;
+DEF title = 'Avg Elapsed Time/Execution (moving 1d) for Instance 4';
+DEF abstract = 'Avg Elapsed Time/Execution for Instance 4 over time from AWR'
+DEF foot = 'Low number of executions or long executing SQL make values less accurate'
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '4');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = '';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 5;
+DEF title = 'Avg Elapsed Time/Execution (moving 1d) for Instance 5';
+DEF abstract = 'Avg Elapsed Time/Execution for Instance 5 over time from AWR'
+DEF foot = 'Low number of executions or long executing SQL make values less accurate'
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '5');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = '';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 6;
+DEF title = 'Avg Elapsed Time/Execution (moving 1d) for Instance 6';
+DEF abstract = 'Avg Elapsed Time/Execution for Instance 6 over time from AWR'
+DEF foot = 'Low number of executions or long executing SQL make values less accurate'
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '6');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = '';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 7;
+DEF title = 'Avg Elapsed Time/Execution (moving 1d) for Instance 7';
+DEF abstract = 'Avg Elapsed Time/Execution for Instance 7 over time from AWR'
+DEF foot = 'Low number of executions or long executing SQL make values less accurate'
+EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '7');
+@@&&skip_all.&&skip_diagnostics.sqld360_9a_pre_one.sql
+
+DEF skip_lch = '';
+DEF skip_all = 'Y';
+SELECT NULL skip_all FROM gv$instance WHERE instance_number = 8;
+DEF title = 'Avg Elapsed Time/Execution (moving 1d) for Instance 8';
 DEF abstract = 'Avg Elapsed Time/Execution for Instance 8 over time from AWR'
 DEF foot = 'Low number of executions or long executing SQL make values less accurate'
 EXEC :sql_text := REPLACE(:sql_text_backup, '@instance_number@', '8');

@@ -4,6 +4,14 @@ Changelog
 I suggest to rely on Github for details about code changes, this will only be a macro about "functionalities"
 Was supposed to start on day 1, better late than never no? :-)
 
+v1710
+=====
+1. sqld360_driver.sql now includes time to support concurrent executions (already supported, just prevets annoying error)
+2. SQLd360 now accepts custom configuration file as 3rd parameter (provided mini.sql as example of config to reduce collection time)
+3. Fixed bug on plan tree heatmap that showed wrong subtree impact numbers
+4. New double Y-xis chart with sharable memory vs child cursors report from AWR, helps spot memory usage by HVC
+5. New AWR reports organized by total, delta and rolling window time (last 1 day, hardcoded for now)
+
 v1709
 =====
 1. Remove limit of 15 on Top N reports, now they report the whole set

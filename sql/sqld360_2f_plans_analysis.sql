@@ -193,8 +193,8 @@ BEGIN
     put(q'[     plan_with_rec_impact AS (-- compute recursive impact (substree impact)                                                                                                          ]');
     put(q'[                              SELECT a.*, (SELECT sum(b.perc_impact)                                                                                                                 ]');
     put(q'[                                             FROM plan_with_ash b                                                                                                                    ]');
-    put(q'[                                            START WITH b.id = a.id                                                                                                                   ]');
-    put(q'[                                           CONNECT BY prior b.id = b.parent_id) sum_perc_impact                                                                                      ]');
+    put(q'[                                            START WITH b.adapt_id = a.adapt_id                                                                                                                   ]');
+    put(q'[                                           CONNECT BY prior b.adapt_id = b.parent_id) sum_perc_impact                                                                                      ]');
     put(q'[                                FROM plan_with_ash a)                                                                                                                                ]');                                                                                  
     put(q'[SELECT adapt_id id,                                                                                                                                                                  ]');
     put(q'[       'data.setRowProperty('||adapt_id||', ''style'',          ''background:#FF'||LPAD(LTRIM(TO_CHAR(255-(255*perc_impact    /100),'XXXX')),2,'0')||CASE WHEN perc_impact = 0 THEN 'FF' ELSE '00' END||''');' node_color,               ]');
@@ -274,8 +274,8 @@ BEGIN
     put(q'[     plan_with_rec_impact AS (-- compute recursive impact (substree impact)                                                                                                          ]');
     put(q'[                              SELECT a.*, (SELECT sum(b.perc_impact)                                                                                                                 ]');
     put(q'[                                             FROM plan_with_ash b                                                                                                                    ]');
-    put(q'[                                            START WITH b.id = a.id                                                                                                                   ]');
-    put(q'[                                           CONNECT BY prior b.id = b.parent_id) sum_perc_impact                                                                                      ]');
+    put(q'[                                            START WITH b.adapt_id = a.adapt_id                                                                                                                   ]');
+    put(q'[                                           CONNECT BY prior b.adapt_id = b.parent_id) sum_perc_impact                                                                                      ]');
     put(q'[                                FROM plan_with_ash a)                                                                                                                                ]');                                                                                  
     put(q'[SELECT ''{v: ''''''||adapt_id||'''''',f: ''''''||adapt_id||'' - ''||operation||'' ''||options||NVL2(object_name,''<br>'','' '')||object_name||''''''}'' id,                          ]'); 
     put(q'[       parent_id,                                                                                                                                                                    ]');
@@ -1754,8 +1754,8 @@ BEGIN
        put(q'[     plan_with_rec_impact AS (-- compute recursive impact (substree impact)                                                                                                                 ]');
        put(q'[                              SELECT a.*, (SELECT sum(b.perc_impact)                                                                                                                        ]');
        put(q'[                                             FROM plan_with_ash b                                                                                                                           ]');
-       put(q'[                                            START WITH b.id = a.id                                                                                                                          ]');
-       put(q'[                                           CONNECT BY prior b.id = b.parent_id) sum_perc_impact                                                                                             ]');
+       put(q'[                                            START WITH b.adapt_id = a.adapt_id                                                                                                                          ]');
+       put(q'[                                           CONNECT BY prior b.adapt_id = b.parent_id) sum_perc_impact                                                                                             ]');
        put(q'[                                FROM plan_with_ash a)                                                                                                                                       ]');                                                                                  
        put(q'[SELECT adapt_id id,                                                                                                                                                                         ]');
        put(q'[       'data.setRowProperty('||adapt_id||', ''style'',          ''background:#FF'||LPAD(LTRIM(TO_CHAR(255-(255*perc_impact    /100),'XXXX')),2,'0')||CASE WHEN perc_impact = 0 THEN 'FF' ELSE '00' END||''');' node_color,               ]');
@@ -1844,8 +1844,8 @@ BEGIN
        put(q'[     plan_with_rec_impact AS (-- compute recursive impact (substree impact)                                                                                                          ]');
        put(q'[                              SELECT a.*, (SELECT sum(b.perc_impact)                                                                                                                 ]');
        put(q'[                                             FROM plan_with_ash b                                                                                                                    ]');
-       put(q'[                                            START WITH b.id = a.id                                                                                                                   ]');
-       put(q'[                                           CONNECT BY prior b.id = b.parent_id) sum_perc_impact                                                                                      ]');
+       put(q'[                                            START WITH b.adapt_id = a.adapt_id                                                                                                                   ]');
+       put(q'[                                           CONNECT BY prior b.adapt_id = b.parent_id) sum_perc_impact                                                                                      ]');
        put(q'[                                FROM plan_with_ash a)                                                                                                                                ]');                                                                                  
        put(q'[SELECT ''{v: ''''''||adapt_id||'''''',f: ''''''||adapt_id||'' - ''||operation||'' ''||options||NVL2(object_name,''<br>'','' '')||object_name||''''''}'' id,                          ]'); 
        put(q'[       parent_id,                                                                                                                                                                    ]');
@@ -2723,8 +2723,8 @@ BEGIN
        put(q'[     plan_with_rec_impact AS (-- compute recursive impact (substree impact)                                                                                                                 ]');
        put(q'[                              SELECT a.*, (SELECT sum(b.perc_impact)                                                                                                                        ]');
        put(q'[                                             FROM plan_with_ash b                                                                                                                           ]');
-       put(q'[                                            START WITH b.id = a.id                                                                                                                          ]');
-       put(q'[                                           CONNECT BY prior b.id = b.parent_id) sum_perc_impact                                                                                             ]');
+       put(q'[                                            START WITH b.adapt_id = a.adapt_id                                                                                                                          ]');
+       put(q'[                                           CONNECT BY prior b.adapt_id = b.parent_id) sum_perc_impact                                                                                             ]');
        put(q'[                                FROM plan_with_ash a)                                                                                                                                       ]');                                                                                  
        put(q'[SELECT adapt_id id,                                                                                                                                                                         ]');
        put(q'[       'data.setRowProperty('||adapt_id||', ''style'',          ''background:#FF'||LPAD(LTRIM(TO_CHAR(255-(255*perc_impact    /100),'XXXX')),2,'0')||CASE WHEN perc_impact = 0 THEN 'FF' ELSE '00' END||''');' node_color,               ]');
@@ -2812,8 +2812,8 @@ BEGIN
        put(q'[     plan_with_rec_impact AS (-- compute recursive impact (substree impact)                                                                                                          ]');
        put(q'[                              SELECT a.*, (SELECT sum(b.perc_impact)                                                                                                                 ]');
        put(q'[                                             FROM plan_with_ash b                                                                                                                    ]');
-       put(q'[                                            START WITH b.id = a.id                                                                                                                   ]');
-       put(q'[                                           CONNECT BY prior b.id = b.parent_id) sum_perc_impact                                                                                      ]');
+       put(q'[                                            START WITH b.adapt_id = a.adapt_id                                                                                                                   ]');
+       put(q'[                                           CONNECT BY prior b.adapt_id = b.parent_id) sum_perc_impact                                                                                      ]');
        put(q'[                                FROM plan_with_ash a)                                                                                                                                ]');                                                                                  
        put(q'[SELECT ''{v: ''''''||adapt_id||'''''',f: ''''''||adapt_id||'' - ''||operation||'' ''||options||NVL2(object_name,''<br>'','' '')||object_name||''''''}'' id,                          ]'); 
        put(q'[       parent_id,                                                                                                                                                                    ]');

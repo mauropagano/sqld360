@@ -184,7 +184,10 @@ PRO          hAxis: {title: '&&haxis.', gridlines: {count: -1}, titleTextStyle: 
 PRO          series: { 0: { &&series_01.}, 1: { &&series_02.},  2: { &&series_03.},  3: { &&series_04.},  4: { &&series_05.},  5: { &&series_06.},  6: { &&series_07.}, 7: {&&series_08.},
 PRO                    8: { &&series_09.}, 9: { &&series_10.}, 10: { &&series_11.}, 11: { &&series_12.}, 12: { &&series_13.}, 13: { &&series_14.}, 14: { &&series_15.}
 PRO          },
-PRO          vAxis: {title: '&&vaxis.', &&vbaseline. gridlines: {count: -1}, titleTextStyle: {fontSize: 16, bold: false}}
+--PRO          vAxis: {title: '&&vaxis.', &&vbaseline. gridlines: {count: -1}, titleTextStyle: {fontSize: 16, bold: false}}
+PRO          vAxes: { 0: {title: '&&vaxis.', titleTextStyle: {fontSize: 16, bold: false}}, 1: {title: '&&vaxis2.', titleTextStyle: {fontSize: 16, bold: false}}},
+PRO          vAxes: { 0: {title: '&&vaxis.', titleTextStyle: {fontSize: 16, bold: false}}, 
+PRO                   1: {textStyle: {color: 'red'},       title: '&&vaxis2.', titleTextStyle: {color: 'red',       fontSize: 16, bold: false}}},
 PRO        };
 PRO
 PRO        var chart = new google.visualization.&&chartype.(document.getElementById('linechart'));

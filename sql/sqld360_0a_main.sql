@@ -37,14 +37,11 @@ PRO
 SPO OFF;
 
 @@sqld360_2a_identification.sql
--- @@&&skip_10g.&&skip_11r1.sqld360_2a_xpand.sql  <= MOVED INSIDE 2a_identification
---@@sqld360_2a_formatted.sql   <= MOVED INSIDE 2a_identification
---@@sqld360_2a_standalone.sql  <= MOVED INSIDE 2a_identification
 @@sqld360_2b_performance.sql
 @@&&from_edb360.&&skip_force_match.&&sqld360_skip_fmatch.sqld360_2c_performance_fm.sql
 @@sqld360_2d_plans.sql
 @@sqld360_2e_plan_control.sql
-@@&&skip_tuning.&&skip_10g.sqld360_2f_sql_monitor.sql
+@@&&skip_tuning.&&skip_10g.&&sqld360_skip_sqlmon.sqld360_2f_sql_monitor.sql
 @@sqld360_2g_binds.sql
 @@sqld360_2h_cursor_sharing.sql
 
@@ -59,7 +56,6 @@ PRO
 SPO OFF;
 
 @@sqld360_3a_objects.sql
---@@sqld360_3b_checks.sql
 @@&&sqld360_skip_stats_h.sqld360_3c_stats_history.sql
 @@&&skip_10g.&&skip_11g.&&skip_12r101.sqld360_3d_inmemory.sql
 @@&&skip_10g.&&skip_11g.sqld360_3e_bt_cache.sql

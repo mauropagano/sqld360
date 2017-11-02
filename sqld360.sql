@@ -151,7 +151,7 @@ BEGIN
        --  the code can switch back to CDB to update the right plan table with the file name
        put('DEF sqld360_container='''||container||'''');
 
-       put('@@&&skip_sqld360.sql/sqld360_0a_main.sql '||i.operation||' '||license);
+       put('@@&&skip_sqld360.sql/sqld360_0a_main.sql '||i.operation||' '||license||' NULL');
        put('HOS unzip -l &&sqld360_main_filename._&&sqld360_file_time.');
 
        -- the following code is to handle the timeout from eDB360

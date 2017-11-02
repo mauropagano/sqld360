@@ -9,8 +9,8 @@ CL COL;
 COL row_num FOR 9999999 HEA '#' PRI;
 
 -- version
-DEF sqld360_vYYNN = 'v1709';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2016-09-06)';
+DEF sqld360_vYYNN = 'v1710';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2016-11-02)';
 DEF sqld360_prefix = 'sqld360';
 
 -- parameters
@@ -98,6 +98,29 @@ BEGIN
   END IF;
 END;
 /
+
+
+PRO
+PRO Parameter 3:
+PRO Name of an optional custom configuration file executed right after 
+PRO sql/sqld360_00_config.sql. If such file name is provided, then corresponding file
+PRO should exist under sqld360-master/sql. Filename is case sensitivive and its existence
+PRO is not validated. Example: custom_config_01.sql
+PRO If no custom configuration file is needed, simply hit the "return" key.
+PRO
+PRO Custom configuration filename? (optional)
+COL custom_config_filename NEW_V custom_config_filename NOPRI;
+SELECT NVL(TRIM('&3.'), 'null') custom_config_filename FROM DUAL;
+
+PRO
+PRO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+PRO
+PRO custom configuration filename: "&&custom_config_filename."
+PRO
+SET SUF '';
+@@&&custom_config_filename.
+SET SUF sql;
+@@&&custom_config_filename.
 
 -- suppressing some unnecessary output
 --SET TERM OFF;
@@ -571,8 +594,9 @@ DEF bubblesDetails = '';
 DEF sql_text = '';
 DEF chartype = '';
 DEF stacked = '';
-DEF haxis = '&&db_version. &&cores_threads_hosts.';
+DEF haxis = '&&sqld360_sqlid. &&db_version. &&cores_threads_hosts.';
 DEF vaxis = '';
+DEF vaxis2 = '';
 DEF vbaseline = '';
 DEF tit_01 = '';
 DEF tit_02 = '';
