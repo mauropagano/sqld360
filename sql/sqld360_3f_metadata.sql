@@ -54,7 +54,7 @@ BEGIN
             WHERE object_owner NOT IN ('ANONYMOUS','APEX_030200','APEX_040000','APEX_SSO','APPQOSSYS','CTXSYS','DBSNMP','DIP','EXFSYS','FLOWS_FILES',
                                        'MDSYS','OLAPSYS','ORACLE_OCM','ORDDATA','ORDPLUGINS','ORDSYS','OUTLN','OWBSYS', 'PUBLIC',
                                        'SI_INFORMTN_SCHEMA','SQLTXADMIN','SQLTXPLAIN','SYS','SYSMAN','SYSTEM','TRCANLZR','WMSYS','XDB','XS$NULL')
-            ORDER BY 1,2,3 DESC) 
+            ORDER BY object_owner, CASE WHEN object_type = 'TABLE' THEN 'AAA' ELSE object_type END, object_name) 
    LOOP
     put('BEGIN');
     put(':mymetadata :=');
@@ -96,6 +96,6 @@ PRO <a href="&&one_spool_filename..txt">txt</a>
 PRO </li>
 PRO </ol>
 SPO OFF;
-HOS zip -jmq 99999_sqld360_&&sqld360_sqlid._drivers sqld360_metadata_&&sqld360_sqlid._driver.sql
+HOS zip -jq 99999_sqld360_&&sqld360_sqlid._drivers sqld360_metadata_&&sqld360_sqlid._driver.sql
 HOS zip -mq &&sqld360_main_filename._&&sqld360_file_time. &&one_spool_filename..txt
 HOS zip -q &&sqld360_main_filename._&&sqld360_file_time. &&sqld360_main_report..html

@@ -9,8 +9,8 @@ CL COL;
 COL row_num FOR 9999999 HEA '#' PRI;
 
 -- version
-DEF sqld360_vYYNN = 'v1710';
-DEF sqld360_vrsn = '&&sqld360_vYYNN. (2016-11-02)';
+DEF sqld360_vYYNN = 'v1801';
+DEF sqld360_vrsn = '&&sqld360_vYYNN. (2018-01-13)';
 DEF sqld360_prefix = 'sqld360';
 
 -- parameters
@@ -505,6 +505,15 @@ COL sqld360_no_read_stats_h new_V sqld360_no_read_stats_h
 SELECT '--' sqld360_no_read_stats_h FROM DUAL;
 SELECT NULL sqld360_no_read_stats_h FROM sys.wri$_optstat_tab_history WHERE rownum <= 1;
 
+--this is the divisor variable, will be used in the formula
+COL sqld360_awr_timescale_d NEW_V sqld360_awr_timescale_d
+--this is the label variable, will be used in the Y-axis label
+COL sqld360_awr_timescale_l NEW_V sqld360_awr_timescale_l
+-- Consider "ms" the exception, everything else goes to default
+SELECT CASE WHEN '&&sqld360_conf_awr_timescale.' = 'ms' THEN '1e3' ELSE '1e6'  END sqld360_awr_timescale_d, CASE WHEN '&&sqld360_conf_awr_timescale.' = 'ms' THEN 'ms'  ELSE 'secs' END sqld360_awr_timescale_l FROM DUAL;
+
+
+
 -- setup
 DEF main_table = '';
 DEF title = '';
@@ -725,7 +734,8 @@ SET TRIMS ON;
 SET TRIM ON; 
 SET TI OFF; 
 SET TIMI OFF; 
-SET ARRAY 1000; 
+-- because of bug 26163790
+--SET ARRAY 999; 
 SET NUM 20; 
 SET SQLBL ON; 
 SET BLO .; 

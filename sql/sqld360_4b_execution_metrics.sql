@@ -729,7 +729,7 @@ DEF tit_14 = '';
 DEF tit_15 = '';
 
 DEF main_table = 'DBA_HIST_SQLSTAT';
-DEF vaxis = 'Avg Elapsed Time per Execution in secs';
+DEF vaxis = 'Avg Elapsed Time per Execution in &&sqld360_awr_timescale_l.';
 DEF vbaseline = '';
 BEGIN
   :sql_text_backup := q'[
@@ -754,12 +754,12 @@ SELECT snap_id snap_id,
   FROM (SELECT a.snap_id, 
                MIN(begin_interval_time) begin_interval_time, 
                MIN(end_interval_time) end_interval_time,
-               ROUND(SUM(elapsed_time_total)/SUM(NVL(NULLIF(executions_total,0),1))/1e6,6) elapsed_time, 
-               ROUND(SUM(cpu_time_total)/SUM(NVL(NULLIF(executions_total,0),1))/1e6,6) cpu_time, 
-               ROUND(SUM(iowait_total)/SUM(NVL(NULLIF(executions_total,0),1))/1e6,6) iowait, 
-               ROUND(SUM(clwait_total)/SUM(NVL(NULLIF(executions_total,0),1))/1e6,6) clwait, 
-               ROUND(SUM(apwait_total)/SUM(NVL(NULLIF(executions_total,0),1))/1e6,6) apwait, 
-               ROUND(SUM(ccwait_total)/SUM(NVL(NULLIF(executions_total,0),1))/1e6,6) ccwait
+               ROUND(SUM(elapsed_time_total)/SUM(NVL(NULLIF(executions_total,0),1))/&&sqld360_awr_timescale_d.,6) elapsed_time, 
+               ROUND(SUM(cpu_time_total)    /SUM(NVL(NULLIF(executions_total,0),1))/&&sqld360_awr_timescale_d.,6) cpu_time, 
+               ROUND(SUM(iowait_total)      /SUM(NVL(NULLIF(executions_total,0),1))/&&sqld360_awr_timescale_d.,6) iowait, 
+               ROUND(SUM(clwait_total)      /SUM(NVL(NULLIF(executions_total,0),1))/&&sqld360_awr_timescale_d.,6) clwait, 
+               ROUND(SUM(apwait_total)      /SUM(NVL(NULLIF(executions_total,0),1))/&&sqld360_awr_timescale_d.,6) apwait, 
+               ROUND(SUM(ccwait_total)      /SUM(NVL(NULLIF(executions_total,0),1))/&&sqld360_awr_timescale_d.,6) ccwait
           FROM (SELECT snap_id, instance_number, begin_interval_time, end_interval_time
                   FROM dba_hist_snapshot
                  WHERE snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.) a,
@@ -882,7 +882,7 @@ DEF tit_14 = '';
 DEF tit_15 = '';
 
 DEF main_table = 'DBA_HIST_SQLSTAT';
-DEF vaxis = 'Avg Elapsed Time per Execution in secs';
+DEF vaxis = 'Avg Elapsed Time per Execution in &&sqld360_awr_timescale_l.';
 DEF vbaseline = '';
 BEGIN
   :sql_text_backup := q'[
@@ -907,12 +907,12 @@ SELECT snap_id snap_id,
   FROM (SELECT a.snap_id, 
                MIN(begin_interval_time) begin_interval_time, 
                MIN(end_interval_time) end_interval_time,
-               ROUND(SUM(elapsed_time_delta)/SUM(NVL(NULLIF(executions_delta,0),1))/1e6,6) elapsed_time, 
-               ROUND(SUM(cpu_time_delta)/SUM(NVL(NULLIF(executions_delta,0),1))/1e6,6) cpu_time, 
-               ROUND(SUM(iowait_delta)/SUM(NVL(NULLIF(executions_delta,0),1))/1e6,6) iowait, 
-               ROUND(SUM(clwait_delta)/SUM(NVL(NULLIF(executions_delta,0),1))/1e6,6) clwait, 
-               ROUND(SUM(apwait_delta)/SUM(NVL(NULLIF(executions_delta,0),1))/1e6,6) apwait, 
-               ROUND(SUM(ccwait_delta)/SUM(NVL(NULLIF(executions_delta,0),1))/1e6,6) ccwait
+               ROUND(SUM(elapsed_time_delta)/SUM(NVL(NULLIF(executions_delta,0),1))/&&sqld360_awr_timescale_d.,6) elapsed_time, 
+               ROUND(SUM(cpu_time_delta)    /SUM(NVL(NULLIF(executions_delta,0),1))/&&sqld360_awr_timescale_d.,6) cpu_time, 
+               ROUND(SUM(iowait_delta)      /SUM(NVL(NULLIF(executions_delta,0),1))/&&sqld360_awr_timescale_d.,6) iowait, 
+               ROUND(SUM(clwait_delta)      /SUM(NVL(NULLIF(executions_delta,0),1))/&&sqld360_awr_timescale_d.,6) clwait, 
+               ROUND(SUM(apwait_delta)      /SUM(NVL(NULLIF(executions_delta,0),1))/&&sqld360_awr_timescale_d.,6) apwait, 
+               ROUND(SUM(ccwait_delta)      /SUM(NVL(NULLIF(executions_delta,0),1))/&&sqld360_awr_timescale_d.,6) ccwait
           FROM (SELECT snap_id, instance_number, begin_interval_time, end_interval_time
                   FROM dba_hist_snapshot
                  WHERE snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.) a,
@@ -1036,7 +1036,7 @@ DEF tit_14 = '';
 DEF tit_15 = '';
 
 DEF main_table = 'DBA_HIST_SQLSTAT';
-DEF vaxis = 'Avg Elapsed Time per Execution in secs';
+DEF vaxis = 'Avg Elapsed Time per Execution in &&sqld360_awr_timescale_l.';
 DEF vbaseline = '';
 BEGIN
   :sql_text_backup := q'[
@@ -1044,17 +1044,17 @@ SELECT snap_id snap_id,
        TO_CHAR(begin_interval_time, 'YYYY-MM-DD HH24:MI')  begin_time, 
        TO_CHAR(end_interval_time, 'YYYY-MM-DD HH24:MI')  end_time,
        NVL(ROUND(SUM(elapsed_time_per_snap) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW)
-            /NVL(NULLIF(SUM(execs_per_snap) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/1e6,6),0) elapsed_time,
+            /NVL(NULLIF(SUM(execs_per_snap) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/&&sqld360_awr_timescale_d.,6),0) elapsed_time,
        NVL(ROUND(SUM(cpu_time_per_snap) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW)
-            /NVL(NULLIF(SUM(execs_per_snap) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/1e6,6),0) cpu_time,
+            /NVL(NULLIF(SUM(execs_per_snap) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/&&sqld360_awr_timescale_d.,6),0) cpu_time,
        NVL(ROUND(SUM(iowait_per_snap) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW)
-            /NVL(NULLIF(SUM(execs_per_snap) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/1e6,6),0) iowait,
+            /NVL(NULLIF(SUM(execs_per_snap) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/&&sqld360_awr_timescale_d.,6),0) iowait,
        NVL(ROUND(SUM(clwait_per_snap) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW)
-            /NVL(NULLIF(SUM(execs_per_snap) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/1e6,6),0) clwait,
+            /NVL(NULLIF(SUM(execs_per_snap) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/&&sqld360_awr_timescale_d.,6),0) clwait,
        NVL(ROUND(SUM(apwait_per_snap) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW)
-            /NVL(NULLIF(SUM(execs_per_snap) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/1e6,6),0) apwait,
+            /NVL(NULLIF(SUM(execs_per_snap) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/&&sqld360_awr_timescale_d.,6),0) apwait,
        NVL(ROUND(SUM(ccwait_per_snap) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW)
-            /NVL(NULLIF(SUM(execs_per_snap) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/1e6,6),0) ccwait,
+            /NVL(NULLIF(SUM(execs_per_snap) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/&&sqld360_awr_timescale_d.,6),0) ccwait,
        0 dummy_07,
        0 dummy_08,
        0 dummy_09,

@@ -400,6 +400,22 @@ END;
 /
 @@sqld360_9a_pre_one.sql
 
+
+DEF title = 'Table Partition Info';
+DEF main_table = 'DBA_PART_TABLES';
+BEGIN
+  :sql_text := q'[
+SELECT /*+ &&top_level_hints. */
+       *
+  FROM dba_part_tables
+ WHERE (owner, table_name) IN (SELECT /*+ UNNEST */ object_owner, object_name FROM plan_table WHERE statement_id = 'LIST_OF_TABLES' AND remarks = '&&sqld360_sqlid.')
+ ORDER BY owner, table_name
+]';
+END;
+/
+@@sqld360_9a_pre_one.sql
+
+
 DEF title = 'Table Partitions';
 DEF main_table = 'DBA_TAB_PARTITIONS';
 BEGIN
@@ -409,6 +425,21 @@ SELECT /*+ &&top_level_hints. */
   FROM dba_tab_partitions
  WHERE (table_owner, table_name) IN (SELECT /*+ UNNEST */ object_owner, object_name FROM plan_table WHERE statement_id = 'LIST_OF_TABLES' AND remarks = '&&sqld360_sqlid.')
  ORDER BY table_owner, table_name, partition_position
+]';
+END;
+/
+@@sqld360_9a_pre_one.sql
+
+
+DEF title = 'Index Partition Info';
+DEF main_table = 'DBA_PART_INDEXES';
+BEGIN
+  :sql_text := q'[
+SELECT /*+ &&top_level_hints. */
+       *
+  FROM dba_part_indexes
+ WHERE (owner, table_name) IN (SELECT /*+ UNNEST */ object_owner, object_name FROM plan_table WHERE statement_id = 'LIST_OF_TABLES' AND remarks = '&&sqld360_sqlid.')
+ ORDER BY owner, index_name
 ]';
 END;
 /
@@ -427,6 +458,21 @@ SELECT /*+ &&top_level_hints. */
    AND a.index_owner = b.owner
    AND a.index_name = b.index_name
  ORDER BY a.index_owner, a.index_name, a.partition_position
+]';
+END;
+/
+@@sqld360_9a_pre_one.sql
+
+
+DEF title = 'LOB Partition Info';
+DEF main_table = 'DBA_PART_LOBS';
+BEGIN
+  :sql_text := q'[
+SELECT /*+ &&top_level_hints. */
+       *
+  FROM dba_part_lobs
+ WHERE (table_owner, table_name) IN (SELECT /*+ UNNEST */ object_owner, object_name FROM plan_table WHERE statement_id = 'LIST_OF_TABLES' AND remarks = '&&sqld360_sqlid.')
+ ORDER BY table_owner, table_name, column_name
 ]';
 END;
 /

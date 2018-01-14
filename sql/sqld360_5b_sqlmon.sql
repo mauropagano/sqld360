@@ -55,7 +55,7 @@ BEGIN
     put('END;');
     put('/');
     put('PRINT :myreport;');
-    put('SPO sqld360_sqlmon_&&sqld360_sqlid._'||i.sql_exec_id||'_'||LPAD(TO_CHAR(i.sql_exec_start, 'HH24MISS'), 6, '0')||'.txt;');
+    put('SPO sqld360_sqlmon_&&sqld360_sqlid._'||i.sql_exec_id||'_'||LPAD(TO_CHAR(i.sql_exec_start, 'YYYYMMDDHH24MISS'), 14, '0')||'.txt;');
     put('PRINT :myreport;');
     put('SPO OFF;');
   END LOOP;
@@ -111,7 +111,7 @@ BEGIN
     put(', type => ''ACTIVE'' );');
     put('END;');
     put('/');
-    put('SPO sqld360_sqlmon_&&sqld360_sqlid._'||i.sql_exec_id||'_'||LPAD(TO_CHAR(i.sql_exec_start, 'HH24MISS'), 6, '0')||'.html;');
+    put('SPO sqld360_sqlmon_&&sqld360_sqlid._'||i.sql_exec_id||'_'||LPAD(TO_CHAR(i.sql_exec_start, 'YYYYMMDDHH24MISS'), 14, '0')||'.html;');
     put('PRINT :myreport;');
     put('SPO OFF;');
   END LOOP;
@@ -170,7 +170,7 @@ BEGIN
     put(', type => ''ACTIVE'' );');
     put('END;');
     put('/');
-    put('SPO sqld360_sqlmon_&&sqld360_sqlid._'||i.sql_exec_id||'_'||REPLACE(SUBSTR(i.sql_exec_start, 12, 8), ':','')||'_hist.html;');
+    put('SPO sqld360_sqlmon_&&sqld360_sqlid._'||i.sql_exec_id||'_'||REPLACE(REPLACE(i.sql_exec_start,':',''),' ','')||'_hist.html;');
     put('PRINT :myreport;');
     put('SPO OFF;');
   END LOOP;

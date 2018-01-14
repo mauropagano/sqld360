@@ -14,7 +14,7 @@ PRO <table><tr class="main">
 
 SET ECHO OFF FEEDBACK OFF TIMING OFF 
 SET SERVEROUT ON SIZE 1000000;
-SET SERVEROUT ON SIZE UNL;
+SET SERVEROUT ON SIZE UNLIMITED;
 
 EXEC :repo_seq := 1;
 
@@ -73,10 +73,9 @@ DEF sqld360_main_report = &&one_spool_filename.
 EXEC :repo_seq := 1;
 SELECT TO_CHAR(:repo_seq) report_sequence FROM DUAL;
 
-SPO sqld360_plans_analysis_&&sqld360_sqlid._driver.sql
 SET SERVEROUT ON SIZE 1000000;
-SET SERVEROUT ON SIZE UNL;
-
+SET SERVEROUT ON SIZE UNLIMITED;
+SPO sqld360_plans_analysis_&&sqld360_sqlid._driver.sql
 
 DECLARE
   PROCEDURE put (p_line IN VARCHAR2)
@@ -410,7 +409,7 @@ BEGIN
     put('SET PAGES &&def_max_rows.          ');
 
     put(q'[DEF title='Avg et/exec for recent execs for PHV ]'||i.plan_hash_value||q'[' ]');
-    put(q'[DEF main_table = 'V$ACTIVE_SESSION_HISTORY'                                 ]');
+    put(q'[DEF main_table = 'GV$ACTIVE_SESSION_HISTORY'                                ]');
     put(q'[DEF skip_lch=''                                                             ]');
     put(q'[DEF chartype = 'LineChart'                                                  ]');
     put(q'[DEF stacked = ''                                                            ]');
@@ -2597,7 +2596,7 @@ BEGIN
        put(''';');
        put('END;');
        put('/');
-       put('@sql/sqld360_9a_pre_one.sql');
+       put('@&&sqld360_skip_rawash.sql/sqld360_9a_pre_one.sql');
 
        put('----------------------------');  
 
@@ -3512,7 +3511,7 @@ BEGIN
        put(''';');
        put('END;');
        put('/');
-       put('@sql/sqld360_9a_pre_one.sql');
+       put('@&&sqld360_skip_rawash.sql/sqld360_9a_pre_one.sql');
 
        put('----------------------------');       
 

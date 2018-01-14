@@ -4,6 +4,11 @@ Changelog
 I suggest to rely on Github for details about code changes, this will only be a macro about "functionalities"
 Was supposed to start on day 1, better late than never no? :-)
 
+v1801
+=====
+1. Added "clean" DDL script, to be used with set_stats to implement a very simple TC
+2. Disable SET ARRAY to prevent issues with 12.2 SQL*Plus
+
 v1710
 =====
 1. sqld360_driver.sql now includes time to support concurrent executions (already supported, just prevets annoying error)

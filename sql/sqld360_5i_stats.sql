@@ -1,7 +1,38 @@
 DEF section_id = '5i';
+DEF section_name = 'DDL';
+DEF title = 'Clean DDL';
+--DEF main_table = 'DBA_TABLES';
+EXEC DBMS_APPLICATION_INFO.SET_MODULE('&&sqld360_prefix.','&&section_id.');
+
+@@sqld360_0s_pre_nondef
+
+SET SERVEROUTPUT ON FEED OFF TIMING OFF VERI OFF TERM OFF
+SET SERVEROUT ON SIZE 1000000;
+SET SERVEROUT ON SIZE UNL;
+SET TERM OFF
+
+exec DBMS_METADATA.SET_TRANSFORM_PARAM(SYS.DBMS_METADATA.SESSION_TRANSFORM, 'DEFAULT', TRUE);
+exec DBMS_METADATA.SET_TRANSFORM_PARAM(SYS.DBMS_METADATA.SESSION_TRANSFORM, 'SQLTERMINATOR', TRUE);
+exec DBMS_METADATA.SET_TRANSFORM_PARAM(SYS.DBMS_METADATA.SESSION_TRANSFORM, 'STORAGE', FALSE);
+exec DBMS_METADATA.SET_TRANSFORM_PARAM(SYS.DBMS_METADATA.SESSION_TRANSFORM, 'TABLESPACE', FALSE);
+exec DBMS_METADATA.SET_TRANSFORM_PARAM(SYS.DBMS_METADATA.SESSION_TRANSFORM, 'CONSTRAINTS', FALSE);
+exec DBMS_METADATA.SET_TRANSFORM_PARAM(SYS.DBMS_METADATA.SESSION_TRANSFORM, 'REF_CONSTRAINTS', FALSE);
+exec DBMS_METADATA.SET_TRANSFORM_PARAM(SYS.DBMS_METADATA.SESSION_TRANSFORM, 'SEGMENT_ATTRIBUTES', FALSE);
+
+SPO &&one_spool_filename..sql
+@sqld360_metadata_&&sqld360_sqlid._driver.sql
+SPO OFF;
+
+SET TERM ON
+HOS zip -mq &&sqld360_main_filename._&&sqld360_file_time. &&one_spool_filename..sql
+HOS zip -jmq 99999_sqld360_&&sqld360_sqlid._drivers sqld360_metadata_&&sqld360_sqlid._driver.sql
+
+----------------------
+
+DEF section_id = '5i';
 DEF section_name = 'Stats';
 DEF title = 'Set Stats';
-DEF main_table = 'DBA_TABLES';
+--DEF main_table = 'DBA_TABLES';
 EXEC DBMS_APPLICATION_INFO.SET_MODULE('&&sqld360_prefix.','&&section_id.');
 
 @@sqld360_0s_pre_nondef
@@ -21,7 +52,7 @@ DECLARE
 BEGIN
 
   DBMS_OUTPUT.PUT_LINE('/*');
-  DBMS_OUTPUT.PUT_LINE(' * This script includes all the commands to set basic level (table, index and column without histograms) stats');
+  DBMS_OUTPUT.PUT_LINE(' * This script includes all the commands to set basic level (table, index and columns) stats');
   DBMS_OUTPUT.PUT_LINE(' * It is intentionally simple to ensure it completes quickly but at the same time allows to change stats easily enough');
   DBMS_OUTPUT.PUT_LINE(' * Objects are expected in current schema, otherwise just chance the owner with whatever you need');
   DBMS_OUTPUT.PUT_LINE(' */');

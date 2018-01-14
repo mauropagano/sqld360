@@ -1253,7 +1253,7 @@ DEF skip_lch = 'Y';
 DEF main_table = 'DBA_HIST_SQLSTAT';
 DEF abstract = 'Average elapsed time per execution per Plan Hash Value from AWR, top best 5 and worst 10';
 DEF foot = 'Low number of executions or long executing SQL make values less accurate';
-DEF vaxis = 'Average Elapsed Time in secs';
+DEF vaxis = 'Average Elapsed Time in &&sqld360_awr_timescale_l.';
 
 COL phv1_ NOPRI
 COL phv2_ NOPRI
@@ -1325,7 +1325,7 @@ SELECT b.snap_id snap_id,
                MAX(CASE WHEN phv = &&phv_15_awr. THEN avg_et_per_exec ELSE NULL END) phv15 
           FROM (SELECT snap_id,
                        plan_hash_value phv, 
-                       ROUND(SUM(elapsed_time_total)/SUM(NVL(NULLIF(executions_total,0),1))/1e6,6) avg_et_per_exec
+                       ROUND(SUM(elapsed_time_total)/SUM(NVL(NULLIF(executions_total,0),1))/&&sqld360_awr_timescale_d.,6) avg_et_per_exec
                   FROM dba_hist_sqlstat
                  WHERE snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.
                    AND sql_id = '&&sqld360_sqlid.'
@@ -1433,7 +1433,7 @@ DEF skip_lch = 'Y';
 DEF main_table = 'DBA_HIST_SQLSTAT';
 DEF abstract = 'Average elapsed time per execution per Plan Hash Value from AWR, top best 5 and worst 10';
 DEF foot = 'Low number of executions or long executing SQL make values less accurate';
-DEF vaxis = 'Average Elapsed Time in secs';
+DEF vaxis = 'Average Elapsed Time in &&sqld360_awr_timescale_l.';
 
 COL phv1_ NOPRI
 COL phv2_ NOPRI
@@ -1505,7 +1505,7 @@ SELECT b.snap_id snap_id,
                MAX(CASE WHEN phv = &&phv_15_awr. THEN avg_et_per_exec ELSE NULL END) phv15 
           FROM (SELECT snap_id,
                        plan_hash_value phv, 
-                       ROUND(SUM(elapsed_time_delta)/SUM(NVL(NULLIF(executions_delta,0),1))/1e6,6) avg_et_per_exec
+                       ROUND(SUM(elapsed_time_delta)/SUM(NVL(NULLIF(executions_delta,0),1))/&&sqld360_awr_timescale_d.,6) avg_et_per_exec
                   FROM dba_hist_sqlstat
                  WHERE snap_id BETWEEN &&minimum_snap_id. AND &&maximum_snap_id.
                    AND sql_id = '&&sqld360_sqlid.'
@@ -1613,7 +1613,7 @@ DEF skip_lch = 'Y';
 DEF main_table = 'DBA_HIST_SQLSTAT';
 DEF abstract = 'Average elapsed time per execution per Plan Hash Value from AWR, top best 5 and worst 10';
 DEF foot = 'Low number of executions or long executing SQL make values less accurate';
-DEF vaxis = 'Average Elapsed Time in secs';
+DEF vaxis = 'Average Elapsed Time in &&sqld360_awr_timescale_l.';
 
 COL phv1_ NOPRI
 COL phv2_ NOPRI
@@ -1653,35 +1653,35 @@ SELECT b.snap_id snap_id,
        TO_CHAR(b.begin_interval_time, 'YYYY-MM-DD HH24:MI')  begin_time, 
        TO_CHAR(b.end_interval_time, 'YYYY-MM-DD HH24:MI')  end_time,
        NVL(ROUND(SUM(etps1 ) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW)
-         /NVL(NULLIF(SUM(eps1 ) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/1e6,6),0) phv1_&&tit_01.  ,
+         /NVL(NULLIF(SUM(eps1 ) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/&&sqld360_awr_timescale_d.,6),0) phv1_&&tit_01.  ,
        NVL(ROUND(SUM(etps2 ) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW)
-         /NVL(NULLIF(SUM(eps2 ) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/1e6,6),0) phv2_&&tit_02.  ,
+         /NVL(NULLIF(SUM(eps2 ) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/&&sqld360_awr_timescale_d.,6),0) phv2_&&tit_02.  ,
        NVL(ROUND(SUM(etps3 ) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW)
-         /NVL(NULLIF(SUM(eps3 ) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/1e6,6),0) phv3_&&tit_03.  ,
+         /NVL(NULLIF(SUM(eps3 ) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/&&sqld360_awr_timescale_d.,6),0) phv3_&&tit_03.  ,
        NVL(ROUND(SUM(etps4 ) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW)
-         /NVL(NULLIF(SUM(eps4 ) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/1e6,6),0) phv4_&&tit_04.  ,
+         /NVL(NULLIF(SUM(eps4 ) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/&&sqld360_awr_timescale_d.,6),0) phv4_&&tit_04.  ,
        NVL(ROUND(SUM(etps5 ) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW)
-         /NVL(NULLIF(SUM(eps5 ) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/1e6,6),0) phv5_&&tit_05.  ,
+         /NVL(NULLIF(SUM(eps5 ) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/&&sqld360_awr_timescale_d.,6),0) phv5_&&tit_05.  ,
        NVL(ROUND(SUM(etps6 ) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW)
-         /NVL(NULLIF(SUM(eps6 ) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/1e6,6),0) phv6_&&tit_06.  ,
+         /NVL(NULLIF(SUM(eps6 ) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/&&sqld360_awr_timescale_d.,6),0) phv6_&&tit_06.  ,
        NVL(ROUND(SUM(etps7 ) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW)
-         /NVL(NULLIF(SUM(eps7 ) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/1e6,6),0) phv7_&&tit_07.  ,
+         /NVL(NULLIF(SUM(eps7 ) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/&&sqld360_awr_timescale_d.,6),0) phv7_&&tit_07.  ,
        NVL(ROUND(SUM(etps8 ) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW)
-         /NVL(NULLIF(SUM(eps8 ) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/1e6,6),0) phv8_&&tit_08.  ,
+         /NVL(NULLIF(SUM(eps8 ) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/&&sqld360_awr_timescale_d.,6),0) phv8_&&tit_08.  ,
        NVL(ROUND(SUM(etps9 ) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW)
-         /NVL(NULLIF(SUM(eps9 ) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/1e6,6),0) phv9_&&tit_09.  ,
+         /NVL(NULLIF(SUM(eps9 ) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/&&sqld360_awr_timescale_d.,6),0) phv9_&&tit_09.  ,
        NVL(ROUND(SUM(etps10) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW)
-         /NVL(NULLIF(SUM(eps10) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/1e6,6),0) phv10_&&tit_10. ,
+         /NVL(NULLIF(SUM(eps10) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/&&sqld360_awr_timescale_d.,6),0) phv10_&&tit_10. ,
        NVL(ROUND(SUM(etps11) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW)
-         /NVL(NULLIF(SUM(eps11) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/1e6,6),0) phv11_&&tit_11. ,
+         /NVL(NULLIF(SUM(eps11) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/&&sqld360_awr_timescale_d.,6),0) phv11_&&tit_11. ,
        NVL(ROUND(SUM(etps12) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW)
-         /NVL(NULLIF(SUM(eps12) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/1e6,6),0) phv12_&&tit_12. ,
+         /NVL(NULLIF(SUM(eps12) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/&&sqld360_awr_timescale_d.,6),0) phv12_&&tit_12. ,
        NVL(ROUND(SUM(etps13) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW)
-         /NVL(NULLIF(SUM(eps13) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/1e6,6),0) phv13_&&tit_13. ,
+         /NVL(NULLIF(SUM(eps13) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/&&sqld360_awr_timescale_d.,6),0) phv13_&&tit_13. ,
        NVL(ROUND(SUM(etps14) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW)
-         /NVL(NULLIF(SUM(eps14) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/1e6,6),0) phv14_&&tit_14. ,
+         /NVL(NULLIF(SUM(eps14) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/&&sqld360_awr_timescale_d.,6),0) phv14_&&tit_14. ,
        NVL(ROUND(SUM(etps15) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW)
-         /NVL(NULLIF(SUM(eps15) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/1e6,6),0) phv15_&&tit_15. 
+         /NVL(NULLIF(SUM(eps15) OVER (ORDER BY end_interval_time RANGE BETWEEN NUMTODSINTERVAL(1,'DAY') PRECEDING AND CURRENT ROW),0),1)/&&sqld360_awr_timescale_d.,6),0) phv15_&&tit_15. 
   FROM (SELECT snap_id,
                MAX(CASE WHEN phv = &&phv_01_awr. THEN elapsed_time_per_snap ELSE NULL END) etps1,
                MAX(CASE WHEN phv = &&phv_02_awr. THEN elapsed_time_per_snap ELSE NULL END) etps2, 
