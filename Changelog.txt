@@ -8,6 +8,12 @@ v1801
 =====
 1. Added "clean" DDL script, to be used with set_stats to implement a very simple TC
 2. Disable SET ARRAY to prevent issues with 12.2 SQL*Plus
+3. Timescale now configurable between seconds and ms (only for AWR reports)
+4. Fixed lack of ability to disable raw ASH under plan analysis drill down page
+5. Added summary report for non sharing reason (same as https://carlos-sierra.net/2017/09/01/poors-man-script-to-summarize-reasons-why-cursors-are-not-shared/)
+6. Added Table/Index/LOB partition info reports
+7. Changed named of SQL Monitor reports (name is sql_exec_start in YYYYMMDDHH24MISS format) so they are easier to spot
+
 
 v1710
 =====
